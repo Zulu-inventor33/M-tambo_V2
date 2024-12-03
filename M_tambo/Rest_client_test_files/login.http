@@ -1,0 +1,117 @@
+### Login - Developer 1 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "alice.developer1@example.com",  # Or "phone_number": "1234567890"
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access_token": "JWT_ACCESS_TOKEN",
+#     "refresh_token": "JWT_REFRESH_TOKEN"
+# }
+
+### Login - Developer 2 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "john.developer2@example.com",  # Or "phone_number": "2345678901"
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access_token": "JWT_ACCESS_TOKEN",
+#     "refresh_token": "JWT_REFRESH_TOKEN"
+# }
+
+### Login - Maintenance 1 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "bob.maintenance1@example.com",  # Or "phone_number": "3456789012"
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access_token": "JWT_ACCESS_TOKEN",
+#     "refresh_token": "JWT_REFRESH_TOKEN"
+# }
+
+### Login - Maintenance 2 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "eve.maintenance2@example.com",  # Or "phone_number": "4567890123"
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access_token": "JWT_ACCESS_TOKEN",
+#     "refresh_token": "JWT_REFRESH_TOKEN"
+# }
+
+### Login - Technician 1 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "charlie.technician1@example.com",  # Or "phone_number": "5678901234"
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access_token": "JWT_ACCESS_TOKEN",
+#     "refresh_token": "JWT_REFRESH_TOKEN"
+# }
+
+### Login - Technician 2 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "david.technician2@example.com",  # Or "phone_number": "6789012345"
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access_token": "JWT_ACCESS_TOKEN",
+#     "refresh_token": "JWT_REFRESH_TOKEN"
+# }
+
+### Login - Invalid Email (Failure)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "invalid.email@example.com",  # Or "phone_number": "0000000000"
+    "password": "password123"
+}
+
+# Expected Failure Response:
+# {
+#     "detail": "Invalid credentials"
+# }
+
+### Login - Incorrect Password (Failure)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "alice.developer1@example.com",  # Or "phone_number": "1234567890"
+    "password": "wrongpassword"
+}
+
+# Expected Failure Response:
+# {
+#     "detail": "Invalid credentials"
+# }
