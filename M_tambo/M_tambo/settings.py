@@ -25,10 +25,38 @@ SECRET_KEY = 'django-insecure-kp+-@nban-ay6zzr#2zg@6k4xsb@n#k4h_!z^5l($cb$9a%c95
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
+ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]"]
+
+# Allow the React app to communicate with the Django API
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React app
 ]
+
+# Enable credentials if needed (e.g., for cookies or authentication headers)
+CORS_ALLOW_CREDENTIALS = True
+
+# Specify the allowed methods
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+    'OPTIONS',
+]
+
+# Ensure allowed headers for the JSON content type
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'x-requested-with',
+    'accept-encoding',
+    'accept-language',
+    'cache-control',
+    'pragma',
+]
+
 
 
 # Application definition
@@ -59,12 +87,12 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'M_tambo.urls'
