@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [accountType, setAccountType] = useState('');
   const [developerName, setDeveloperName] = useState('');
-  const [address, setAddress] = useState('');
+  const [developerAddress, setDeveloperAddress] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [companyAddress, setCompanyAddress] = useState('');
@@ -64,25 +65,71 @@ const Register = () => {
     return valid;
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form data
     if (validateForm()) {
-      console.log('Form submitted');
-      // Add your API request or form submission logic here
+
+      // Prepare data for the API request based on account type
+      const userData = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone_number: phone,
+        password: password,
+        account_type: accountType,
+      };
+
+      // Add additional fields based on account type
+      if (accountType === 'developer') {
+        userData.developer_name = developerName;
+        userData.address = developerAddress;
+      } else if (accountType === 'maintenance') {
+        userData.company_name = companyName;
+        userData.company_address = companyAddress;
+        userData.company_registration_number = companyRegNumber;
+        userData.specialization = specialization;
+      } else if (accountType === 'technician') {
+        userData.specialization = specialization;
+        userData.maintenance_company = affiliatedCompany;
+      }
+
+      console.log('Sending userData:', JSON.stringify(userData));
+
+      try {
+        const response = await axios.post('http://localhost:8000/api/signup/', JSON.stringify(userData), {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log("User registered successfully:", response.data);
+      } catch (error) {
+        if (error.response) {
+          // If the error is a response error (e.g., 400, 500 from the server)
+          console.log("Error message:", error.response.data.error || error.response.data);
+        } else if (error.request) {
+          // If the request was made but no response was received
+          console.log("No response received:", error.request);
+        } else {
+          console.log("Error:", error.message);
+        }
+      }
     }
   };
 
   return (
-    <div className='relative bg-gray-100 overflow-hidden'>
+    <div className='relative bg-gray-100 overflow-hidden w-full h-full'>
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white shadow-lg rounded-lg p-6 overflow-y-auto">
+        <div className="bg-white shadow-lg rounded-lg p-6 md:max-h-[500px] overflow-y-auto max-w-4xl mx-auto">
           <h3 className="text-2xl pb-2 text-[#fc4b3b] text-center font-semibold mb-6 border-b-2 border-[#2c2c64]">Welcome to M-tambo please register to Join our platform.</h3>
           {/* Form section starts here */}
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Column 1 */}
               <div className="col-span-1">
+                {/* email field */}
                 <div className="mb-4">
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-700">Email</label>
                   <input
@@ -98,6 +145,7 @@ const Register = () => {
                   {error.email && <span className="text-red-500 text-sm">{error.email}</span>}
                 </div>
 
+                {/* first name field */}
                 <div className="mb-4">
                   <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700">First Name</label>
                   <input
@@ -113,6 +161,26 @@ const Register = () => {
                   {error.firstName && <span className="text-red-500 text-sm">{error.firstName}</span>}
                 </div>
 
+                {/* lastname field */}
+                <div className="mb-4">
+                  <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700">Last Name</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b] ${error.lastName ? 'border-red-500' : ''}`}
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                  {error.lastName && <span className="text-red-500 text-sm">{error.lastName}</span>}
+                </div>
+              </div>
+
+              {/* Column 2 */}
+              <div className="col-span-1">
+                {/* phone number field */}
                 <div className="mb-4">
                   <label htmlFor="phone" className="block text-sm font-semibold text-gray-700">Phone Number</label>
                   <input
@@ -128,6 +196,7 @@ const Register = () => {
                   {error.phone && <span className="text-red-500 text-sm">{error.phone}</span>}
                 </div>
 
+                {/* password field */}
                 <div className="mb-4">
                   <label htmlFor="password" className="block text-sm font-semibold text-gray-700">Password</label>
                   <input
@@ -142,25 +211,8 @@ const Register = () => {
                   />
                   {error.password && <span className="text-red-500 text-sm">{error.password}</span>}
                 </div>
-              </div>
 
-              {/* Column 2 */}
-              <div className="col-span-1">
-                <div className="mb-4">
-                  <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700">Last Name</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b] ${error.lastName ? 'border-red-500' : ''}`}
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                  />
-                  {error.lastName && <span className="text-red-500 text-sm">{error.lastName}</span>}
-                </div>
-
+                {/* confirm password field */}
                 <div className="mb-4">
                   <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700">Confirm Password</label>
                   <input
@@ -176,6 +228,7 @@ const Register = () => {
                   {error.confirmPassword && <span className="text-red-500 text-sm">{error.confirmPassword}</span>}
                 </div>
 
+                {/* account type field */}
                 <div className="mb-4">
                   <label htmlFor="accountType" className="block text-sm font-semibold text-gray-700">Account Type</label>
                   <select
@@ -194,17 +247,31 @@ const Register = () => {
 
                 {/* Conditionally Render Developer Fields */}
                 {accountType === 'developer' && (
-                  <div className="mb-4">
-                    <label htmlFor="developerName" className="block text-sm font-semibold text-gray-700">Developer Name</label>
-                    <input
-                      type="text"
-                      id="developerName"
-                      name="developerName"
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b]"
-                      placeholder="Developer Name"
-                      value={developerName}
-                      onChange={(e) => setDeveloperName(e.target.value)}
-                    />
+                  <div>
+                    <div className="mb-4">
+                      <label htmlFor="developerName" className="block text-sm font-semibold text-gray-700">Developer Name</label>
+                      <input
+                        type="text"
+                        id="developerName"
+                        name="developerName"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b]"
+                        placeholder="Developer Name"
+                        value={developerName}
+                        onChange={(e) => setDeveloperName(e.target.value)}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label htmlFor="developerAddress" className="block text-sm font-semibold text-gray-700">Developer Address</label>
+                      <input
+                        type="text"
+                        id="developerAddress"
+                        name="developerAddress"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b]"
+                        placeholder="Developer Address"
+                        value={developerAddress}
+                        onChange={(e) => setDeveloperAddress(e.target.value)}
+                      />
+                    </div>
                   </div>
                 )}
 

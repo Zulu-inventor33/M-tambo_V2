@@ -6,16 +6,27 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny  # Allow any user to access these endpoints
 from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
+from rest_framework.exceptions import ValidationError
 
 # View for User SignUp
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        print(f"Received data: {request.data}")
+
+        # Check if email or phone number already exists to handle the errors more gracefully
+        if User.objects.filter(email=request.data.get('email')).exists():
+            return Response({"error": "A user with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(phone_number=request.data.get('phone_number')).exists():
+            return Response({"error": "A user with this phone number already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Step 1: Validate and create the user
         user_serializer = UserSerializer(data=request.data)
+        print(f"serealized data: {user_serializer}")
 
         if user_serializer.is_valid():
+            print("data is validypppppppppppppppppppp")
             user = user_serializer.save()  # Save user and get the user instance
             account_type = user.account_type
 
@@ -102,6 +113,7 @@ class SignUpView(APIView):
                 return Response(user_serializer.data, status=status.HTTP_201_CREATED)
 
         # If user_serializer is not valid, return errors
+        print(f"Serializer errors: {user_serializer.errors}")
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
