@@ -26,9 +26,10 @@ class SignUpView(APIView):
         print(f"serealized data: {user_serializer}")
 
         if user_serializer.is_valid():
-            print("data is validypppppppppppppppppppp")
-            user = user_serializer.save()  # Save user and get the user instance
+            user = user_serializer.save()
             account_type = user.account_type
+
+            print(f"Account_type: {account_type}")
 
             # Step 2: Handle 'maintenance' account type (Create or Update Maintenance profile)
             if account_type == 'maintenance':
