@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { notifySuccess, notifyError } from '../utils/notificationUtils';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const Register = () => {
   // Initialize useNavigate hook
@@ -24,8 +26,8 @@ const Register = () => {
     equipmentSpecialization: '',
     affiliatedCompany: '',
   });
-
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -230,10 +232,10 @@ const Register = () => {
                 </div>
 
                 {/* Password field */}
-                <div className="mb-4">
+                <div className="relative mb-4">
                   <label htmlFor="password" className="block text-sm font-semibold text-gray-700">Password</label>
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     id="password"
                     name="password"
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b] ${errors.password ? 'border-red-500' : ''}`}
@@ -242,14 +244,23 @@ const Register = () => {
                     onChange={handleInputChange}
                     required
                   />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} 
+                    className="absolute inset-y-0 right-4 top-6 focus:outline-none" aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? (
+                      <FontAwesomeIcon icon={faEye} />
+                    ) : (
+                      <FontAwesomeIcon icon={faEyeSlash} />
+                    )}
+                  </button>
                   {errors.password && <span className="text-red-500 text-sm">{errors.password}</span>}
                 </div>
 
                 {/* Confirm Password field */}
-                <div className="mb-4">
+                <div className="relative mb-4">
                   <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700">Confirm Password</label>
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     id="confirmPassword"
                     name="confirmPassword"
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fc4b3b] ${errors.confirmPassword ? 'border-red-500' : ''}`}
@@ -258,6 +269,15 @@ const Register = () => {
                     onChange={handleInputChange}
                     required
                   />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} 
+                    className="absolute inset-y-0 right-4 top-6 focus:outline-none" aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? (
+                      <FontAwesomeIcon icon={faEye} />
+                    ) : (
+                      <FontAwesomeIcon icon={faEyeSlash} />
+                    )}
+                  </button>
                   {errors.confirmPassword && <span className="text-red-500 text-sm">{errors.confirmPassword}</span>}
                 </div>
 

@@ -1,23 +1,38 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { notifySuccess, notifyError } from '../utils/notificationUtils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  // To redirect the user after successful login
+  const navigate = useNavigate();
   
   // Handle email and password validation
   const validateForm = () => {
     let formErrors = { email: '', password: '' };
     let valid = true;
 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!email) {
       formErrors.email = 'Email is required';
+      valid = false;
+    } else if (!emailRegex.test(email)) {
+      formErrors.email = 'Please enter a valid email address';
       valid = false;
     }
 
     if (!password) {
       formErrors.password = 'Password is required';
+      valid = false;
+    } else if (password.length < 6) {
+      formErrors.password = 'Password must be at least 6 characters';
       valid = false;
     }
 
@@ -26,15 +41,50 @@ const Login = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
-      console.log('Form submitted');
+      setLoading(true);
+      const userData = {
+        email_or_phone: email,
+        password: password
+      };
+
+      console.log("Data to be submitted for Login:", JSON.stringify(userData));
+      try {
+        const response = await axios.post(`/api/login/`, JSON.stringify(userData), {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        notifySuccess("Welcome Back to M-tambo!");
+        console.log("User logins successfully:", response.data);
+        // Successful login, store the tokens in localStorage
+        localStorage.setItem('access_token', response.data.access);
+        localStorage.setItem('refresh_token', response.data.refresh);
+        setLoading(false);
+        navigate('/dashboard'); // Redirect to dashboard or home page
+      } catch (error) {
+        // Handle network or server error
+        setLoading(false);
+        const errorMessage = error.response?.data?.error || 'Something went wrong!';
+        console.log("Error message:", error);
+        notifyError(errorMessage);
+        if (error.response?.data?.error === 'A user with this email already exists.') {
+          setError(prevErrors => ({
+            ...prevErrors,
+            password: 'Something went wrong. Please try again later.'
+          }));
+        } else {
+          notifyError(errorMessage);
+        }
+      }
     }
   };
 
   return (
-    <div className='relative bg-gray-100 overflow-hidden'>
+    <div className='relative bg-gray-100 overflow-hidden w-full h-full'>
       {/* Decorative Rounded Divs */}
       <div className="absolute z-0 w-40 h-40 bg-[#fc4b3b] rounded-full -right-28 -top-28"></div>
       <div className="absolute z-0 w-40 h-40 bg-[#fc4b3b] rounded-full -left-28 -bottom-16"></div>
@@ -56,17 +106,6 @@ const Login = () => {
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-[#2c2c64]">Welcome Back!</h2>
           </div>
-
-          {/* Error message (e.g., email not verified) */}
-          {/* This can be a dynamic error if needed */}
-          {/* Example: */}
-          {/* {verificationNeeded && (
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg mb-4">
-              <strong className="font-semibold">Warning!</strong> Verification needed
-              <br />
-              <button className="text-[#fc4b3b] font-semibold">Resend verification email</button>
-            </div>
-          )} */}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,17 +145,9 @@ const Login = () => {
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? (
-                  <svg width="18px" height="18px" viewBox="0 0 24 24" stroke="#000000">
-                    <path d="M2 2L22 22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M6.71277 6.7226C3.66479 8.79527 2 12 2 12C2 12 5.63636 19 12 19C14.0503 19 15.8174 18.2734 17.2711 17.2884M11 5.05822C11.3254 5.02013 11.6588 5 12 5C18.3636 5 22 12 22 12C22 12 21.3082 13.3317 20 14.8335" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M14 14.2362C13.4692 14.7112 12.7684 15.0001 12 15.0001C10.3431 15.0001 9 13.657 9 12.0001C9 11.1764 9.33193 10.4303 9.86932 9.88818" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <FontAwesomeIcon icon={faEye} />
                 ) : (
-                  <svg width="18px" height="18px" viewBox="0 0 24 24" stroke="#000000">
-                    <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M1 12C1 12 5 20 12 20C19 20 23 12 23 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="12" cy="12" r="3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <FontAwesomeIcon icon={faEyeSlash} />
                 )}
               </button>
               {error.password && <span className="text-red-500 text-sm mt-1">{error.password}</span>}
@@ -127,8 +158,9 @@ const Login = () => {
               <button
                 type="submit"
                 className="w-full bg-[#fc4b3b] text-white py-3 rounded-lg font-semibold hover:bg-[#fc4b3b]/80"
+                disabled={loading}
               >
-                Sign In
+                {loading ? "Logging in..." : "Sign In"}
               </button>
             </div>
           </form>
@@ -142,4 +174,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;
