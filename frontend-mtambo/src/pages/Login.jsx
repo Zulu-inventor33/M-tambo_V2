@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthenticationContext.jsx';
 import axios from 'axios';
 import { notifySuccess, notifyError } from '../utils/notificationUtils';
 
@@ -13,6 +14,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   // To redirect the user after successful login
   const navigate = useNavigate();
+  // Access the login function
+  const { login } = useContext(AuthContext);
   
   // Handle email and password validation
   const validateForm = () => {
@@ -58,10 +61,11 @@ const Login = () => {
             'Content-Type': 'application/json',
           },
         });
+
+        // Call the login function from context to store user and tokens Globally
+        login(response.data.user, response.data.access);
         notifySuccess("Welcome Back to M-tambo!");
         console.log("User logins successfully:", response.data);
-        // Successful login, store the tokens in localStorage
-        localStorage.setItem('access_token', response.data.access);
         localStorage.setItem('refresh_token', response.data.refresh);
         setLoading(false);
         navigate('/dashboard'); // Redirect to dashboard or home page
