@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { notifySuccess, notifyError } from '../utils/notificationUtils';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  // Initialize useNavigate hook
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -72,6 +76,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+      setLoading(true);
       const userData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -104,7 +109,10 @@ const Register = () => {
         });
         notifySuccess("Registration successful! Welcome to M-tambo.");
         console.log("User registered successfully:", response.data);
+        setLoading(false);
+        navigate('/login');
       } catch (error) {
+        setLoading(false);
         const errorMessage = error.response?.data?.error || 'Something went wrong!';
         console.log("Error message:", errorMessage);
         notifyError(errorMessage);
@@ -117,6 +125,8 @@ const Register = () => {
           notifyError(errorMessage);
         }
       }
+    } else {
+      setLoading(false);
     }
   };
 
@@ -144,7 +154,7 @@ const Register = () => {
   return (
     <div className="relative bg-gray-100 overflow-hidden w-full h-full">
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white shadow-lg rounded-lg p-6 md:max-h-[500px] overflow-y-auto max-w-4xl mx-auto">
+        <div className="bg-white shadow-lg rounded-lg p-6 md:max-h-[580px] overflow-y-auto max-w-4xl mx-auto">
           <h3 className="text-2xl pb-2 text-[#fc4b3b] text-center font-semibold mb-6 border-b-2 border-[#2c2c64]">
             Welcome to M-tambo please register to join our platform.
           </h3>
@@ -397,21 +407,26 @@ const Register = () => {
               )}
             </div>
 
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex justify-center gap-3 items-center mt-4">
               <button
                 type="submit"
-                className="bg-[#2c2c64] text-white py-2 px-4 rounded-lg hover:bg-gray-400"
+                className="bg-[#2c2c64] text-white py-2 px-4 rounded-lg hover:bg-[#fc4b3b]"
+                disabled={loading}
               >
-                Register
+                {loading ? 'Registering...' : 'Register'}
               </button>
               <button
                 type="button"
                 onClick={handleReset}
-                className="bg-[#2c2c64] text-white py-2 px-4 rounded-lg hover:bg-gray-400"
+                className="bg-[#fc4b3b] text-white py-2 px-4 rounded-lg hover:bg-[#2c2c64]"
               >
                 Reset
               </button>
             </div>
+            <div className="mt-6 text-center mb-3">
+              <p className="text-gray-700">Already have an account? <a href="/login" className="text-[#fc4b3b]">Login</a></p>
+            </div>
+            {errors.server && <div className="text-red-500 mt-4">{errors.server}</div>}
           </form>
         </div>
       </div>
