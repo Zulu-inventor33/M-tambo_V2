@@ -30,7 +30,7 @@ urlpatterns = [
     #     "company_name": "Smith Elevators Co.",
     #     "company_address": "456 Elevator Ave, Citytown",
     #     "company_registration_number": "REG123456",
-    #     "specialization": 1  # ID of the specialization (e.g., Elevators)
+    #     "specialization": HVAC
     # }
     #
     # Example Request Body for a Technician:
@@ -41,8 +41,8 @@ urlpatterns = [
     #     "phone_number": "1122334455",
     #     "password": "password123",
     #     "account_type": "technician",
-    #     "specialization": 1,  # ID of the specialization (e.g., Elevators)
-    #     "maintenance_company": 1  # ID of the maintenance company (e.g., Smith Elevators Co.)
+    #     "specialization": Elevators,  # ID of the specialization (e.g., Elevators)
+    #     "maintenance_company_id": 11  # ID of the maintenance company (e.g., Smith Elevators Co.)
     # }
     path('signup/', SignUpView.as_view(), name='signup'),
 

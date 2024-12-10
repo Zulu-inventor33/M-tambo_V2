@@ -6,104 +6,131 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny  # Allow any user to access these endpoints
 from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
+from django.shortcuts import get_object_or_404
+
 
 # View for User SignUp
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # Step 1: Validate and create the user
+        # Step 1: Validate and create the user using UserSerializer
         user_serializer = UserSerializer(data=request.data)
 
         if user_serializer.is_valid():
-            user = user_serializer.save()  # Save user and get the user instance
-            account_type = user.account_type
+            user = user_serializer.save()  # Save the user and get the user instance
+            account_type = user.account_type  # Extract the account type
 
-            # Step 2: Handle 'maintenance' account type (Create or Update Maintenance profile)
+            # Step 2: Handle profile creation based on account type
             if account_type == 'maintenance':
-                # Ensure the necessary fields are available in the request data
-                company_name = request.data.get("company_name")
-                company_address = request.data.get("company_address")
-                company_registration_number = request.data.get("company_registration_number")
-                specialization_name = request.data.get("specialization")
-
-                if not all([company_name, company_address, company_registration_number, specialization_name]):
-                    return Response(
-                        {"error": "All fields are required for the Maintenance profile."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Create or update the Maintenance profile
-                maintenance_profile, created = Maintenance.objects.get_or_create(user=user)
-                maintenance_profile.company_name = company_name
-                maintenance_profile.company_address = company_address
-                maintenance_profile.company_registration_number = company_registration_number
-                maintenance_profile.specialization = specialization_name
-                maintenance_profile.save()
-
-                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
-
-            # Step 3: Handle 'developer' account type (Create Developer profile)
-            elif account_type == 'developer':
-                # Ensure the necessary fields for Developer profile are available
-                developer_name = request.data.get("developer_name")
-                address = request.data.get("address")
-
-                if not all([developer_name, address]):
-                    return Response(
-                        {"error": "Both developer_name and address are required for the Developer profile."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Create the Developer profile
-                developer_profile = Developer.objects.create(
-                    user=user,
-                    developer_name=developer_name,
-                    address=address
-                )
-
-                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
-
-            # Step 4: Handle 'technician' account type (Create Technician profile)
+                return self.create_maintenance_profile(request, user)
             elif account_type == 'technician':
-                # Validate fields for Technician profile
-                specialization = request.data.get("specialization")
-                maintenance_company_id = request.data.get("maintenance_company_id")
+                return self.create_technician_profile(request, user)
+            elif account_type == 'developer':
+                return self.create_developer_profile(request, user)
 
-                # Ensure that both specialization and maintenance_company_id are provided
-                if not all([specialization, maintenance_company_id]):
-                    return Response(
-                        {"error": "Both specialization and maintenance_company_id are required for the Technician profile."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Step 4.1: Check if the Maintenance company exists
-                try:
-                    maintenance_company = Maintenance.objects.get(id=maintenance_company_id)
-                except Maintenance.DoesNotExist:
-                    return Response(
-                        {"error": "Maintenance company not found."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Step 4.2: Create the Technician profile and link it to the maintenance company
-                try:
-                    technician = Technician.objects.create(
-                        user=user,
-                        specialization=specialization,
-                        maintenance_company=maintenance_company  # Correctly link to the maintenance company
-                    )
-                except Exception as e:
-                    return Response(
-                        {"error": str(e)},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
-
-                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+            # If account type is invalid
+            return Response(
+                {"error": "Invalid account type provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # If user_serializer is not valid, return errors
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def create_maintenance_profile(self, request, user):
+        # Handle the maintenance user profile creation
+        company_name = request.data.get("company_name")
+        company_address = request.data.get("company_address")
+        company_registration_number = request.data.get("company_registration_number")
+        specialization_name = request.data.get("specialization")
+
+        # Ensure all necessary fields are provided
+        if not all([company_name, company_address, company_registration_number, specialization_name]):
+            return Response(
+                {"error": "All fields are required for the Maintenance profile."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create or update the Maintenance profile
+        maintenance_profile, created = Maintenance.objects.get_or_create(user=user)
+        maintenance_profile.company_name = company_name
+        maintenance_profile.company_address = company_address
+        maintenance_profile.company_registration_number = company_registration_number
+        maintenance_profile.specialization = specialization_name
+        maintenance_profile.save()
+
+        # Return response with user and maintenance profile data
+        return Response(
+            {"user": UserSerializer(user).data, "maintenance_profile": MaintenanceSerializer(maintenance_profile).data},
+            status=status.HTTP_201_CREATED
+        )
+
+    def create_technician_profile(self, request, user):
+        # Ensure both specialization and maintenance_company_id are provided
+        specialization = request.data.get("specialization")
+        maintenance_company_id = request.data.get("maintenance_company_id")
+
+        if not all([specialization, maintenance_company_id]):
+            return Response(
+                {"error": "Both specialization and maintenance_company_id are required for the Technician profile."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if the Maintenance company exists
+        try:
+            maintenance_company = Maintenance.objects.get(id=maintenance_company_id)
+        except Maintenance.DoesNotExist:
+            return Response(
+                {"error": f"Maintenance company with ID {maintenance_company_id} does not exist."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create Technician profile and link it to the Maintenance company
+        technician_serializer = TechnicianSerializer(data={
+            'user': user.id,  # Ensure the user is passed correctly
+            'specialization': specialization,
+            'maintenance_company_id': maintenance_company.id  # Link to the Maintenance company
+        })
+
+        if technician_serializer.is_valid():
+            technician = technician_serializer.save()  # Save the technician instance
+            # Return response with user and technician profile data
+            return Response(
+                {"user": UserSerializer(user).data, "technician_profile": TechnicianSerializer(technician).data},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                technician_serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+    def create_developer_profile(self, request, user):
+        # Handle the developer user profile creation
+        developer_name = request.data.get("developer_name")
+        address = request.data.get("address")
+
+        # Ensure both developer_name and address are provided
+        if not all([developer_name, address]):
+            return Response(
+                {"error": "Both developer_name and address are required for the Developer profile."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create Developer profile
+        developer_profile = Developer.objects.create(
+            user=user,
+            developer_name=developer_name,
+            address=address
+        )
+
+        # Return response with user and developer profile data
+        return Response(
+            {"user": UserSerializer(user).data, "developer_profile": DeveloperSerializer(developer_profile).data},
+            status=status.HTTP_201_CREATED
+        )
 
 class LoginView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this endpoint

@@ -45,7 +45,32 @@ Content-Type: application/json
     "specialization": "Elevators"
 }
 
-### Sign Up - Maintenance 2 (Registered First)
+# -----------------------------
+
+### Sign Up - Maintenance 2 (Elevators)
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Alice",
+    "last_name": "Williams",
+    "email": "alice.maintenance2@example.com",
+    "phone_number": "5678981234",
+    "password": "password123",
+    "account_type": "maintenance",
+    "company_name": "ElevateTech Solutions",
+    "company_address": "456 Repair St, Citytown",
+    "company_registration_number": "REG789012",
+    "specialization": "Elevators"
+}
+
+# Description:
+# This test verifies that another maintenance company specializing in "Elevators" can also sign up successfully.
+# The expected result is a 201 Created status with the company and specialization details.
+
+# -----------------------------
+
+### Sign Up - Maintenance 3 (Registered First)
 POST http://localhost:8000/api/signup/ HTTP/1.1
 Content-Type: application/json
 
@@ -56,13 +81,111 @@ Content-Type: application/json
     "phone_number": "4567890123",
     "password": "password123",
     "account_type": "maintenance",
-    "company_name": "Elevate Services Ltd.",
+    "company_name": "Eve conditioning Services Ltd.",
     "company_address": "101 Maintenance Rd, Citytown",
     "company_registration_number": "REG654321",
-    "specialization_name": "HVAC"
+    "specialization": "HVAC"
 }
 
+# Description:
+# This test checks the sign-up process for a maintenance company specializing in "HVAC".
+# The expected result is a 201 Created status with the company and specialization details.
+
+# -----------------------------
+
+### Sign Up - Maintenance 4 (HVAC)
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "John",
+    "last_name": "Miller",
+    "email": "john.maintenance3@example.com",
+    "phone_number": "6789012345",
+    "password": "password123",
+    "account_type": "maintenance",
+    "company_name": "HVAC Services Inc.",
+    "company_address": "123 Airflow Blvd, Citytown",
+    "company_registration_number": "REG987654",
+    "specialization": "HVAC"
+}
+
+# Description:
+# This test checks the sign-up process for another maintenance company specializing in "HVAC".
+# The expected result is a 201 Created status with the company and specialization details.
+
+# -----------------------------
+
+### Sign Up - Maintenance 5 (Power Backup Generators)
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Tom",
+    "last_name": "Smith",
+    "email": "tom.maintenance1@example.com",
+    "phone_number": "7890123456",
+    "password": "password123",
+    "account_type": "maintenance",
+    "company_name": "PowerBackup Inc.",
+    "company_address": "500 Power St, Citytown",
+    "company_registration_number": "REG112233",
+    "specialization": "Power Backup Generators"
+}
+
+# Description:
+# This test checks the sign-up process for a maintenance company specializing in "Power Backup Generators".
+# The expected result is a 201 Created status with the company and specialization details.
+
+# -----------------------------
+
+### Sign Up - Maintenance 6 (Power Backup Generators)
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Sara",
+    "last_name": "Lee",
+    "email": "sara.maintenance2@example.com",
+    "phone_number": "8901234567",
+    "password": "password123",
+    "account_type": "maintenance",
+    "company_name": "Backup Power Solutions",
+    "company_address": "300 Backup Rd, Citytown",
+    "company_registration_number": "REG998877",
+    "specialization": "Power Backup Generators"
+}
+
+# Description:
+# This test verifies that another maintenance company specializing in "Power Backup Generators" can sign up successfully.
+# The expected result is a 201 Created status with the company and specialization details.
+
+# -----------------------------
+
+### Sign Up - Maintenance 7 (Power Backup Generators)
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "James",
+    "last_name": "Brown",
+    "email": "james.maintenance3@example.com",
+    "phone_number": "9012345678",
+    "password": "password123",
+    "account_type": "maintenance",
+    "company_name": "Emergency Power Systems",
+    "company_address": "200 Emergency Ave, Citytown",
+    "company_registration_number": "REG554433",
+    "specialization": "Power Backup Generators"
+}
+
+# Description:
+# This test ensures that a third maintenance company specializing in "Power Backup Generators" can also sign up successfully.
+# The expected result is a 201 Created status with the company and specialization details.
+
 ### Sign Up - Technician 1 (Linked to Existing Maintenance Company)
+### To be able to run this test you will have to replace the
+### The maintenance ID with the ID that has been registered in your computer
 POST http://localhost:8000/api/signup/ HTTP/1.1
 Content-Type: application/json
 
@@ -73,22 +196,172 @@ Content-Type: application/json
     "phone_number": "5678901234",
     "password": "password123",
     "account_type": "technician",
-    "specialization_name": "Elevators",
+    "specialization": "Elevators",
     "maintenance_company_id": 11
 }
 
-### Sign Up - Technician 2 (Linked to Existing Maintenance Company)
+### Sign Up - Technician 2 (HVAC) Linked to Maintenance Company ID 12
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Charlie",
+    "last_name": "Brown",
+    "email": "charlie.techniciain1@example.com",
+    "phone_number": "5679901234",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "HVAC",
+    "maintenance_company_id": 12
+}
+
+# Description:
+# This test verifies that a technician specializing in "HVAC" can sign up and is linked to the maintenance company with ID 12.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 12.
+
+# -----------------------------
+
+### Sign Up - Technician 3 (HVAC) Linked to Maintenance Company ID 12
 POST http://localhost:8000/api/signup/ HTTP/1.1
 Content-Type: application/json
 
 {
     "first_name": "David",
-    "last_name": "Miller",
+    "last_name": "Wilson",
     "email": "david.technician2@example.com",
+    "phone_number": "6789012305",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "HVAC",
+    "maintenance_company_id": 12
+}
+
+# Description:
+# This test verifies that another technician specializing in "HVAC" can sign up and is linked to the maintenance company with ID 12.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 12.
+
+# -----------------------------
+
+### Sign Up - Technician 4 (HVAC) Linked to Maintenance Company ID 14
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Emma",
+    "last_name": "Taylor",
+    "email": "emma.technician3@example.com",
+    "phone_number": "7896923456",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "HVAC",
+    "maintenance_company_id": 14
+}
+
+# Description:
+# This test verifies that a technician specializing in "HVAC" can sign up and is linked to the maintenance company with ID 14.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 14.
+
+# -----------------------------
+
+### Sign Up - Technician 5 (HVAC) Linked to Maintenance Company ID 14
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Sophia",
+    "last_name": "Miller",
+    "email": "sophia.technician4@example.com",
+    "phone_number": "8901236767",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "HVAC",
+    "maintenance_company_id": 14
+}
+
+# Description:
+# This test verifies that another technician specializing in "HVAC" can sign up and is linked to the maintenance company with ID 14.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 14.
+
+### Sign Up - Technician 6 (Power Backup Generators) Linked to Maintenance Company ID 15
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Sophia",
+    "last_name": "Green",
+    "email": "sophia.technician6@examplepower.com",
+    "phone_number": "5678901234",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "Power Backup Generators",
+    "maintenance_company_id": 15
+}
+
+# Description:
+# This test verifies that Technician 6, specializing in "Power Backup Generators", can sign up and is linked to the maintenance company with ID 15.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 15.
+
+# -----------------------------
+
+### Sign Up - Technician 7 (Power Backup Generators) Linked to Maintenance Company ID 15
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "James",
+    "last_name": "White",
+    "email": "james.technician7@examplepower.com",
     "phone_number": "6789012345",
     "password": "password123",
     "account_type": "technician",
-    "specialization_name": "Power Backup Generators",
-    "maintenance_company_name": "Elevate Services Ltd."
+    "specialization": "Power Backup Generators",
+    "maintenance_company_id": 15
 }
+
+# Description:
+# This test verifies that Technician 7, specializing in "Power Backup Generators", can sign up and is linked to the maintenance company with ID 15.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 15.
+
+# -----------------------------
+
+### Sign Up - Technician 8 (Power Backup Generators) Linked to Maintenance Company ID 17
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Liam",
+    "last_name": "Johnson",
+    "email": "liam.technician8@examplebackup.com",
+    "phone_number": "7890123456",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "Power Backup Generators",
+    "maintenance_company_id": 17
+}
+
+# Description:
+# This test verifies that Technician 8, specializing in "Power Backup Generators", can sign up and is linked to the maintenance company with ID 17.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 17.
+
+# -----------------------------
+
+### Sign Up - Technician 9 (Power Backup Generators) Linked to Maintenance Company ID 17
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Olivia",
+    "last_name": "Martinez",
+    "email": "olivia.technician9@examplebackup.com",
+    "phone_number": "8901234567",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "Power Backup Generators",
+    "maintenance_company_id": 17
+}
+
+# Description:
+# This test verifies that Technician 9, specializing in "Power Backup Generators", can sign up and is linked to the maintenance company with ID 17.
+# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 17.
+
 

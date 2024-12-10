@@ -61,7 +61,7 @@ class Maintenance(models.Model):
     specialization = models.CharField(max_length=100)  # Directly store the specialization as a string
 
     def __str__(self):
-        return self.company_name
+        return f"{self.company_name} - {self.specialization}"
 
 
 class Technician(models.Model):
@@ -70,4 +70,4 @@ class Technician(models.Model):
     maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name='technicians',null=False)
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        return f"{self.user.first_name} {self.user.last_name} - {self.maintenance_company}"

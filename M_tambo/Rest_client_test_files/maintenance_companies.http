@@ -1,21 +1,88 @@
-### Get All Maintenance Companies (Success)
-### Test Maintenance Companies by Specialization: Elevators
-GET http://localhost:8000/api/companies/?specialization=Elevators
+### Get All Maintenance Companies by Specialization: Elevators (Success)
+### During Registration since specialization is the first box.
+#Upon selecting the specialization field, It will trigger
+#It will trigger this API to fetch all the maintenance companies dealing with that particular spez e.g Elevators
+#It will give you both id and company_name
+#company name is what you will use to visually present to the user as a drop down menu
+# id is what you will use to send to the back-end during signup since it is the primary key.
+GET http://localhost:8000/api/maintenance-companies/?specialization=Elevators
+Accept: application/json
+
+# Expected Success Response:
+# [
+#   {
+#     "id": 11,
+#     "company_name": "Johnson Elevators Co."
+#   }
+# ]
+
+# Description:
+# This test checks if the "Elevators" specialization is correctly returned when requested via query parameters.
+# The expected response is a 200 OK status with a list of companies offering the "Elevators" specialization.
+# The "id" field will depend on the database values and can vary.
+
+# -----------------------------
+
+### Get Specialization: HVAC (Success)
+GET http://localhost:8000/api/maintenance-companies/?specialization=HVAC HTTP/1.1
 Accept: application/json
 
 # Expected Success Response:
 # [
 #     {
-#         "company_name": "Johnson Elevators Co."
-#     },
-#     {
-#         "company_name": "Elevate Services Ltd."
+#         "id": 12,  # Note: The ID will depend on the database values.
+#         "company_name": "HVAC Solutions Ltd."
 #     }
 # ]
+# Description:
+# This test checks if the "HVAC" specialization is correctly returned when requested via query parameters.
+# The expected response is a 200 OK status with a list of companies offering the "HVAC" specialization.
+# The "id" field will depend on the database values and can vary.
 
-### Get All Maintenance Companies (Failure - Empty List Example)
-GET http://localhost:8000/api/maintenance_companies/ HTTP/1.1
-Content-Type: application/json
+# -----------------------------
 
-# Expected Failure Response (if no maintenance companies are registered):
-# []
+### Get Specialization: Power Backup Generators (Success)
+GET http://localhost:8000/api/maintenance-companies/?specialization=Power%20Backup%20Generators HTTP/1.1
+Accept: application/json
+
+# Expected Success Response:
+# [
+#     {
+#         "id": 13,  # Note: The ID will depend on the database values.
+#         "company_name": "PowerBackup Inc."
+#     }
+# ]
+# Description:
+# This test checks if the "Power Backup Generators" specialization is correctly returned when requested via query parameters.
+# The expected response is a 200 OK status with a list of companies offering the "Power Backup Generators" specialization.
+# The "id" field will depend on the database values and can vary.
+
+# -----------------------------
+
+### Get Specialization: Non-Existent Specialization (Not Found)
+GET http://localhost:8000/api/maintenance-companies/?specialization=NonExistentSpecialization HTTP/1.1
+Accept: application/json
+
+# Expected Error Response (if the specialization does not exist):
+# {
+#     "detail": "Not Found"
+# }
+# Status Code: 404
+# Description:
+# This test checks the behavior when requesting a specialization that does not exist via query parameters.
+# The expected result is a 404 Not Found response.
+
+# -----------------------------
+
+### Get Specialization: Empty or Invalid Specialization (Bad Request)
+GET http://localhost:8000/api/maintenance-companies/?specialization= HTTP/1.1
+Accept: application/json
+
+# Expected Error Response (if the specialization parameter is empty or invalid):
+# {
+#     "detail": "Bad Request"
+# }
+# Status Code: 400
+# Description:
+# This test checks the behavior when requesting a specialization with an empty or invalid specialization query parameter.
+# The expected result is a 400 Bad Request response.

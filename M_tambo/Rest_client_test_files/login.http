@@ -3,97 +3,143 @@ POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "alice.developer1@example.com",  # Or "phone_number": "1234567890"
+    "email_or_phone": "alice.developer1@example.com",
     "password": "password123"
 }
 
 # Expected Success Response:
 # {
-#     "access_token": "JWT_ACCESS_TOKEN",
-#     "refresh_token": "JWT_REFRESH_TOKEN"
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
 # }
+
+# -----------------------------
 
 ### Login - Developer 2 (Success)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "john.developer2@example.com",  # Or "phone_number": "2345678901"
+    "email_or_phone": "john.developer2@example.com",
     "password": "password123"
 }
 
 # Expected Success Response:
 # {
-#     "access_token": "JWT_ACCESS_TOKEN",
-#     "refresh_token": "JWT_REFRESH_TOKEN"
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
 # }
+
+# -----------------------------
 
 ### Login - Maintenance 1 (Success)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "bob.maintenance1@example.com",  # Or "phone_number": "3456789012"
+    "email_or_phone": "bob.maintenance1@example.com",
     "password": "password123"
 }
 
 # Expected Success Response:
 # {
-#     "access_token": "JWT_ACCESS_TOKEN",
-#     "refresh_token": "JWT_REFRESH_TOKEN"
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
 # }
+
+# -----------------------------
 
 ### Login - Maintenance 2 (Success)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "eve.maintenance2@example.com",  # Or "phone_number": "4567890123"
+    "email_or_phone": "eve.maintenance2@example.com",
     "password": "password123"
 }
 
 # Expected Success Response:
 # {
-#     "access_token": "JWT_ACCESS_TOKEN",
-#     "refresh_token": "JWT_REFRESH_TOKEN"
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
 # }
 
-### Login - Technician 1 (Success)
+# -----------------------------
+
+### Login - Technician 6 (Success)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "charlie.technician1@example.com",  # Or "phone_number": "5678901234"
+    "email_or_phone": "sophia.technician6@examplepower.com",
     "password": "password123"
 }
 
 # Expected Success Response:
 # {
-#     "access_token": "JWT_ACCESS_TOKEN",
-#     "refresh_token": "JWT_REFRESH_TOKEN"
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
 # }
 
-### Login - Technician 2 (Success)
+# -----------------------------
+
+### Login - Technician 7 (Success)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "david.technician2@example.com",  # Or "phone_number": "6789012345"
+    "email_or_phone": "james.technician7@examplepower.com",
     "password": "password123"
 }
 
 # Expected Success Response:
 # {
-#     "access_token": "JWT_ACCESS_TOKEN",
-#     "refresh_token": "JWT_REFRESH_TOKEN"
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
 # }
+
+# -----------------------------
+
+### Login - Technician 8 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "email_or_phone": "liam.technician8@examplebackup.com",
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
+# }
+
+# -----------------------------
+
+### Login - Technician 9 (Success)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "email_or_phone": "olivia.technician9@examplebackup.com",
+    "password": "password123"
+}
+
+# Expected Success Response:
+# {
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
+# }
+
+# -----------------------------
 
 ### Login - Invalid Email (Failure)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "invalid.email@example.com",  # Or "phone_number": "0000000000"
+    "email_or_phone": "invalid.email@example.com",
     "password": "password123"
 }
 
@@ -102,12 +148,14 @@ Content-Type: application/json
 #     "detail": "Invalid credentials"
 # }
 
+# -----------------------------
+
 ### Login - Incorrect Password (Failure)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "alice.developer1@example.com",  # Or "phone_number": "1234567890"
+    "email_or_phone": "alice.developer1@example.com",
     "password": "wrongpassword"
 }
 
