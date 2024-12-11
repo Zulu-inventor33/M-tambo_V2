@@ -1,10 +1,10 @@
 import React from 'react';
-import Navbar from '../components/Header/Navbar';
+import Navbar from '../components/Navbar_home_page/Navbar';
 import HeroSection from '../components/Hero/Hero'
 
 const Home = () => {
   return (
-    <div className="h-screen bg-gray-100">
+    <div>
       <Navbar />
       <HeroSection />
     </div>

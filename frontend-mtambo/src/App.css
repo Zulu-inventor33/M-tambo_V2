@@ -1,9 +1,56 @@
-.App {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+html {
+    line-height: 1.15;
+    -webkit-text-size-adjust: 100%;
+    -moz-tab-size: 4px;
+    -o-tab-size: 4;
+    tab-size: 4;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
+}
+
+*, :after, :before {
+    box-sizing: border-box;
+    border: 0 solid;
     margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary-color: #0078D4;
+    --secondary-color: #4CAF50;
+    --accent-color: #FF9800;
+    --background-color: #F5F5F5;
+    --text-color: #333333;
+    --secondary-neutral: #D1D1D1;
+    --highlight-color: #669BBC;
+}
+
+body {
+    font-family: '__Inter_aa45b7', '__Inter_Fallback_aa45b7', "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 0.9375rem;
+    scrollbar-gutter: stable;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+}
+
+a {
+    background-color: transparent;
+    text-decoration: none;
+}
+
+ul {
+    display: block;
+    list-style-type: disc;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    unicode-bidi: isolate;
+}
+
+button, input, optgroup, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: 1.15;
+    margin: 0;
+    margin-right: 0px;
 }

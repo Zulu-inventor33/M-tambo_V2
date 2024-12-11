@@ -1,0 +1,58 @@
+Primary Color - Trust and Professionalism
+#0078D4 (Azure Blue)
+Usage: This deep, professional blue can be used for primary buttons, headers, or icons. It conveys trust and stability, which is perfect for an equipment maintenance app.
+
+Secondary Color - Safety and Maintenance
+#4CAF50 (Vibrant Green)
+Usage: Green often symbolizes "go" or "safe," making it ideal for indicating good operational status or successful actions (like completed maintenance or "OK" statuses). Use it for positive feedback messages or to highlight working systems.
+
+Accent Color - Alert or Urgency
+#FF9800 (Amber)
+Usage: Amber adds a sense of urgency without being too alarming like red. Use it for warning messages, upcoming maintenance tasks, or areas that need attention.
+
+Neutral Background - Clean and Readable
+#F5F5F5 (Light Grey)
+Usage: A soft grey background helps to create a clean, professional look, and allows other colors to stand out. It’s perfect for large areas or backgrounds in cards and containers.
+
+Text Color - Clear and Legible
+#333333 (Charcoal Grey)
+Usage: Dark grey ensures high contrast and readability for text without the harshness of black. Ideal for body text, labels, and navigation items.
+
+Secondary Neutral - Subtle Contrast
+#D1D1D1 (Light Grey)
+Usage: This can be used for borders, dividers, or inactive buttons. It provides subtle contrast to differentiate sections while maintaining a clean, professional design.
+
+Highlight Color - Soft and Calming
+#669BBC (Muted Blue)
+Usage: This color can be used for highlighting secondary items, such as inactive state buttons, tooltips, or information cards. It adds a calming touch to the interface.
+
+Example Palette Overview:
+Primary: #0078D4 (Azure Blue)
+Secondary: #4CAF50 (Vibrant Green)
+Accent: #FF9800 (Amber)
+Background: #F5F5F5 (Light Grey)
+Text: #333333 (Charcoal Grey)
+Secondary Neutral: #D1D1D1 (Light Grey)
+Highlight: #669BBC (Muted Blue)
+
+
+How to Use This Palette:
+Azure Blue (#0078D4) will dominate the app’s interface for key interactive elements such as primary buttons, links, and major headers, ensuring a strong, consistent brand presence.
+
+Vibrant Green (#4CAF50) can be used to indicate successful actions, such as completed maintenance, operational equipment, or confirmation messages.
+
+Amber (#FF9800) will highlight attention areas like upcoming maintenance or error alerts, giving a soft yet noticeable call to action without overwhelming users.
+
+Light Grey (#F5F5F5) should be used for background areas to keep the interface clean and uncluttered, allowing other elements to stand out.
+
+Charcoal Grey (#333333) is best for primary text, ensuring legibility against the lighter background.
+
+Muted Blue (#669BBC) will be used for secondary elements like non-critical buttons, informational cards, or icons, adding a nice contrast without overpowering the main elements.
+
+Light Grey (#D1D1D1) is ideal for dividing content or separating sections of the app, allowing users to quickly scan and navigate.
+
+Why This Palette Works:
+Trust and Clarity: The blue tones (Azure Blue and Muted Blue) project reliability and professionalism, while green adds a sense of safety and operational efficiency.
+Urgency: Amber signals important maintenance-related alerts without the harshness of red.
+Legibility: Charcoal grey and light grey ensure that text is always clear and easy to read, making the app accessible and user-friendly.
+Balance: This palette has a good mix of bright, energetic colors and muted tones, which helps to balance attention-grabbing elements with a clean, non-overwhelming interface.

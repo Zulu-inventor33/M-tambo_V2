@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const App = () => {
   return (

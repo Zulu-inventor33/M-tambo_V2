@@ -8,6 +8,8 @@ from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
 from rest_framework.exceptions import ValidationError
 
+from django.contrib.auth import get_user_model
+
 # View for User SignUp
 class SignUpView(APIView):
     permission_classes = [AllowAny]
@@ -119,9 +121,11 @@ class SignUpView(APIView):
 
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]  # Allow any user to access this endpoint
+    # Allow any user to access this endpoint
+    permission_classes = [AllowAny]
 
     def post(self, request):
+        # Deserialize the incoming request data
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             email_or_phone = serializer.validated_data['email_or_phone']
@@ -129,17 +133,44 @@ class LoginView(APIView):
             
             # Adjust authentication to handle email or phone number login
             user = authenticate(request, username=email_or_phone, password=password)
+            print(f"yooooooo: {user}")
+
+            #this is for debugging purposes
+            #we have added on top of returning access token, we are return user so that
+            #we can use the user to maintain a session on the frontend using react context
+            if user:
+                print(f"Full User Object: {user}")
+                print(f"User ID: {user.id}")
+                print(f"User Email: {user.email}")
+                print(f"First_Name: {user.first_name}")
+                print(f"account_type: {user.account_type}")
+            else:
+                print("Authentication failed!")
+            
             if user is not None:
+                # Generate JWT tokens for the authenticated user
                 refresh = RefreshToken.for_user(user)
                 access_token = refresh.access_token
 
+                # Serialize the user data to return relevant information
+                user_data = {
+                    'id': user.id,
+                    'first_name': user.first_name,
+                    'email': user.email,
+                    'account_type': user.account_type
+                }
+
+                # Return the user data and tokens in the response
                 return Response({
+                    'user': user_data,
                     'access': str(access_token),
                     'refresh': str(refresh)
                 })
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # If serializer is invalid, return validation errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # View to List Available Specializations (for Frontend Dropdown)
 class SpecializationListView(APIView):
