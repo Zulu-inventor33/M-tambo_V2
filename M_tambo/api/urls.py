@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path,include
 from account.views import SignUpView, LoginView, SpecializationListView, MaintenanceListView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     # Endpoint to register a new user (Sign Up)
@@ -118,5 +119,14 @@ urlpatterns = [
     #         }
     #
     # This view allows any user (authenticated or not) to access the data.
-    path('maintenance-companies/', MaintenanceListView.as_view(), name='maintenance-companies-list'),
+    #path('maintenance-companies/', MaintenanceListView.as_view(), name='maintenance-companies-list'),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # {
+    # "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczNDA3NzI5OCwiaWF0IjoxNzMzOTkwODk4LCJqdGkiOiI2ZTJhODExNzdlM2U0YWUxODYwY2M5MjcxMTMwMTBlZCIsInVzZXJfaWQiOjF9.dbryfrKrHG3u5Ox-CSp7l5qFczAlROPeLMyQhPa3Rr4",
+    # "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzOTkxMTk4LCJpYXQiOjE3MzM5OTA4OTgsImp0aSI6IjViYTAwOTAyZTlhMDQzYmU4YzY3NDRiYzRlM2EwZmNjIiwidXNlcl9pZCI6MX0.iEoD96y2Xg-PSu6kdLHn32SjPvdP5Am7gmdPggWr_lg"
+    # }
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    #external routes
+    path('maintenance-companies/', include('maintenance_companies.urls')),
+    path('technicians/', include('technicians.urls')),
 ]

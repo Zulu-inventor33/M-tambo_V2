@@ -1,0 +1,79 @@
+mtambo/
+│
+├── accounts/                   # App for managing login, signup, authentication, user profiles
+│   ├── __init__.py
+│   ├── views.py                # Views for handling login, signup, and user management
+│   ├── serializers.py          # Serializers for user registration, login, profile updates
+│   ├── models.py               # Models for user (Custom User model, if any)
+│   ├── urls.py                 # URL routing for accounts (login, signup, user management)
+│   ├── permissions.py          # Permissions to manage user access (e.g., IsAuthenticated)
+│   └── tokens.py               # Token-based authentication (JWT or session tokens)
+│
+├── maintenance_companies/       # App for managing Maintenance Companies, their buildings, lifts, technicians, etc.
+│   ├── __init__.py
+│   ├── views.py                # Views for managing maintenance companies, buildings, lifts, etc.
+│   ├── serializers.py          # Serializers for maintenance companies and their related data
+│   ├── models.py               # Models for Maintenance Companies, Buildings, Lifts, etc.
+│   ├── urls.py                 # URL routing for maintenance companies (buildings, lifts, technicians)
+│   ├── permissions.py          # Permissions for accessing company-specific data
+│   └── migrations/             # Database migrations for maintenance companies
+│
+├── api/                        # Folder to store all API endpoint routes for the project
+│   ├── __init__.py
+│   ├── urls.py                 # Central URL routing file that includes all apps' routes
+│   ├── dashboard/              # Dashboard-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for Dashboard, such as technician activity, jobs summary
+│   │   ├── serializers.py      # Dashboard-specific serializers
+│   │   ├── models.py           # Dashboard-related models (if needed)
+│   │   └── urls.py             # URL routing specific to Dashboard
+│   ├── jobs/                   # Job-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for creating, updating, and managing jobs
+│   │   ├── serializers.py      # Job-specific serializers
+│   │   ├── models.py           # Job-related models (Job, MaintenanceLog, etc.)
+│   │   └── urls.py             # URL routing specific to Jobs
+│   ├── technicians/            # Technician-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for technician activity, details, stats
+│   │   ├── serializers.py      # Technician-specific serializers
+│   │   ├── models.py           # Technician-related models (Technician, etc.)
+│   │   └── urls.py             # URL routing specific to Technicians
+│   ├── buildings/              # Building-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for managing buildings, linked lifts, and maintenance tasks
+│   │   ├── serializers.py      # Building-specific serializers
+│   │   ├── models.py           # Building-related models (Building, Lift, etc.)
+│   │   └── urls.py             # URL routing specific to Buildings
+│   ├── claims/                 # Claims-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for managing claims (by developers)
+│   │   ├── serializers.py      # Claims-specific serializers
+│   │   ├── models.py           # Claims-related models
+│   │   └── urls.py             # URL routing specific to Claims
+│   ├── alerts/                 # Alerts/notifications-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for triggering and fetching alerts
+│   │   ├── serializers.py      # Alerts-specific serializers
+│   │   ├── models.py           # Alerts-related models (alert types, statuses)
+│   │   └── urls.py             # URL routing specific to Alerts
+│   ├── calendar/               # Calendar-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for fetching and managing calendar tasks
+│   │   ├── serializers.py      # Calendar-specific serializers
+│   │   ├── models.py           # Calendar-related models
+│   │   └── urls.py             # URL routing specific to Calendar
+│   ├── logged_issues/          # Logged issues (from developers) related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for fetching logged issues
+│   │   ├── serializers.py      # Logged issues-specific serializers
+│   │   ├── models.py           # Logged issues-related models
+│   │   └── urls.py             # URL routing specific to Logged Issues
+│   ├── reports/                # Reports-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for fetching and generating reports (job stats)
+│   │   ├── serializers.py      # Report-specific serializers
+│   │   ├── models.py           # Report-related models
+│   │   └── urls.py             # URL routing specific to Reports
+└── manage.py
+

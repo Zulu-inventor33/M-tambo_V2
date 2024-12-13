@@ -360,8 +360,33 @@ Content-Type: application/json
     "maintenance_company_id": 17
 }
 
-# Description:
-# This test verifies that Technician 9, specializing in "Power Backup Generators", can sign up and is linked to the maintenance company with ID 17.
-# The expected result is a 201 Created status with the technician details, and the "maintenance_company_id" field should be set to 17.
 
+### Sign Up - Technician 10
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
 
+{
+    "first_name": "Sophia",
+    "last_name": "Williams",
+    "email": "sophia.tech@example.com",
+    "phone_number": "9876543210",
+    "password": "securePassword321",
+    "account_type": "technician",
+    "specialization": "HVAC",
+    "maintenance_company_id": 12
+}
+
+### Sign Up - Technician 11
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "first_name": "Nancy",
+    "last_name": "Lamilez",
+    "email": "nancy.technician9@examplebackup.com",
+    "phone_number": "7201234567",
+    "password": "password123",
+    "account_type": "technician",
+    "specialization": "Power Backup Generators",
+    "maintenance_company_id": 15
+}

@@ -67,7 +67,7 @@ class Maintenance(models.Model):
 class Technician(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='technician_profile')
     specialization = models.CharField(max_length=100)  # Directly store the specialization as a string
-    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name='technicians',null=False)
+    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name='technicians',null=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.maintenance_company}"

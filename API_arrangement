@@ -1,0 +1,89 @@
+mtambo/
+│
+├── accounts/                   # App for managing login, signup, authentication, user profiles
+│   ├── urls.py                 # URL routing for accounts (login, signup, user management)
+│   ├── /api/accounts/signup/     # POST: Register a new user (Technician or Admin) with details
+│   ├── /api/accounts/login/      # POST: User login (returns JWT token on success)
+│   ├── /api/accounts/logout/     # POST: Logout user (invalidate JWT token)
+│   ├── /api/accounts/profile/    # GET: Get logged-in user's profile (name, email, etc.)
+│   ├── /api/accounts/update-profile/ # PUT: Update user's profile information
+│
+├── maintenance_companies/       # App for managing Maintenance Companies, their buildings, lifts, etc.
+│   ├── urls.py                 # URL routing for maintenance companies (buildings, lifts, technicians)
+│   ├── /api/maintenance-companies/  # GET: List all maintenance companies
+│   ├── /api/maintenance-companies/{specialization}/ #GET : list all companies in a certain specialization. Should return company name and ID
+│   ├── /api/maintenance-companies/{company_id}/  # GET: Get details of a specific maintenance company
+│   ├── /api/maintenance-companies/update/{company_id}/  # PATCH and PUT: Alter both singular and multiple fields of the details of a maintenance company
+│   ├── /api/maintenance-companies/{company_id}/technicians/  # GET: List technicians for a company
+│   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/  # GET: Get technician details for a company
+│   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/remove/  # DELETE: Delete a technician that is linked to the company.
+│   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/add/  # POST a technician to a certain maintenance company.
+│   ├── /api/maintenance-companies/{company_id}/buildings/  # GET: List all buildings under a specific company
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details (lifts, jobs, etc.)
+│   ├── /api/maintenance-companies/{company_id}/lifts/  # GET: List all lifts under a specific company
+│   ├── /api/maintenance-companies/{company_id}/lifts/{lift_id}/  # GET: Get lift details (maintenance, jobs, etc.)
+│
+├── api/                        # Folder to store all API endpoint routes for the project
+│   ├── dashboard/              # Dashboard-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Dashboard-related routes
+│   │   ├── /api/dashboard/     # GET: Get overall dashboard stats (jobs, technician activities)
+│   │   ├── /api/dashboard/todays-jobs/  # GET: Get all jobs scheduled for today (Job ID, Building, Lift, Status)
+│   │   ├── /api/dashboard/technician-activity/  # GET: Get technician activity data (total jobs, completed, pending, etc.)
+│   │   ├── /api/dashboard/technician/{technician_id}/  # GET: Get all jobs assigned to a specific technician
+│
+│   ├── jobs/                   # Job-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Job-related routes
+│   │   ├── /api/jobs/          # GET: List all jobs (with filters for date, job status, etc.)
+│   │   ├── /api/jobs/{job_id}/  # GET: Get specific job details (description, building, lift, status, etc.)
+│   │   ├── /api/jobs/create/    # POST: Create a new job (with building, lift, technician, job details)
+│   │   ├── /api/jobs/{job_id}/update/  # PUT: Update a job's status (e.g., from Pending to Completed)
+│   │   ├── /api/jobs/{job_id}/log/  # GET: Get the maintenance log of a job
+│   │   ├── /api/jobs/{job_id}/claim/  # POST: File a claim for a completed job
+│
+│   ├── technicians/            # Technician-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Technician-related routes
+│   │   ├── /api/technicians/   # GET: List all technicians
+│   │   ├── /api/technicians/unlinked/  # GET: List all technicians that are not listed to any Maintenace company
+│   │   ├── /api/technicians/unlinked/{specialization}/   # GET: List all technicians not linked to any maintenance company based on specialization
+│   │   ├── /api/technicians/{specialization}/ #GET : list all technicians in a certain specialization. Should return technician name, Id and maintenance_company he is linked to
+│   │   ├── /api/technicians/{technician_id}/  # GET: Get specific technician details (completed jobs, pending jobs, etc.)
+│   |   ├── /api/technicians/{technician_id}/unlink/  # PATCH: An API for a technician to unlink himself from any Maintenace company
+│   │   ├── /api/technicians/{technician_id}/jobs/  # GET: Get all jobs assigned to a specific technician
+│   │   ├── /api/technicians/{technician_id}/update/  # PUT: Update technician info (job completion, status, etc.)
+│
+│   ├── buildings/              # Building-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Building-related routes
+│   │   ├── /api/buildings/     # GET: List all buildings
+│   │   ├── /api/buildings/{building_id}/  # GET: Get building details (lifts, jobs, contact info)
+│   │   ├── /api/buildings/{building_id}/jobs/  # GET: Get all jobs for a building (by job status)
+│   │   ├── /api/buildings/{building_id}/lifts/  # GET: Get all lifts in a specific building
+│   │   ├── /api/buildings/{building_id}/lifts/{lift_id}/  # GET: Get lift-specific job history and issues
+│
+│   ├── claims/                 # Claims-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Claim-related routes
+│   │   ├── /api/claims/        # GET: List all claims filed by developers
+│   │   ├── /api/claims/{claim_id}/  # GET: Get specific claim details (building, technician, job ID)
+│   │   ├── /api/claims/file/   # POST: File a claim for a completed job
+│
+│   ├── alerts/                 # Alerts/notifications-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Alerts-related routes
+│   │   ├── /api/alerts/        # GET: List all alerts (new technician registration, job completion, etc.)
+│   │   ├── /api/alerts/{alert_id}/  # GET: Get specific alert details
+│   │   ├── /api/alerts/mark-read/{alert_id}/  # PUT: Mark an alert as read
+│
+│   ├── calendar/               # Calendar-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Calendar-related routes
+│   │   ├── /api/calendar/      # GET: Get a list of all scheduled maintenance tasks
+│   │   ├── /api/calendar/{date}/  # GET: Get tasks scheduled for a specific day
+│
+│   ├── logged_issues/          # Logged issues (from developers) related views, models, serializers
+│   │   ├── urls.py             # URL routing for Logged Issues-related routes
+│   │   ├── /api/logged-issues/ # GET: List all logged issues (by building, date, lift)
+│   │   ├── /api/logged-issues/{issue_id}/  # GET: Get specific issue details
+│
+│   ├── reports/                # Reports-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Reports-related routes
+│   │   ├── /api/reports/       # GET: Generate a report of completed, pending, and overdue jobs for the month
+│   │   ├── /api/reports/technicians/  # GET: Get stats of all technicians (completed, pending, overdue jobs)
+└── manage.py
+

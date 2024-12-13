@@ -1,4 +1,13 @@
-### Get All Maintenance Companies by Specialization: Elevators (Success)
+POST http://127.0.0.1:8000/api/token/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "mutea@gmail.com",
+  "password": "Nairobi2023#"
+}
+
+### Store the Access Token from the response
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM0MDAwNjE0LCJpYXQiOjE3MzQwMDAzMTQsImp0aSI6IjNiMmJhYzJkYTQ5NzRmMjRiMGM5ODNkNzAxYWI3NzJhIiwidXNlcl9pZCI6MX0.Am0xVhQv4IgeByLqrlIZvX9FXCWoAQM9sWVWnw-I_DQ
 ### During Registration since specialization is the first box.
 #Upon selecting the specialization field, It will trigger
 #It will trigger this API to fetch all the maintenance companies dealing with that particular spez e.g Elevators
@@ -86,3 +95,13 @@ Accept: application/json
 # Description:
 # This test checks the behavior when requesting a specialization with an empty or invalid specialization query parameter.
 # The expected result is a 400 Bad Request response.
+
+### Test: Get Maintenance Company Detail
+GET http://127.0.0.1:8000/api/maintenance-companies/id/12/ HTTP/1.1
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### Test: Another Endpoint
+GET http://127.0.0.1:8000/api/maintenance-companies/id/15/ HTTP/1.1
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
