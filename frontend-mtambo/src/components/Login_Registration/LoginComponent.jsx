@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './LoginComponent.css';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons/faGoogle';
 import { faEyeSlash, faQuestion, faEye } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { notifyInfo, notifyError, notifySuccess } from '../../utils/notificationUtils';
-
+import { notifyError, notifySuccess } from '../../utils/notificationUtils';
+import { AuthContext } from '../../context/AuthenticationContext';
 import { useNavigate } from 'react-router-dom';
 
 const LoginComponent = () => {
@@ -16,6 +15,8 @@ const LoginComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+
+  const { login } = useContext(AuthContext);
 
   // Handle email and password validation
   const validateForm = () => {
@@ -62,13 +63,16 @@ const LoginComponent = () => {
           },
         });
 
-        // Call the login function from context to store user and tokens Globally
-        login(response.data.user, response.data.access);
-        notifySuccess("Welcome Back to M-tambo!");
-        console.log("User logins successfully:", response.data);
-        localStorage.setItem('refresh_token', response.data.refresh);
-        setLoading(false);
-        navigate('/dashboard'); // Redirect to dashboard or home page
+        // one of the repsonse I get from MTAMBO API IS ACCESS
+        if (response.status === 200) {
+          // Call the login function from context to store user and tokens Globally on the local storage
+          // This will help us keep the user data global
+          setLoading(false);
+          login(response.data.user, response.data.access, response.data.refresh);
+          notifySuccess("Welcome Back to M-tambo!");
+          navigate('/dashboard');
+        }
+        return;
       } catch (error) {
         // Handle network or server error
         setLoading(false);
@@ -173,12 +177,6 @@ const LoginComponent = () => {
               <FontAwesomeIcon icon={faQuestion} />
               <div className="login-page-new__main-form-help-text"> Help </div>
             </a>
-          </div>
-          <div className="login-page-new__main-bot">
-            <div className="login-page-new__main-bot-text ng-star-inserted">
-              Don't have an account?
-              <Link to="/register" className="login-page-new__main-bot-text-link">Sign up</Link>
-            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons/faGoogle';
 import { faEye, faEyeSlash, faCode, faTools, faWrench } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { notifySuccess, notifyError } from '../../utils/notificationUtils';
@@ -144,7 +143,6 @@ const RegistrationComponent = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData);
         if (validateForm()) {
             setLoading(true);
             const userData = {
@@ -169,18 +167,19 @@ const RegistrationComponent = () => {
                 userData.affiliated_company = formData.affiliatedCompany;
             }
 
-            console.log("Data to be submitted:", JSON.stringify(userData));
-
             try {
                 const response = await axios.post('/api/signup/', JSON.stringify(userData), {
                     headers: {
                         'Content-Type': 'application/json',
                     },
                 });
-                notifySuccess("Registration successful! Welcome to M-tambo.");
-                console.log("User registered successfully:", response.data);
-                setLoading(false);
-                navigate('/login');
+                // the response that I get from server api is user details if reg is successfull contains
+                // the user details
+                if (response?.data?.first_name === formData.firstName) {
+                    notifySuccess("Registration successful! Welcome to M-tambo.");
+                    setLoading(false);
+                }
+                return;
             } catch (error) {
                 setLoading(false);
                 const errorMessage = error.response?.data?.error || 'Something went wrong!';
@@ -530,12 +529,12 @@ const RegistrationComponent = () => {
                                             Previous
                                         </button>
                                     )}
-                                    {step <= 4 && (
+                                    {step < 4 && (
                                         <button type="button" className="next-button" onClick={handleNextStep}>
                                             Next
                                         </button>
                                     )}
-                                    {step > 4 && (
+                                    {step === 4 && (
                                         <button type="submit" className="submit-button">
                                         Sign Up
                                     </button>

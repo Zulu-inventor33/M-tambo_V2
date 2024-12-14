@@ -49,10 +49,11 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   // Handle login
-  const login = (userData, accessToken) => {
+  const login = (userData, accessToken, refreshToken) => {
     const loginTime = Date.now();
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('login_time', loginTime.toString());
     setUser(userData);
     setIsAuthenticated(true);
