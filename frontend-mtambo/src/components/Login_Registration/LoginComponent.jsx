@@ -3,6 +3,10 @@ import './LoginComponent.css';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons/faGoogle';
+import { faEyeSlash, faQuestion, faEye } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import { notifyInfo, notifyError, notifySuccess } from '../../utils/notificationUtils';
+
 import { useNavigate } from 'react-router-dom';
 
 const LoginComponent = () => {
@@ -105,44 +109,69 @@ const LoginComponent = () => {
             <div className="login-page-new__main-form-title-brand"></div>
             <h1 className="login-page-new__main-form-title ng-star-inserted"> Welcome back!</h1>
             {/* continue with google */}
-            <button className="google-btn">
-              Continue with Google
-              <FontAwesomeIcon icon={faGoogle} className='google-icon' />
-            </button>
+            <div className='g-sign-in-button'>
+              <div className='content-wrapper'>
+                <div className='logo-wrapper'>
+                  <img src="https://developers.google.com/identity/images/g-logo.png" alt="google icon" />
+                </div>
+                <span className="text-container">
+                  <span>Continue with Google</span>
+                </span>
+              </div>
+            </div>
             {/* or Separator */}
             <div className="social-login-divider ng-star-inserted">
               <span className="social-login-divider_text">or</span>
             </div>
             {/* the login form starts here */}
             <div className="login-page-new__main-form-router-outlet">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="login-page-new__main-form-row">
-                  <label for="email" className="login-page-new__main-form-row-label">Email</label>
+                  {/* email input section */}
+                  <label htmlFor="email" className="login-page-new__main-form-row-label">Email</label>
                   <input
-                    id="loginEmail"
-                    placeholder="Enter your email"
                     type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
+                  {error.email && <span className="text-red-500 text-sm mt-1">{error.email}</span>}
                 </div>
+                {/* password input section */}
                 <div className="login-page-new__main-form-row">
-                  <label for="password" className="login-page-new__main-form-row-label">Password</label>
-                  <input
-                    id="loginPassword"
-                    type="password"
-                    autocorrect="off"
-                    placeholder="Enter password"
-                  />
+                  <label htmlFor="password" className="login-page-new__main-form-row-label">Password</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoCorrect="off"
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="password-toggle-button"
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? (<FontAwesomeIcon icon={faEye} />) : (<FontAwesomeIcon icon={faEyeSlash} />)}
+                    </button>
+                  </div>
                 </div>
-                <button type="submit" class="login-page-new__main-form-button">
+                <button type="submit" className="login-page-new__main-form-button">
                   <span className="login-page-new__main-form-button-text"> Sign In </span>
                 </button>
               </form>
             </div>
-            <a href="#" target="_blank" class="login-page-new__main-form-help">
-              <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 6a6 6 0 016-6h4a6 6 0 016 6v4a6 6 0 01-6 6H6a6 6 0 01-6-6V6zm2 0a4 4 0 014-4h4a4 4 0 014 4v4a4 4 0 01-4 4H6a4 4 0 01-4-4V6zm5.117-.483c-.12.25-.34.483-.617.483H6c-.552 0-1.016-.46-.836-.982A3.001 3.001 0 0111 6c0 1.126-.62 1.863-1.538 2.308C9.192 8.44 9 8.7 9 9a1 1 0 01-2 0v-.5c0-.828.724-1.313 1.482-1.647C8.787 6.72 9 6.467 9 6a1 1 0 00-1-1c-.512 0-.761.262-.883.517zM8 13a1 1 0 100-2 1 1 0 000 2z" fill="#fff"></path>
-              </svg>
-              <div class="login-page-new__main-form-help-text"> Help </div>
+            <a href="#" target="_blank" className="login-page-new__main-form-help">
+              <FontAwesomeIcon icon={faQuestion} />
+              <div className="login-page-new__main-form-help-text"> Help </div>
             </a>
           </div>
           <div className="login-page-new__main-bot">

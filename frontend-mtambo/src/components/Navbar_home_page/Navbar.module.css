@@ -168,6 +168,7 @@ a {
     padding-top: .3125rem;
     padding-bottom: .3125rem;
     color: #fff;
+    border: 1px solid;
     border-color: rgb(255 255 255);
     border-top-width: .0625rem;
     border-right-width: .0625rem;

@@ -4,7 +4,7 @@
     width: 100vw;
     height: 100vh;
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: hidden;
     background-color: #fafbfc;
     font-family: -apple-system,BlinkMacSystemFont,Segoe UI,roboto,Helvetica Neue,helvetica,arial,sans-serif;
 }
@@ -21,25 +21,70 @@ nav {
     top: 34px;
     left: 34px;
     z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Add a clean, modern font */
+    transition: transform 0.3s ease-in-out;
+}
+  
+.login-page-new__logo:hover {
+    transform: scale(1.05);
+}
+  
+/*
+======================================================================================================================
+----------------------------------------- Error section styling ---------------------------------
+===================================================================================================================== */
+.error-messages {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 14px;
 }
 
-.login-page-new__logo-img {
-    width: 124px;
-    height: auto;
-}
-
-.login-page-new__logo-header-black {
-    font-size: x-large;
-    font-weight: bold;
-}
-
-.login-page-new__logo-text {
-    margin-top: 0.1875rem;
+.error-text {
+    margin: 5px 0;
     display: flex;
     align-items: center;
-    font-size: 0.8125rem;
-    font-weight: 500;
 }
+
+.error-icon {
+    margin-right: 8px;
+    color: #f44336;
+    font-size: 18px;
+}
+
+
+.login-page-new__logo-header-black {
+    font-size: 2rem;
+    font-weight: bolder;
+    color: #2a2e34;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+  
+.login-page-new__logo-header-black:hover {
+    color: #e04f44;
+}
+  
+.login-page-new__logo-text {
+    margin-top: 0.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+  
+.login-page-new__logo-text:hover {
+    opacity: 1;
+} 
 
 .login-page-new__top-right {
     position: fixed;
@@ -99,7 +144,7 @@ nav {
     left: 0;
     overflow: hidden;
     pointer-events: none;
-    background: url("../images/login_background2.jpg") center 10px no-repeat;
+    background: url("../images/login_background.png") center 10px no-repeat;
     background-size: auto;
     background-size: cover;
 }
@@ -165,7 +210,7 @@ nav {
     align-items: center;
     text-align: center;
     text-transform: uppercase;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
 }
 
 
@@ -206,10 +251,6 @@ nav {
     padding: 0 0 8px 2px;
 }
 
-.cu-form__input:invalid {
-    box-shadow: none;
-}
-
 .login-page-new__main-form-row input {
     transition: border-color .2s cubic-bezier(.785,.135,.15,.86) 0s;
     font-size: 14px;
@@ -222,6 +263,28 @@ nav {
     padding: 0 20px 0 36px;
     height: 40px;
     color: #2a2e34;
+}
+
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-toggle-button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 2;
+}
+  
+.password-toggle-button svg {
+    color: #333;
+    font-size: 15px;
 }
 
 .login-page-new__main-form-row input:hover, .login-page-new__main-form-row input:focus-visible {
@@ -241,7 +304,15 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     border-radius: 9px;
     width: 100%;
     margin-bottom: 22px;
-    background-color: rgb(95, 85, 238);
+    background: linear-gradient(45deg, #736EF5, #E8618E, #8A5AEF, #A726ED);
+    color: rgb(255,255,255);
+}
+
+.login-page-new__main-form-button-text {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
 }
 
 .login-page-new__main-bot {
@@ -351,6 +422,185 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     height: 16px;
 }
 
+/*
+======================================================================================================================
+----------------------------------------- THE BUTTONS FOR NEXT, PREVIOUS AND SUBMIT ---------------------------------
+===================================================================================================================== */
+.login-page-new__main-form-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.prev-button, .next-button, .submit-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.prev-button {
+    background-color: #736EF5;
+    color: white;
+}
+
+.next-button {
+    background-color: #E8618E;
+    color: white;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.prev-button:hover {
+    background-color: #8A5AEF;
+}
+
+.next-button:hover {
+    background-color: #A726ED;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+.password-toggle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+}
+
+/*
+======================================================================================================================
+----------------------------------------- ACCOUNT TYPE SELECTION STYLING ---------------------------------
+===================================================================================================================== */
+.account-type-title {
+    font-weight: 600;
+}
+
+.account-type-options {
+    display: flex;
+    margin-top: 10px;
+    flex-direction: column;
+    gap: 20px;
+}
+  
+.account-type-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+  
+.account-type-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+  
+.account-type-label {
+    padding: 10px 20px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    color: #444;
+    background-color: #f5f5f5;
+    width: 100%;
+}
+  
+.account-type-radio:checked + .account-type-label {
+    border-color: #4CAF50;
+    background-color: #e3f9e5;
+}
+  
+.account-type-label:hover {
+    border-color: #3e8e41;
+}
+  
+.account-type-icon {
+    font-size: 24px;
+    color: #4CAF50;
+}
+  
+.account-type-label span {
+    font-weight: bold;
+    color: #333;
+}
+  
+.account-type-label:hover .account-type-icon {
+    color: #3e8e41;
+}
+
+.g-sign-in-button {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 10px;
+    display: inline-block;
+    width: 100%;
+    height: 50px;
+    background-color: #4285f4;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .25);
+    transition: background-color .218s, border-color .218s, box-shadow .218s;
+  }
+  
+.g-sign-in-button:hover {
+    cursor: pointer;
+    -webkit-box-shadow: 0 0 3px 3px rgba(66, 133, 244, .3);
+    box-shadow: 0 0 3px 3px rgba(66, 133, 244, .3);
+}
+  
+.g-sign-in-button:active {
+    background-color: #3367D6;
+    transition: background-color .2s;
+}
+  
+.g-sign-in-button .content-wrapper {
+    height: 100%;
+    width: 100%;
+    border: 1px solid transparent;
+}
+  
+.g-sign-in-button img {
+    width: 18px;
+    height: 18px;
+}
+  
+.g-sign-in-button .logo-wrapper {
+    padding: 15px;
+    background: #fff;
+    width: 48px;
+    height: 100%;
+    border-radius: 5px;
+    display: inline-block;
+}
+  
+.g-sign-in-button .text-container {
+    font-family: "Roboto", arial, sans-serif;
+    font-weight: 500;
+    letter-spacing: .21px;
+    font-size: 16px;
+    line-height: 48px;
+    vertical-align: top;
+    border: none;
+    display: inline-block;
+    text-align: center;
+    width: 180px;
+}
+  
 
 @media screen and (max-width: 544px) {
     .login-page-new__main-form-row input {
@@ -359,6 +609,13 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 }
 
 @media only screen and (max-width: 768px) {
+    .login-page-new__logo {
+        top: 20px;
+        left: 20px;
+    }
+    .login-page-new__logo-header-black {
+        font-size: 1.5rem;
+    }
     .login-page-new__top-right-text {
       display: none;
     }
