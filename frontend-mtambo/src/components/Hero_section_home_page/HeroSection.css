@@ -241,7 +241,7 @@ button, select {
     color: rgb(66, 66, 66);
 }
 
-.form-container2 .settings_btn {
+.form-container2 .settings-btn {
     display: none;
     flex-shrink: 0;
     height: 32px;
@@ -262,11 +262,11 @@ button, select {
     cursor: pointer;
 }
 
-.form-container2 .settings_btn:hover {
+.form-container2 .settings-btn:hover {
     border-color: rgb(18 18 18);
 }
 
-.form-container2 .settings_btn svg {
+.form-container2 .settings-btn svg {
     color: rgb(18, 18, 18);
     font-size: 20px;
     fill: currentColor;
@@ -280,10 +280,8 @@ button, select {
     justify-content: center;
     align-items: center;
     color: rgb(255,255,255);
-    padding-top: .625rem;
-    padding-right: .625rem;
-    padding-left: .625rem;
-    padding-bottom: .625rem;
+    padding: .625rem;
+    margin-right: 10px;
     row-gap: .625rem;
     -moz-column-gap: .625rem;
     column-gap: .625rem;
@@ -605,14 +603,6 @@ button, select {
     .hero_section_wrapper {
         height: 525px;
     }
-    .hero_section_title {
-        padding-left: 4.375rem;
-        padding-right: 4.375rem;
-    }
-    .hero_section_subtitle {
-        padding-left: 4.375rem;
-        padding-right: 4.375rem;
-    }
     .form-container2 .assets-container .button-container {
         padding: 0 15px;
     }
@@ -648,7 +638,7 @@ button, select {
         height: 494px;
     }
     .form-container2 .assets-container .button-container {
-        width: 195px;
+        width: 140px;
         padding: 0 15px;
     }
 
@@ -685,10 +675,10 @@ button, select {
         height: 56px;
     }
     .form-container2 .assets-container .button-container {
-        width: 195px;
+        width: 140px;
         padding: 0 15px;
     }
-    .form-container2 .settings_btn {
+    .form-container2 .settings-btn {
         display: flex;
         height: 40px;
         width: 40px;
@@ -720,7 +710,6 @@ button, select {
         font-size: 18px;
     }
 }
-
 
 /* for screens with a minimum width of 1096px (68.5rem) */
 @media screen and (min-width: 1096px) {

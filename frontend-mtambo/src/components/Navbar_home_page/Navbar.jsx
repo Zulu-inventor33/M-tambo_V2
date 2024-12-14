@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faBell, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import styles from './Navbar.module.css';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,7 +52,7 @@ const Navbar = () => {
                     <a className={styles.price_link} href="#">Pricing</a>
                 </li>
                 <li className={styles.sign_up_container}>
-                    <a href="#" className={styles.sign_up_link}>Sign in</a>
+                    <Link to="/login" className={styles.sign_up_link}>Sign In</Link>
                 </li>
             </ul>
             ) : (

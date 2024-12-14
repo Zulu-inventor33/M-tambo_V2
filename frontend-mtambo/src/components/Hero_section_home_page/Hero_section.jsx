@@ -1,7 +1,12 @@
 import React from 'react';
 import './HeroSection.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faTachometer, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faSearch, 
+  faTachometer, 
+  faCaretDown,
+  faCog
+} from '@fortawesome/free-solid-svg-icons';
 
 const HeroSection = () => {
   return (
@@ -11,10 +16,10 @@ const HeroSection = () => {
         <div aria-hidden="true" className="hero_section_wrapper">
           <div className="hero_section_wrapper2"></div>
         </div>
-        <div className="hero_section_content">
+        <div class="hero_section_content">
           {/* hero title subtitle section */}
-          <h1 className="hero_section_title">Transform, Streamline, Optimize.</h1>
-          <p className="hero_section_subtitle">
+          <h1 class="hero_section_title">Transform, Streamline, Optimize.</h1>
+          <p class="hero_section_subtitle">
             Empower your team with smarter, more efficient maintenance solutions with M-tambo.
           </p>
           {/* hero search section */}
@@ -42,18 +47,14 @@ const HeroSection = () => {
                       </button>
                     </div>
                     {/* separator bar */}
-                    <div className="separator_bar"></div>
+                    <div className="separator-bar"></div>
                     {/* input section */}
                     <input type="text" placeholder="Search for jobs, equipments, technicians..." autocomplete="off" value="" />
-                    <button type="button" className="settings_btn">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="-49 141 512 512" width="16" height="16" aria-hidden="true">
-                        <path d="M207 503c-58.448 0-106.393-47.945-106.393-106.393 0-58.448 47.945-106.393 106.393-106.393 58.448 0 106.393 47.945 106.393 106.393 0 58.448-47.945 106.393-106.393 106.393zm0-190.393c-46.149 0-83.18 37.03-83.18 83.18 0 46.149 37.03 83.18 83.18 83.18 46.149 0 83.18-37.03 83.18-83.18 0-46.149-37.03-83.18-83.18-83.18z"></path>
-                      </svg>
+                    <button type="button" className="settings-btn">
+                      <FontAwesomeIcon icon={faCog}/>
                     </button>
                     <button type="submit" className="search_btn">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="-49 141 512 512" width="16" height="16" aria-hidden="true">
-                        <path d="M448.178 602.822 316.426 471.071c26.355-33.88 42.074-76.422 42.074-122.571 0-110.28-89.72-200-200-200s-200 89.72-200 200 89.72 200 200 200c46.149 0 88.691-15.719 122.571-42.074l131.751 131.751c4.882 4.882 11.28 7.323 17.678 7.323s12.796-2.441 17.678-7.322c9.762-9.763 9.762-25.593 0-35.356M8.5 348.5c0-82.71 67.29-150 150-150s150 67.29 150 150-67.29 150-150 150-150-67.29-150-150"></path>
-                      </svg>
+                      <FontAwesomeIcon icon={faSearch}/>
                       <span className="search_label">Search</span>
                     </button>
                   </div>
@@ -61,27 +62,85 @@ const HeroSection = () => {
               </div>
             </div>
           </div>
-        </div>
-        {/* hero images card section */}
-        <div className="hero_images_cards_section">
-          <div className="images_cards_container">
-            <div className="cards_container">
-              <ul className="cards_list_container">
-                <li>
-                  <div className="card_container">
-                    <a href="#" className="card">
-                      <img alt="Elevator Maintenance Image" loading="lazy" decoding="async" className="card_img" src="./images/elevator.jpg" />
-                      <div className="card_text">
-                        <p role="heading" aria-level="4" className="card_heading">Comprehensive Lift Maintenance Support</p>
-                        <p className="card_subheading">Efficient elevator management with cutting-edge CMMS technology</p>
-                      </div>
-                    </a>
+          {/* hero images card section */}
+          <div class="hero_images_cards_section">
+            <div class="images_cards_container">
+              <div class="cards_container">
+                <div class="inner-cards-container">
+                  <div class="inner-cards-container2">
+                    <div class="">
+                      <ul class="cards-list-container">
+                        <li>
+                          <div class="card-container">
+                              <a href="#" class="card">
+                                <img alt="lifts Image" loading='lazy' class="card-img" src="/images/elevator.jpg"/>
+                                <div class="card-text">
+                                    <p role="heading" aria-level="4" class="card-heading">Comprehensive Lift Maintenance Support</p>
+                                    <p class="card-subheading">Efficient elevator management with cutting-edge CMMS technology</p>
+                                </div>
+                              </a>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="card-container">
+                              <a href="#" class="card">
+                                <img alt="technicia" loading="lazy" class="card-img" src="/images/technician.jpg"/>
+                                <div class="card-text">
+                                    <p role="heading" aria-level="4" class="card-heading">Task Management Dashboard</p>
+                                    <p class="card-subheading">Manage tasks, track progress, and report easily.</p>
+                                </div>
+                              </a>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="card-container">
+                              <a href="#" class="card">
+                                <img alt="dashboard" loading="lazy" class="card-img" src="/images/dashboard_img.jpg"/>
+                                <div class="card-text">
+                                    <p role="heading" aria-level="4" class="card-heading">Maintenance Company Dashboard</p>
+                                    <p class="card-subheading">Streamline task management, tracking, and reporting.</p>
+                                </div>
+                              </a>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="card-container">
+                              <a href="#" class="card">
+                                <img alt="repairing" loading="lazy" class="card-img" src="./images/repairing.jpg"/>
+                                <div class="card-text">
+                                    <p role="heading" aria-level="4" class="card-heading">Efficient Repair Management</p>
+                                    <p class="card-subheading">Use our CMMS system to streamline and track repairs.</p>
+                                </div>
+                              </a>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="card-container">
+                              <a href="#" class="card">
+                                <img alt="hvac" loading="lazy" class="card-img" src="/images/hvac.jpg"/>
+                                <div class="card-text">
+                                    <p role="heading" aria-level="4" class="card-heading">HVAC Maintenance Made Easy</p>
+                                    <p class="card-subheading">Track, manage, and optimize HVAC systems with our CMMS.</p>
+                                </div>
+                              </a>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-                </li>
-                {/* More cards... */}
-              </ul>
+                  <button class="scroll-btn-container">
+                      <span class="scroll-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-49 141 512 512" width="16" height="16" aria-hidden="true">
+                            <path d="M262.145 397 98.822 560.323c-9.763 9.763-9.763 25.592 0 35.355s25.592 9.763 35.355 0l181-181c4.882-4.881 7.323-11.279 7.323-17.677s-2.441-12.796-7.322-17.678l-181-181c-9.764-9.763-25.592-9.763-35.355 0s-9.763 25.592 0 35.355z"></path>
+                        </svg>
+                      </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+          </div>
+          <div className="hero_section_content">
         </div>
       </div>
     </main>
