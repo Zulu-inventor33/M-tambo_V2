@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faBell, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import styles from './Navbar.module.css';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthenticationContext';
 
 const Navbar = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // we are retrieving this from our authentication context to determine if user is logged
+    // in or not.
+    const { isAuthenticated, user, logout } = useContext(AuthContext);
 
     return (
         <nav className={styles.nav_container}>
@@ -45,7 +48,7 @@ const Navbar = () => {
                 </li>
             </ul>
 
-            {!isLoggedIn ? (
+            {!isAuthenticated ? (
             // This section is shown when the user is NOT logged in
             <ul className={styles.sign_up_price_container}>
                 <li className={styles.pricing_container}>
@@ -77,6 +80,8 @@ const Navbar = () => {
                 </li>
             </ul>
             )}
+
+            
         </nav>
     );
 };
