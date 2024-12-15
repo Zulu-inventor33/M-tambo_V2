@@ -176,6 +176,7 @@ const RegistrationComponent = () => {
                 // the response that I get from server api is user details if reg is successfull contains
                 // the user details
                 if (response?.data?.first_name === formData.firstName) {
+                    console.log("yoooooooooooooooooooooooo");
                     notifySuccess("Registration successful! Welcome to M-tambo.");
                     setLoading(false);
                 }
