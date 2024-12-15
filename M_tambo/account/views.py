@@ -124,48 +124,12 @@ class SignUpView(APIView):
             developer_name=developer_name,
             address=address
         )
-
-                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
-
-            # Step 4: Handle 'technician' account type (Create Technician profile)
-            elif account_type == 'technician':
-                # Validate fields for Technician profile
-                specialization = request.data.get("specialization")
-                maintenance_company_id = request.data.get("maintenance_company_id")
-
-                # Ensure that both specialization and maintenance_company_id are provided
-                if not all([specialization, maintenance_company_id]):
-                    return Response(
-                        {"error": "Both specialization and maintenance_company_id are required for the Technician profile."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Step 4.1: Check if the Maintenance company exists
-                try:
-                    maintenance_company = Maintenance.objects.get(id=maintenance_company_id)
-                except Maintenance.DoesNotExist:
-                    return Response(
-                        {"error": "Maintenance company not found."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Step 4.2: Create the Technician profile and link it to the maintenance company
-                try:
-                    technician = Technician.objects.create(
-                        user=user,
-                        specialization=specialization,
-                        maintenance_company=maintenance_company  # Correctly link to the maintenance company
-                    )
-                except Exception as e:
-                    return Response(
-                        {"error": str(e)},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
-
-                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
-
-        # If user_serializer is not valid, return errors
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return response with user and developer profile data
+        return Response(
+            {"user": UserSerializer(user).data, "developer_profile": DeveloperSerializer(developer_profile).data},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class LoginView(APIView):

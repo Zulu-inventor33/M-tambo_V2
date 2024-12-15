@@ -175,10 +175,10 @@ const RegistrationComponent = () => {
                 });
                 // the response that I get from server api is user details if reg is successfull contains
                 // the user details
-                if (response?.status === 201) {
-                    console.log(loading);
+                if (response?.data?.first_name === formData.firstName) {
+                    console.log("yoooooooooooooooooooooooo");
+                    notifySuccess("Registration successful! Welcome to M-tambo.");
                     setLoading(false);
-                    notifySuccess("Registered successfully!");
                 }
                 return;
             } catch (error) {
@@ -537,8 +537,8 @@ const RegistrationComponent = () => {
                                     )}
                                     {step === 4 && (
                                         <button type="submit" className="submit-button">
-                                            Sign Up
-                                        </button>
+                                        Sign Up
+                                    </button>
                                     )}
                                 </div>
                             </form>
@@ -546,13 +546,6 @@ const RegistrationComponent = () => {
                     </div>
                 </div>
             </div>
-            {/* Optional: Overlay */}
-            {loading && (
-                <div className="overlay">
-                    <div className="spinner"></div>
-                    <div className="overlay-content">Signing up...</div>
-                </div>
-            )}
         </div>
     );
 };
