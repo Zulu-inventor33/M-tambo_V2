@@ -89,15 +89,12 @@ class UnlinkTechnicianFromCompanyView(APIView):
             technician.save()
             return Response({"message": "You have successfully been unlinked from the maintenance company."}, status=status.HTTP_200_OK)
         except Technician.DoesNotExist:
-<<<<<<< HEAD
             return Response({"error": "Technician not found."}, status=status.HTTP_404_NOT_FOUND)
-=======
             return Response(
                 {"error": "Technician not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
 
->>>>>>> e0be0cb (Elevator APIs completed)
 
 class TechnicianDetailByEmailView(APIView):
     permission_classes = [AllowAny]  # Modify this as per your permissions

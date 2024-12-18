@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 from django.shortcuts import render
-=======
 from django.shortcuts import render,get_object_or_404
->>>>>>> e0be0cb (Elevator APIs completed)
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -54,7 +51,6 @@ class MaintenanceCompanyBySpecializationView(generics.ListAPIView):
         filtered_data = [{"id": item["id"], "company_name": item["company_name"]} for item in serialized_data]
         return Response(filtered_data)
 
-<<<<<<< HEAD
 @swagger_auto_schema(
     tags=["Maintenance Companies"],
     operation_description="Retrieve details of a specific maintenance company by ID.",
@@ -83,7 +79,6 @@ class MaintenanceCompanyDetailView(generics.RetrieveAPIView):
     ],
     responses={200: TechnicianListSerializer(many=True)}
 )
-=======
 
 class MaintenanceCompanyDetailView(APIView):
     permission_classes = [AllowAny]
@@ -104,7 +99,6 @@ class MaintenanceCompanyDetailView(APIView):
 
     
 # View to list all technicians for a specific maintenance company
->>>>>>> e0be0cb (Elevator APIs completed)
 class MaintenanceCompanyTechniciansView(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = TechnicianListSerializer
@@ -235,10 +229,8 @@ class UpdateMaintenanceCompanyView(UpdateAPIView):
         return self.update(request, partial=partial, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-<<<<<<< HEAD
         return self.update(request, *args, **kwargs)
 
-=======
         """
         Handle full update (updating all fields).
         """
@@ -259,4 +251,3 @@ class MaintenanceCompanyByEmailView(generics.RetrieveAPIView):
             return user.maintenance_profile  # This will return the associated Maintenance object
         except User.DoesNotExist:
             raise NotFound(detail="User with this email not found.")
->>>>>>> e0be0cb (Elevator APIs completed)
