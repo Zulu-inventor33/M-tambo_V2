@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from django.shortcuts import render
+=======
+from django.shortcuts import render,get_object_or_404
+>>>>>>> e0be0cb (Elevator APIs completed)
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -7,6 +11,7 @@ from rest_framework.generics import UpdateAPIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import Maintenance
+from account.models import User
 from .serializers import MaintenanceSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
@@ -49,6 +54,7 @@ class MaintenanceCompanyBySpecializationView(generics.ListAPIView):
         filtered_data = [{"id": item["id"], "company_name": item["company_name"]} for item in serialized_data]
         return Response(filtered_data)
 
+<<<<<<< HEAD
 @swagger_auto_schema(
     tags=["Maintenance Companies"],
     operation_description="Retrieve details of a specific maintenance company by ID.",
@@ -77,6 +83,28 @@ class MaintenanceCompanyDetailView(generics.RetrieveAPIView):
     ],
     responses={200: TechnicianListSerializer(many=True)}
 )
+=======
+
+class MaintenanceCompanyDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, company_id):
+        try:
+            # Attempt to retrieve the maintenance company by ID
+            company = Maintenance.objects.get(id=company_id)
+            
+            # Serialize and return the company data
+            serialized_data = MaintenanceSerializer(company)
+            return Response(serialized_data.data, status=status.HTTP_200_OK)
+        
+        except Maintenance.DoesNotExist:
+            # Print a log if company not found
+            print(f"Company with ID {company_id} not found.")
+            raise NotFound(detail="Maintenance company not found.")
+
+    
+# View to list all technicians for a specific maintenance company
+>>>>>>> e0be0cb (Elevator APIs completed)
 class MaintenanceCompanyTechniciansView(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = TechnicianListSerializer
@@ -207,5 +235,28 @@ class UpdateMaintenanceCompanyView(UpdateAPIView):
         return self.update(request, partial=partial, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
+<<<<<<< HEAD
         return self.update(request, *args, **kwargs)
 
+=======
+        """
+        Handle full update (updating all fields).
+        """
+        return self.update(request, *args, **kwargs)
+    
+class MaintenanceCompanyByEmailView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]  # Modify this as per your permissions
+    serializer_class = MaintenanceSerializer
+    
+    def get_object(self):
+        # Retrieve the User by email
+        email = self.kwargs['email']
+        try:
+            user = User.objects.get(email=email)
+            # Check if the user has an associated maintenance profile
+            if not user.maintenance_profile:
+                raise NotFound(detail="User has no maintenance company associated.")
+            return user.maintenance_profile  # This will return the associated Maintenance object
+        except User.DoesNotExist:
+            raise NotFound(detail="User with this email not found.")
+>>>>>>> e0be0cb (Elevator APIs completed)

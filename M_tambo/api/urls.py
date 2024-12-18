@@ -28,7 +28,7 @@ urlpatterns = [
     #     "address": "123 Developer St, Dev City"
     # }
     #
-    # Example Request Body for a Maintenance Worker:
+    # Example Request Body for a Maintenance Company:
     # {
     #     "first_name": "Jane",
     #     "last_name": "Smith",
@@ -136,4 +136,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('maintenance-companies/', include('maintenance_companies.urls')),
     path('technicians/', include('technicians.urls')),
+    path('developers/', include('developers.urls')),
+    path('buildings/', include('buildings.urls')),
+    path('elevators/', include('elevators.urls')),
 ]

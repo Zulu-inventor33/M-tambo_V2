@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from .models import Technician
+from account.models import User
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from .serializers import TechnicianListSerializer, TechnicianDetailSerializer, TechnicianSpecializationSerializer
@@ -87,5 +89,34 @@ class UnlinkTechnicianFromCompanyView(APIView):
             technician.save()
             return Response({"message": "You have successfully been unlinked from the maintenance company."}, status=status.HTTP_200_OK)
         except Technician.DoesNotExist:
+<<<<<<< HEAD
             return Response({"error": "Technician not found."}, status=status.HTTP_404_NOT_FOUND)
+=======
+            return Response(
+                {"error": "Technician not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
+>>>>>>> e0be0cb (Elevator APIs completed)
+
+class TechnicianDetailByEmailView(APIView):
+    permission_classes = [AllowAny]  # Modify this as per your permissions
+    serializer_class = TechnicianDetailSerializer
+    
+    def get(self, request, technician_email, *args, **kwargs):
+        try:
+            # Retrieve the User by email using the custom user model
+            user = User.objects.get(email=technician_email)
+            
+            # Assuming 'technician_profile' is the related name in your User model
+            if user.technician_profile is None:
+                raise NotFound(detail="User has no technician profile associated.")
+            
+            # Serialize the technician profile
+            serializer = self.serializer_class(user.technician_profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except User.DoesNotExist:
+            raise NotFound(detail="User with this email not found.")
+        except Technician.DoesNotExist:
+            raise NotFound(detail="Technician profile not found for this user.")

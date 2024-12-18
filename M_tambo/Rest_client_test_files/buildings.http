@@ -1,0 +1,125 @@
+# This file is for testing the registration of buildings and listing all buildings via API.
+# The following two endpoints will be tested:
+# 1. POST /api/buildings/add/ - Register a new building (with a trailing slash)
+# 2. GET /api/buildings/ - List all buildings (with a trailing slash)
+
+
+### Registering Buildings
+
+# Building 1 - Sunset Towers by Developer 1
+POST http://localhost:8000/api/buildings/add/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "developer_id": 1,
+    "name": "Sundowners Towers",
+    "address": "123 Sunset Boulevard, Los Angeles, CA",
+    "contact": "555-12544"
+}
+
+
+### Building 2 - Sunset Heights by Developer 1
+POST http://localhost:8000/api/buildings/add/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "developer_id": 1,
+    "name": "Sunset Heights",
+    "address": "456 Sunset Blvd, Los Angeles, CA",
+    "contact": "555-5678"
+}
+
+
+### Building 3 - Ocean View Apartments by Developer 2
+POST http://localhost:8000/api/buildings/add/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "developer_id": 2,
+    "name": "Ocean View Apartments",
+    "address": "789 Ocean Drive, Miami, FL",
+    "contact": "555-8765"
+}
+
+
+### Building 4 - Beachfront Condos by Developer 2
+POST http://localhost:8000/api/buildings/add/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "developer_id": 2,
+    "name": "Beachfront Condos",
+    "address": "321 Beach Avenue, Miami, FL",
+    "contact": "555-4321"
+}
+
+
+### List All Registered Buildings
+
+GET http://localhost:8000/api/buildings/ HTTP/1.1
+Content-Type: application/json
+
+
+### Test 1: Fetch details of an existing building
+# This test will query an existing building with id=1.
+
+GET http://127.0.0.1:8000/api/buildings/1/ HTTP/1.1
+Content-Type: application/json
+
+### Expected Response:
+# The response should contain the details of the building with id=1 if it exists in the database.
+# You should expect a 200 OK response with the building details as JSON, like:
+#
+# {
+#     "id": 1,
+#     "name": "Sunset Towers",
+#     "address": "123 Sunset Boulevard, Los Angeles, CA",
+#     "contact": "555-1234",
+#     "developer": 1,
+#     "developer_name": "Developer Name"
+# }
+
+### Test 2: Fetch details of a non-existing building
+# This test will query a building that does not exist, with id=999.
+
+GET http://127.0.0.1:8000/api/buildings/999/ HTTP/1.1
+Content-Type: application/json
+
+### Expected Response:
+# Since there is no building with id=999, the response should return a 404 Not Found status code.
+# The response body will contain an error message indicating that the building was not found, like:
+#
+# {
+#     "error": "Building not found."
+# }
+
+### Test 3: Fetch details of another existing building
+# This test will query an existing building with id=2.
+
+GET http://127.0.0.1:8000/api/buildings/2/ HTTP/1.1
+Content-Type: application/json
+
+### Expected Response:
+# You should receive a 200 OK response with the details of the building with id=2, such as:
+#
+# {
+#     "id": 2,
+#     "name": "Mountain View Apartments",
+#     "address": "456 Mountain Road, San Francisco, CA",
+#     "contact": "555-6789",
+#     "developer": 2,
+#     "developer_name": "Mountain Builders"
+# }
+
+### Test Case 1: Successfully retrieve buildings for a developer
+# Test for valid developer ID (e.g., developer_id = 1)
+
+GET http://127.0.0.1:8000/api/buildings/developer/1/ HTTP/1.1
+Accept: application/json
+
+### Test Case 2: No buildings found for a developer
+# Test for developer ID that has no associated buildings (e.g., developer_id = 9999)
+
+GET http://127.0.0.1:8000/api/buildings/developer/9999/ HTTP/1.1
+Accept: application/json
+
