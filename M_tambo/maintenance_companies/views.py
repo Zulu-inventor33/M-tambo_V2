@@ -1,12 +1,11 @@
-from django.shortcuts import render
-
-# Create your views here.
+from django.shortcuts import render,get_object_or_404
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from .models import Maintenance
+from account.models import User
 from .serializers import MaintenanceSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
@@ -38,14 +37,23 @@ class MaintenanceCompanyBySpecializationView(generics.ListAPIView):
         return Response(filtered_data)
 
 
-# View to get details of a specific maintenance company by ID
-class MaintenanceCompanyDetailView(generics.RetrieveAPIView):
-    queryset = Maintenance.objects.all()
-    serializer_class = MaintenanceSerializer
+class MaintenanceCompanyDetailView(APIView):
+    permission_classes = [AllowAny]
 
-    def get_object(self):
-        # Retrieve the specific maintenance company by ID
-        return Maintenance.objects.get(id=self.kwargs['company_id'])
+    def get(self, request, company_id):
+        try:
+            # Attempt to retrieve the maintenance company by ID
+            company = Maintenance.objects.get(id=company_id)
+            
+            # Serialize and return the company data
+            serialized_data = MaintenanceSerializer(company)
+            return Response(serialized_data.data, status=status.HTTP_200_OK)
+        
+        except Maintenance.DoesNotExist:
+            # Print a log if company not found
+            print(f"Company with ID {company_id} not found.")
+            raise NotFound(detail="Maintenance company not found.")
+
     
 # View to list all technicians for a specific maintenance company
 class MaintenanceCompanyTechniciansView(generics.ListAPIView):
@@ -223,3 +231,19 @@ class UpdateMaintenanceCompanyView(UpdateAPIView):
         Handle full update (updating all fields).
         """
         return self.update(request, *args, **kwargs)
+    
+class MaintenanceCompanyByEmailView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]  # Modify this as per your permissions
+    serializer_class = MaintenanceSerializer
+    
+    def get_object(self):
+        # Retrieve the User by email
+        email = self.kwargs['email']
+        try:
+            user = User.objects.get(email=email)
+            # Check if the user has an associated maintenance profile
+            if not user.maintenance_profile:
+                raise NotFound(detail="User has no maintenance company associated.")
+            return user.maintenance_profile  # This will return the associated Maintenance object
+        except User.DoesNotExist:
+            raise NotFound(detail="User with this email not found.")
