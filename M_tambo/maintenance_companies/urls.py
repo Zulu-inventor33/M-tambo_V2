@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
 #NON-PROTECTED ENDPOINTS:
-    path('', MaintenanceCompanyListView.as_view(), name='maintenance_company_list'),
+    path('maintenance/', MaintenanceCompanyListView.as_view(), name='maintenance_company_list'),
     path('specialization/<str:specialization>/', MaintenanceCompanyBySpecializationView.as_view(), name='maintenance_company_by_specialization'),
 #PROTECTED ENDPOINTS
     path('<int:company_id>/', MaintenanceCompanyDetailView.as_view(), name='maintenance_company_detail'),

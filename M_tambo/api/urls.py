@@ -7,7 +7,15 @@ urlpatterns = [
     # POST /api/signup/
     # This endpoint allows a user to sign up based on their account type (developer, maintenance, technician).
     # The request body will contain the user's personal information and additional fields depending on the account type.
-    #
+    # Example Request Body for a User:
+    # {
+    #   'email': 'maintenance@example.com',
+    #   'password': 'password123',
+    #   'first_name': 'John',
+    #   'last_name': 'Doe',
+    #   'phone_number': '1234567890',
+    #   "account_type": "maintenance_company",
+    #    }
     # Example Request Body for a Developer:
     # {
     #     "first_name": "John",
@@ -126,7 +134,6 @@ urlpatterns = [
     # "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzOTkxMTk4LCJpYXQiOjE3MzM5OTA4OTgsImp0aSI6IjViYTAwOTAyZTlhMDQzYmU4YzY3NDRiYzRlM2EwZmNjIiwidXNlcl9pZCI6MX0.iEoD96y2Xg-PSu6kdLHn32SjPvdP5Am7gmdPggWr_lg"
     # }
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    #external routes
     path('maintenance-companies/', include('maintenance_companies.urls')),
     path('technicians/', include('technicians.urls')),
 ]

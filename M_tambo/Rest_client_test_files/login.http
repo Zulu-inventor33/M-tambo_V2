@@ -13,7 +13,49 @@ Content-Type: application/json
 #     "refresh": "JWT_REFRESH_TOKEN"
 # }
 
-# -----------------------------
+# -------------------------------
+## Login - Developer 1 (Failure: Incorrect Password)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "email_or_phone": "alice.developer1@example.com",
+    "password": "wrongpassword456"
+}
+
+# Expected Failure Response:
+# {
+#     "error": "Invalid credentials"
+# }
+
+# ---------------------------------
+## Login - Developer 1 (Failure: Missing Email or Phone)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "password": "password123"
+}
+
+# Expected Failure Response:
+# {
+#     "error": "Email or phone number is required"
+# }
+
+# ---------------------------------
+## Login - Developer 1 (Failure: User Not Found)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "email_or_phone": "unknown.user@example.com",
+    "password": "password123"
+}
+
+# Expected Failure Response:
+# {
+#     "error": "User not found"
+# }
 
 ### Login - Developer 2 (Success)
 POST http://localhost:8000/api/login/ HTTP/1.1
@@ -134,6 +176,7 @@ Content-Type: application/json
 
 # -----------------------------
 
+
 ### Login - Invalid Email (Failure)
 POST http://localhost:8000/api/login/ HTTP/1.1
 Content-Type: application/json
@@ -163,3 +206,170 @@ Content-Type: application/json
 # {
 #     "detail": "Invalid credentials"
 # }
+#
+
+# ----------------------------
+### Login - Maintenance Company (Valid Credentials)
+
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "platnumz@example.com",
+  "password": "Platnumz001"
+}
+
+###
+
+# Expected Success Response:
+# HTTP/1.1 200 OK
+# {
+#     "access": "JWT_ACCESS_TOKEN",
+#     "refresh": "JWT_REFRESH_TOKEN"
+# }
+
+# -----------------------------
+### Login - Maintenance Company (Failure: Nonexistent Account)
+
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "validuser@example.com",
+  "password": "WrongPassword456"
+}
+
+###
+
+# Expected Failure Response:
+# HTTP/1.1 401 Unauthorized
+# {
+#     "error": "Invalid credentials"
+# }
+
+# -------------------------------
+### Login - Maintenance Company (Failure: Missing Password)
+
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "nonexistent@example.com",
+  "password": "SomePassword123"
+}
+
+###
+
+# Expected Failure Response:
+# HTTP/1.1 401 Unauthorized
+# {
+#     "error": "Invalid credentials"
+# }
+
+# ----------------------------------
+## Login - Maintenance Company (Failure: Missing Email or Phone)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "password": "ValidPassword123"
+}
+
+# Expected Failure Response:
+# {
+#     "error": "Email or phone number is required"
+# }
+
+# -----------------------------------------
+## Login - Maintenance Company (Failure: Invalid Email Format)
+### Login - Maintenance Company (Invalid Email Format)
+
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "invalid-email-format",
+  "password": "ValidPassword123"
+}
+
+# Expected Failure Response:
+# HTTP/1.1 400 Bad Request
+# {
+#     "error": "Invalid email format"
+# }
+
+###
+
+### Login - Maintenance Company (Failure: Account Locked)
+
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "lockeduser@example.com",
+  "password": "ValidPassword123"
+}
+
+# Expected Failure Response:
+# HTTP/1.1 403 Forbidden
+# {
+#     "error": "Account is locked"
+# }
+
+###
+
+### Login - Maintenance Company (Valid Credentials)
+
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "platnumz@example.com",
+  "password": "Platnumz001"
+}
+
+###
+
+# Expected Success Response (Example):
+# HTTP/1.1 200 OK
+# {
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM0NDI2MDg2LCJpYXQiOjE3MzQ0MjU3ODYsImp0aSI6ImQ5MGY0Nzg1NDg0MjRkYzQ5NjgwODE4YThhZDhmNDAzIiwidXNlcl9pZCI6Nzd9.Sh8-m_eLwdWWvanXJZD7kD5-kNckp3QZ_AqwnfzVSLI",
+#   "user": {
+#     "id": 1,
+#     "email": "validuser@example.com"
+#   }
+# }
+
+### Login of maintenance company locked account
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "email_or_phone": "lockeduser@example.com",
+  "password": "ValidPassword123"
+}
+
+###
+
+# Expected Response (Example)
+# HTTP/1.1 200 OK
+# {
+#   "token": "abc123xyz",
+#   "user": {
+#     "id": 1,
+#     "email": "lockeduser@example.com"
+#   }
+# }
+
+###Login of maintenance company (Failed: no entry of both email and password)
+POST http://localhost:8000/api/login/ HTTP/1.1
+Content-Type: application/json
+
+# Expected Failure Response:
+# {
+#     "error": "Request body is required"
+# }
+
+# ------------------------------------------
+
+

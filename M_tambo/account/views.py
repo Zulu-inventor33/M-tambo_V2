@@ -7,37 +7,68 @@ from rest_framework.permissions import AllowAny  # Allow any user to access thes
 from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.db import transaction
+from rest_framework import serializers
 
+import logging
+logger = logging.getLogger(__name__)
 
 # View for User SignUp
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(request_body=UserSerializer)
     def post(self, request):
         # Step 1: Validate and create the user using UserSerializer
         user_serializer = UserSerializer(data=request.data)
+        
+        # Check if the serializer is valid first
+        if not user_serializer.is_valid():
+            logger.warning(f"User creation failed: {user_serializer.errors}")
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Use transaction to ensure atomicity
+            with transaction.atomic():
+                # Save the user and get the user instance
+                user = user_serializer.save()  
+                account_type = user.account_type  # Extract the account type
 
-        if user_serializer.is_valid():
-            user = user_serializer.save()  # Save the user and get the user instance
-            account_type = user.account_type  # Extract the account type
-
-            # Step 2: Handle profile creation based on account type
-            if account_type == 'maintenance':
-                return self.create_maintenance_profile(request, user)
-            elif account_type == 'technician':
-                return self.create_technician_profile(request, user)
-            elif account_type == 'developer':
-                return self.create_developer_profile(request, user)
-
-            # If account type is invalid
+                # Step 2: Handle profile creation based on account type
+                if account_type == 'maintenance':
+                    return self.create_maintenance_profile(request, user)
+                elif account_type == 'technician':
+                    return self.create_technician_profile(request, user)
+                elif account_type == 'developer':
+                    return self.create_developer_profile(request, user)
+                else:
+                    # Delete the user if account type is invalid
+                    user.delete()
+                    return Response(
+                        {"error": "Invalid account type provided."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+        
+        except serializers.ValidationError as e:
+            # Log the specific validation error
+            logger.error(f"Profile creation failed: {str(e)}")
+            # Delete the user if profile creation fails
+            user.delete()
+            return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Catch any unexpected errors
+            logger.exception(f"Unexpected error in user signup: {str(e)}")
+            # Delete the user to prevent partial registrations
+            user.delete()
             return Response(
-                {"error": "Invalid account type provided."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "An unexpected error occurred during signup."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        # If user_serializer is not valid, return errors
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(request_body=MaintenanceSerializer) 
     def create_maintenance_profile(self, request, user):
         # Handle the maintenance user profile creation
         company_name = request.data.get("company_name")
@@ -65,7 +96,9 @@ class SignUpView(APIView):
             {"user": UserSerializer(user).data, "maintenance_profile": MaintenanceSerializer(maintenance_profile).data},
             status=status.HTTP_201_CREATED
         )
+    
 
+    @swagger_auto_schema(request_body=TechnicianSerializer)
     def create_technician_profile(self, request, user):
         # Ensure both specialization and maintenance_company_id are provided
         specialization = request.data.get("specialization")
@@ -105,8 +138,10 @@ class SignUpView(APIView):
                 technician_serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
 
 
+    @swagger_auto_schema(request_body=DeveloperSerializer)
     def create_developer_profile(self, request, user):
         # Handle the developer user profile creation
         developer_name = request.data.get("developer_name")
@@ -132,9 +167,14 @@ class SignUpView(APIView):
             status=status.HTTP_201_CREATED
         )
 
+    
 class LoginView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this endpoint
 
+    @swagger_auto_schema(
+    request_body=LoginSerializer,
+    responses={200: 'Login successful', 400: 'Bad request'}
+)
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -155,10 +195,27 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 # View to List Available Specializations (for Frontend Dropdown)
 class SpecializationListView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this endpoint
 
+    @swagger_auto_schema(
+        operation_summary="List Available Specializations",
+        operation_description="Fetches a list of specializations that can be displayed in dropdowns or UI forms.",
+        responses={
+            200: openapi.Response(
+                description="List of specializations",
+                examples={
+                    "application/json": {
+                        "option1": "Elevators",
+                        "option2": "HVAC",
+                        "option3": "Power Backup Generators"
+                    }
+                }
+            )
+        }
+    )
     def get(self, request):
         # Define the specializations as a dictionary with formatted options
         specializations = {
@@ -172,25 +229,74 @@ class SpecializationListView(APIView):
 
 
 # View for Maintenance Company List
+
 class MaintenanceListView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this endpoint
 
+    
+
+    @swagger_auto_schema(
+        operation_summary="List Maintenance Companies by Specialization",
+        operation_description="Fetches maintenance companies filtered by the given specialization. "
+                              "The specialization is provided as a query parameter.",
+        manual_parameters=[
+            openapi.Parameter(
+                'specialization',
+                openapi.IN_QUERY,
+                description="Specialization to filter companies (e.g., 'Elevators', 'HVAC')",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of maintenance companies",
+                examples={
+                    "application/json": [
+                        {
+                            "id": 1,
+                            "name": "Elite HVAC Solutions",
+                            "address": "123 Main St, Cityville",
+                            "specialization": "HVAC"
+                        },
+                        {
+                            "id": 2,
+                            "name": "Elevator Experts",
+                            "address": "456 Highrise Ave, Cityville",
+                            "specialization": "Elevators"
+                        }
+                    ]
+                }
+            ),
+            400: openapi.Response(
+                description="Specialization is required",
+                examples={"application/json": {"error": "Specialization is required"}}
+            ),
+            404: openapi.Response(
+                description="No companies found for the given specialization",
+                examples={"application/json": {"error": "No companies found dealing with HVAC"}}
+            ),
+        }
+    )
     def get(self, request):
-        # Get the 'specialization' parameter from the query params
-        specialization_name = request.query_params.get('specialization', None)
+        specialization = request.query_params.get('specialization')
+        
+        valid_specializations = ["Elevators", "HVAC", "Power Backup Generators"]
+        if not specialization:
+            return Response({'error': 'Specialization is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            maintenances = Maintenance.objects.filter(specialization=specialization)
+            
+            if not maintenances.exists():
+                return Response({'error': 'No maintenance companies found for this specialization'}, 
+                                status=status.HTTP_404_NOT_FOUND)
+            
+            # Serialize the data (you'll need to create a serializer)
+            serializer = MaintenanceSerializer(maintenances, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+   
 
-        if not specialization_name:
-            return Response({"error": "Specialization is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Filter maintenance companies based on the specialization provided
-        maintenance_companies = Maintenance.objects.filter(specialization__iexact=specialization_name)
-
-        # Check if there are any maintenance companies for the given specialization
-        if not maintenance_companies.exists():
-            return Response({"error": f"No companies found dealing with {specialization_name}"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Serialize the filtered maintenance companies
-        serializer = MaintenanceListSerializer(maintenance_companies, many=True)
-
-        # Return the serialized data in the response
-        return Response(serializer.data, status=status.HTTP_200_OK)

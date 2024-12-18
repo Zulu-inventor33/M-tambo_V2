@@ -9,29 +9,88 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'phone_number', 'password', 
+            'account_type', 'specialization', 'maintenance_company_id'
+        ]
+        extra_kwargs = {'password': {'write_only': True}}  # Ensure password is not included in responses
+
+    def validate(self, data):
+        account_type = data.get("account_type")
+
+        # Validate required fields for each account type
+        if account_type == 'maintenance':
+            required_fields = [
+                'first_name', 'last_name', 'email', 'phone_number', 'password',
+                'company_name', 'company_address', 'company_registration_number', 'specialization'
+            ]
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise serializers.ValidationError(
+                    f"Missing required fields for maintenance account: {missing_fields}"
+                )
+
+        elif account_type == 'technician':
+            required_fields = [
+                'first_name', 'last_name', 'email', 'phone_number', 'password',
+                'specialization', 'maintenance_company_id'
+            ]
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise serializers.ValidationError(
+                    f"Missing required fields for technician account: {missing_fields}"
+                )
+
+        elif account_type == 'developer':
+            required_fields = [
+                'first_name', 'last_name', 'email', 'phone_number', 'password',
+                'developer_name', 'address'
+            ]
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise serializers.ValidationError(
+                    f"Missing required fields for developer account: {missing_fields}"
+                )
+
+        return data
+
+class UserSerializer(serializers.ModelSerializer):
+    specialization = serializers.CharField(required=False)  # Optional for maintenance users and technicians
+    maintenance_company_id = serializers.IntegerField(write_only=True, required=False)  # Added for technician users
+
+    class Meta:
+        model = User
         fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'password', 'account_type', 'specialization', 'maintenance_company_id']
         extra_kwargs = {'password': {'write_only': True}}  # Ensure password is not included in responses
 
     def validate(self, data):
-        # Add extra validation if needed, for example:
-        if data.get("account_type") == 'technician' and not data.get("maintenance_company_id"):
-            raise serializers.ValidationError("Maintenance company ID is required for technicians.")
+        account_type = data.get("account_type")
+    
+    # Validate required fields for each account type
+        if account_type == 'maintenance':
+            required_fields = ['first_name', 'last_name', 'email', 'phone_number', 'password', 
+                               'company_name', 'company_address', 'company_registration_number', 'specialization']
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise serializers.ValidationError(f"Missing required fields for maintenance account: {missing_fields}")
+    
+        elif account_type == 'technician':
+            required_fields = ['first_name', 'last_name', 'email', 'phone_number', 'password', 
+                               'specialization', 'maintenance_company_id']
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise serializers.ValidationError(f"Missing required fields for technician account: {missing_fields}")
+    
+        elif account_type == 'developer':
+            required_fields = ['first_name', 'last_name', 'email', 'phone_number', 'password', 
+                               'developer_name', 'address']
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise serializers.ValidationError(f"Missing required fields for developer account: {missing_fields}")
+    
+
         return data
 
-    def create(self, validated_data):
-        # Extract specialization name and maintenance_company_id if provided
-        specialization_name = validated_data.pop('specialization', None)
-        maintenance_company_id = validated_data.pop('maintenance_company_id', None)
-
-        # Create the user object (password will be hashed)
-        user = User.objects.create(**validated_data)
-        user.set_password(validated_data['password'])  # Hash the password
-
-        # Do not handle profile creation here; it's handled in the SignUpView after user creation
-
-        user.save()
-        return user
-    
 
 class TechnicianSerializer(serializers.ModelSerializer):
     maintenance_company_id = serializers.IntegerField(write_only=True)  # Accept the ID for linking to Maintenance
