@@ -21,52 +21,23 @@ class SignUpView(APIView):
 
     @swagger_auto_schema(request_body=UserSerializer)
     def post(self, request):
-        # Step 1: Validate and create the user using UserSerializer
         user_serializer = UserSerializer(data=request.data)
         
-        # Check if the serializer is valid first
-        if not user_serializer.is_valid():
-            logger.warning(f"User creation failed: {user_serializer.errors}")
-            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
-            # Use transaction to ensure atomicity
             with transaction.atomic():
-                # Save the user and get the user instance
-                user = user_serializer.save()  
-                account_type = user.account_type  # Extract the account type
-
-                # Step 2: Handle profile creation based on account type
-                if account_type == 'maintenance':
-                    return self.create_maintenance_profile(request, user)
-                elif account_type == 'technician':
-                    return self.create_technician_profile(request, user)
-                elif account_type == 'developer':
-                    return self.create_developer_profile(request, user)
-                else:
-                    # Delete the user if account type is invalid
-                    user.delete()
-                    return Response(
-                        {"error": "Invalid account type provided."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-        
-        except serializers.ValidationError as e:
-            # Log the specific validation error
-            logger.error(f"Profile creation failed: {str(e)}")
-            # Delete the user if profile creation fails
-            user.delete()
-            return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                if user_serializer.is_valid():
+                    user = user_serializer.save()
+                    return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
         except Exception as e:
-            # Catch any unexpected errors
-            logger.exception(f"Unexpected error in user signup: {str(e)}")
-            # Delete the user to prevent partial registrations
-            user.delete()
+            # Log the error
+            logger.error(f"Unexpected error in user signup: {str(e)}")
+            # Return error response
             return Response(
                 {"error": "An unexpected error occurred during signup."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
     @swagger_auto_schema(request_body=MaintenanceSerializer) 
     def create_maintenance_profile(self, request, user):
@@ -168,30 +139,37 @@ class SignUpView(APIView):
         )
 
     
+# account/views.py
+
 class LoginView(APIView):
-    permission_classes = [AllowAny]  # Allow any user to access this endpoint
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
-    request_body=LoginSerializer,
-    responses={200: 'Login successful', 400: 'Bad request'}
-)
+        request_body=LoginSerializer,
+        responses={200: 'Login successful', 400: 'Bad request', 401: 'Unauthorized'}
+    )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             email_or_phone = serializer.validated_data['email_or_phone']
             password = serializer.validated_data['password']
             
-            # Adjust authentication to handle email or phone number login
+            print("Attempting authentication...")
             user = authenticate(request, username=email_or_phone, password=password)
-            if user is not None:
-                refresh = RefreshToken.for_user(user)
-                access_token = refresh.access_token
+            print(f"Authentication result: {user}")
 
-                return Response({
-                    'access': str(access_token),
-                    'refresh': str(refresh)
-                })
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            if user is None:  # Changed this condition to check for None explicitly
+                return Response(
+                    {"error": "Invalid credentials"}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+                
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh)
+            })
+            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

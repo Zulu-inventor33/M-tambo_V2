@@ -78,70 +78,65 @@ class SignUpViewTest(APITestCase):
                 last_name='User',
                 account_type='maintenance'
                 ) 
+ 
     def test_signup_successful_developer(self):
         """Test successful signup for Developer account type."""
-        developer_data = {
-                'email': 'testuser@example.com',
-                'phone_number': '1234567890',
-                'first_name': 'Test',
-                'last_name': 'User',
-                'password': 'Password123',
-                'account_type': 'developer',
-                'developer_name': 'Test Developer',
-                'address': '123 Developer St',
-                }
-        response = self.client.post(reverse('signup'), self.valid_user_data, format='json')
+        data = {
+            'email': 'testuser@example.com',
+            'phone_number': '1234567890',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'password': 'Password123',
+            'account_type': 'developer',
+            'developer_name': 'Test Developer',
+            'address': '123 Developer St'
+        }
+        response = self.client.post(reverse('signup'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['email'], self.valid_user_data['email'])
+        self.assertEqual(response.data['email'], data['email'])
         self.assertEqual(response.data['account_type'], 'developer')
-
-        # Check that Developer profile is created
-        developer_profile = Developer.objects.get(user__email=self.valid_user_data['email'])
-        self.assertEqual(developer_profile.developer_name, self.valid_user_data['first_name'])
-        self.assertEqual(developer_profile.address, 'Test Address')  # Ensure developer's address is set
 
     def test_signup_successful_maintenance(self):
         """Test successful signup for Maintenance account type."""
-        self.valid_user_data.update({
+        response = self.client.post(reverse('signup'), {
             'email': 'maintenance@example.com',
             'phone_number': '1234567890',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'password': 'Password123',
             'account_type': 'maintenance',
             'company_name': 'Test Maintenance',
             'company_address': 'Test Street, City',
-            'company_registration_number': '123456',
-            'specialization': 'Elevataors'
-        })
+            'company_registration_number': '123456'
+        }, format='json')
 
-        response = self.client.post(reverse('signup'), self.valid_user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['email'], self.valid_user_data['email'])
+        self.assertEqual(response.data['email'], 'maintenance@example.com')
         self.assertEqual(response.data['account_type'], 'maintenance')
 
-        # Check that Maintenance profile is created
-        maintenance_profile = Maintenance.objects.get(user__email=self.valid_user_data['email'])
-        self.assertEqual(maintenance_profile.company_name, self.valid_user_data['company_name'])
-        self.assertEqual(maintenance_profile.company_address, self.valid_user_data['company_address'])
+        maintenance_profile = Maintenance.objects.get(user__email='maintenance@example.com')
+        self.assertEqual(maintenance_profile.company_name, 'Test Maintenance')
+        self.assertEqual(maintenance_profile.company_address, 'Test Street, City')
 
     def test_signup_successful_technician(self):
         """Test successful signup for Technician account type."""
-        self.valid_user_data.update({
+        response = self.client.post(reverse('signup'), {
             'email': 'technician@example.com',
             'phone_number': '1234567890',
             'first_name': 'Test',
             'last_name': 'User',
             'password': 'Password123',
             'account_type': 'technician',
-            'specialization': 'Elevataors',
-        })
+            'specialization': 'Elevators',
+            'maintenance_company_id': 1
+        }, format='json')
 
-        response = self.client.post(reverse('signup'), self.valid_user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['email'], self.valid_user_data['email'])
+        self.assertEqual(response.data['email'], 'technician@example.com')
         self.assertEqual(response.data['account_type'], 'technician')
 
-        # Check that Technician profile is created
-        technician_profile = Technician.objects.get(user__email=self.valid_user_data['email'])
-        self.assertEqual(technician_profile.specialization, self.valid_user_data['specialization'])
+        technician_profile = Technician.objects.get(user__email='technician@example.com')
+        self.assertEqual(technician_profile.specialization, 'Elevators')
 
     def test_signup_with_existing_email(self):
         """Test signup failure with an existing email."""

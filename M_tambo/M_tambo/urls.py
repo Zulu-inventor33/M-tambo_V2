@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 # Create schema view
 schema_view = get_schema_view(
     openapi.Info(
@@ -29,14 +29,11 @@ schema_view = get_schema_view(
         contact=openapi.Contact(email="keiyatinayo@gmail.com"),
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),  # Allow any user to access the docs
+    permission_classes=[permissions.AllowAny],  # Allow any user to access the docs
 )
 
 urlpatterns = [
     path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-
-urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('admin/', admin.site.urls),

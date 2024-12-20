@@ -170,4 +170,7 @@ LOGGING = {
         },
     },
 }
-
+AUTHENTICATION_BACKENDS = [
+    'account.backends.EmailOrPhoneAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',  # Keep default backend as fallback
+]
