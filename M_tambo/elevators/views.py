@@ -162,3 +162,4 @@ class DeleteElevatorView(DestroyAPIView):
         except Elevator.DoesNotExist:
             # Raise a 404 error if the elevator doesn't exist
             raise NotFound(detail="Elevator not found.")
+

@@ -1,0 +1,324 @@
+### 1. Test: Get List of All Technicians
+# URL: /api/technicians/
+GET http://localhost:8000/api/technicians/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "specialization": "Electrician",
+    "maintenance_company": "ABC Corp"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "specialization": "Plumber",
+    "maintenance_company": null
+  }
+]
+
+### Failure Scenario: Unauthorized Access (Invalid Token)
+GET http://localhost:8000/api/technicians/ HTTP/1.1
+Authorization: Bearer <INVALID_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 2. Test: Get List of Unlinked Technicians (without a maintenance company)
+# URL: /api/technicians/unlinked/
+GET http://localhost:8000/api/technicians/unlinked/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "specialization": "Plumber",
+    "maintenance_company": null
+  },
+  {
+    "id": 4,
+    "name": "Mark Lee",
+    "specialization": "Electrician",
+    "maintenance_company": null
+  }
+]
+
+### Failure Scenario: No Unlinked Technicians
+GET http://localhost:8000/api/technicians/unlinked/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "message": "No technicians are unlinked to a maintenance company."
+}
+
+---
+
+### 3. Test: Get List of Unlinked Technicians by Specialization
+# URL: /api/technicians/unlinked/{specialization}/
+GET http://localhost:8000/api/technicians/unlinked/Electrician/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 4,
+    "name": "Mark Lee",
+    "specialization": "Electrician",
+    "maintenance_company": null
+  }
+]
+
+### Failure Scenario: No Unlinked Technicians for Specialization
+GET http://localhost:8000/api/technicians/unlinked/Plumber/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "message": "No unlinked technicians found for this specialization."
+}
+
+---
+
+### 4. Test: Get Technicians by Specialization
+# URL: /api/technicians/{specialization}/
+GET http://localhost:8000/api/technicians/Electrician/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "specialization": "Electrician",
+    "maintenance_company": "ABC Corp"
+  },
+  {
+    "id": 4,
+    "name": "Mark Lee",
+    "specialization": "Electrician",
+    "maintenance_company": null
+  }
+]
+
+### Failure Scenario: No Technicians for Specialization
+GET http://localhost:8000/api/technicians/Plumber/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "message": "No technicians found with the given specialization."
+}
+
+---
+
+### 5. Test: Get Technician Details by ID
+# URL: /api/technicians/id/{technician_id}/
+GET http://localhost:8000/api/technicians/id/1/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Doe",
+  "specialization": "Electrician",
+  "maintenance_company": "ABC Corp",
+  "completed_jobs": [
+    {
+      "job_id": 101,
+      "job_name": "Fix Wiring Issue",
+      "status": "Completed"
+    }
+  ],
+  "pending_jobs": [
+    {
+      "job_id": 102,
+      "job_name": "Install Light Fixtures",
+      "status": "Pending"
+    }
+  ]
+}
+
+### Failure Scenario: Technician Not Found by ID
+GET http://localhost:8000/api/technicians/id/999/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Technician not found."
+}
+
+---
+
+### 6. Test: Get Technician Details by Email
+# URL: /api/technicians/email/{technician_email}/
+GET http://localhost:8000/api/technicians/email/testuser@example.com/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "Test User",
+  "specialization": "Plumber",
+  "maintenance_company": null
+}
+
+### Failure Scenario: Technician Not Found by Email
+GET http://localhost:8000/api/technicians/email/nonexistentuser@example.com/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "User with this email not found."
+}
+
+---
+
+### 7. Test: Unlink a Technician from a Maintenance Company (PATCH)
+# URL: /api/technicians/{technician_id}/unlink/
+PATCH http://localhost:8000/api/technicians/1/unlink/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "message": "You have successfully been unlinked from the maintenance company and you are currently not associated with any company."
+}
+
+### Failure Scenario: Technician Already Unlinked
+PATCH http://localhost:8000/api/technicians/2/unlink/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "message": "Sorry you are currently not associated with any maintenance company."
+}
+
+---
+
+### 8. Test: Get All Jobs Assigned to a Technician (GET)
+# URL: /api/technicians/{technician_id}/jobs/
+GET http://localhost:8000/api/technicians/1/jobs/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "job_id": 101,
+    "job_name": "Fix Wiring Issue",
+    "status": "Completed"
+  },
+  {
+    "job_id": 102,
+    "job_name": "Install Light Fixtures",
+    "status": "Pending"
+  }
+]
+
+### Failure Scenario: No Jobs Assigned to Technician
+GET http://localhost:8000/api/technicians/2/jobs/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "message": "No jobs assigned to this technician."
+}
+
+---
+
+### 9. Test: Update Technician Info (PUT)
+# URL: /api/technicians/{technician_id}/update/
+PUT http://localhost:8000/api/technicians/1/update/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "specialization": "Electrician",
+  "maintenance_company": "ABC Corp"
+}
+
+### Expected Output:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Updated",
+  "specialization": "Electrician",
+  "maintenance_company": "ABC Corp"
+}
+
+### Failure Scenario: Invalid Technician ID
+PUT http://localhost:8000/api/technicians/999/update/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "specialization": "Electrician",
+  "maintenance_company": "XYZ Corp"
+}
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Technician not found."
+}

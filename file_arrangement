@@ -18,6 +18,22 @@ mtambo/
 │   ├── permissions.py          # Permissions for accessing company-specific data
 │   └── migrations/             # Database migrations for maintenance companies
 │
+├── developers/       # App for managing Maintenance Companies, their buildings, lifts, technicians, etc.
+│   ├── __init__.py
+│   ├── views.py                # Views for developers
+│   ├── serializers.py          # Serializers for developers
+│   ├── models.py               # Models for developers
+│   ├── urls.py                 # URL routing for developers
+│   ├── permissions.py          # Permissions for developers
+│   └── migrations/             #Migrations for developers
+|   |
+│   ├── technicians/            # Technician-related views, models, serializers
+│   │   ├── __init__.py
+│   │   ├── views.py            # Views for technician activity, details, stats
+│   │   ├── serializers.py      # Technician-specific serializers
+│   │   ├── models.py           # Technician-related models (Technician, etc.)
+│   │   └── urls.py             # URL routing specific to Technicians
+|   |
 ├── api/                        # Folder to store all API endpoint routes for the project
 │   ├── __init__.py
 │   ├── urls.py                 # Central URL routing file that includes all apps' routes
@@ -33,12 +49,12 @@ mtambo/
 │   │   ├── serializers.py      # Job-specific serializers
 │   │   ├── models.py           # Job-related models (Job, MaintenanceLog, etc.)
 │   │   └── urls.py             # URL routing specific to Jobs
-│   ├── technicians/            # Technician-related views, models, serializers
+│   ├── lifts/                   # Lift-related views, models, serializers
 │   │   ├── __init__.py
-│   │   ├── views.py            # Views for technician activity, details, stats
-│   │   ├── serializers.py      # Technician-specific serializers
-│   │   ├── models.py           # Technician-related models (Technician, etc.)
-│   │   └── urls.py             # URL routing specific to Technicians
+│   │   ├── views.py            # Views for Lifts
+│   │   ├── serializers.py      # Lift-specific serializers
+│   │   ├── models.py           # Lift-related models
+│   │   └── urls.py             # URL routing specific to Lifts
 │   ├── buildings/              # Building-related views, models, serializers
 │   │   ├── __init__.py
 │   │   ├── views.py            # Views for managing buildings, linked lifts, and maintenance tasks

@@ -133,25 +133,52 @@ class SignUpView(APIView):
         )
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]  # Allow any user to access this endpoint
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
+        
         if serializer.is_valid():
             email_or_phone = serializer.validated_data['email_or_phone']
             password = serializer.validated_data['password']
             
             # Adjust authentication to handle email or phone number login
             user = authenticate(request, username=email_or_phone, password=password)
+            
             if user is not None:
+                # Generate the tokens for the user
                 refresh = RefreshToken.for_user(user)
                 access_token = refresh.access_token
 
-                return Response({
+                # Determine the account type based on the user's related profile
+                account_type = None
+                if hasattr(user, 'developer_profile'):
+                    account_type = 'developer'
+                elif hasattr(user, 'maintenance_profile'):
+                    account_type = 'maintenance'
+                elif hasattr(user, 'technician_profile'):
+                    account_type = 'technician'
+
+                # Prepare the user data for the response
+                user_data = {
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'phone_number': user.phone_number,  # Assuming the User model has a 'phone_number' field
+                    'account_type': account_type,
+                    'created_at': user.created_at,
+                    'is_staff': user.is_staff,
                     'access': str(access_token),
                     'refresh': str(refresh)
-                })
+                }
+
+                # Return the response with user data and tokens
+                return Response(user_data, status=status.HTTP_200_OK)
+            
+            # Invalid credentials
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # If the serializer is not valid, return the validation errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

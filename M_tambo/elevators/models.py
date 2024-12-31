@@ -30,13 +30,13 @@ class Elevator(models.Model):
     installation_date = models.DateField()
 
     # Maintenance Company Profile (One-to-One Relationship)
-    maintenance_company_profile = models.ForeignKey(Maintenance, on_delete=models.SET_NULL, null=True, blank=True, related_name="elevators")
+    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.SET_NULL, null=True, blank=True, related_name="elevators")
 
     # Developer Profile (One-to-One Relationship)
-    developer_profile = models.ForeignKey(Developer, on_delete=models.SET_NULL, null=True, blank=True, related_name="elevators")
+    developer = models.ForeignKey(Developer, on_delete=models.SET_NULL, null=True, blank=True, related_name="elevators")
 
     # Technician Profile (One-to-One Relationship)
-    technician_profile = models.ForeignKey(Technician, on_delete=models.SET_NULL, null=True, blank=True, related_name="elevators")
+    technician = models.ForeignKey(Technician, on_delete=models.SET_NULL, null=True, blank=True, related_name="elevators")
 
     def __str__(self):
         return f"{self.machine_number} - {self.user_name} - {self.building.name}"

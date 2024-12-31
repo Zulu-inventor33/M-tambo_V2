@@ -1,6 +1,7 @@
 from django.db import models
 from technicians.models import TechnicianProfile
 from maintenance_companies.models import MaintenanceCompanyProfile
+from jobs.models import MaintenanceSchedule, AdHocMaintenanceTask
 from django.apps import apps
 
 class Alert(models.Model):
@@ -11,10 +12,10 @@ class Alert(models.Model):
     ]
     
     alert_type = models.CharField(max_length=20, choices=ALERT_CHOICES)
-    technician = models.ForeignKey(TechnicianProfile, on_delete=models.CASCADE, related_name="alerts")
-    company = models.ForeignKey(MaintenanceCompanyProfile, on_delete=models.CASCADE, related_name="alerts", null=True, blank=True)
-    maintenance_schedule = models.ForeignKey('jobs.MaintenanceSchedule', on_delete=models.CASCADE, related_name="alerts", null=True, blank=True)
-    adhoc_task = models.ForeignKey('jobs.AdHocMaintenanceTask', on_delete=models.CASCADE, related_name="alerts", null=True, blank=True)
+    technician = models.ForeignKey(TechnicianProfile, on_delete=models.CASCADE, related_name="alerts_received")
+    company = models.ForeignKey(MaintenanceCompanyProfile, on_delete=models.CASCADE, related_name="alerts_received", null=True, blank=True)
+    maintenance_schedule = models.ForeignKey(MaintenanceSchedule, on_delete=models.CASCADE, related_name="maintenance_schedule_alerts", null=True, blank=True)
+    adhoc_task = models.ForeignKey(AdHocMaintenanceTask, on_delete=models.CASCADE, related_name="adhoc_task_alerts", null=True, blank=True)
     alert_message = models.TextField()
     alert_date = models.DateTimeField(auto_now_add=True)
     

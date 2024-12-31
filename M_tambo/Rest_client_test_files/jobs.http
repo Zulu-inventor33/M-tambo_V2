@@ -1,0 +1,393 @@
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/
+# Method: GET
+# Description: Lists all maintenance schedules.
+# This endpoint allows you to retrieve a list of all maintenance schedules. You can use optional query parameters to filter the results, such as by technician, elevator, status, and scheduled date.
+# =======================
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/
+
+# Optional Query Parameters:
+# - technician_id (optional): Filter by technician's ID.
+# - elevator_id (optional): Filter by elevator's ID.
+# - status (optional): Filter by maintenance status (e.g., "scheduled", "completed", "overdue").
+# - scheduled_date (optional): Filter by the scheduled date of the maintenance.
+# - next_schedule (optional): Filter by the frequency of the next scheduled maintenance (e.g., "1_month", "3_months").
+
+# Example Request with Filters:
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/?technician_id=456&status=scheduled
+
+# Success Response - List of All Maintenance Schedules
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "elevator": 123,
+        "technician": 456,
+        "status": "scheduled",
+        "scheduled_date": "2024-12-31",
+        "next_schedule": "3_months"
+    },
+    {
+        "id": 790,
+        "elevator": 124,
+        "technician": 457,
+        "status": "completed",
+        "scheduled_date": "2024-11-01",
+        "next_schedule": "1_month"
+    }
+]
+
+# Failure Response - No Maintenance Schedules Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found."
+}
+
+# Failure Response - Invalid Filter Parameters
+HTTP/1.1 400 Bad Request
+{
+    "detail": "Invalid filter parameter: technician_id must be an integer."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/create/elevator/{elevator_id}/
+# Method: POST
+# Description: Creates a new maintenance schedule for a given elevator ID.
+# This endpoint allows you to schedule a maintenance task for an elevator by providing necessary details like technician, scheduled date, and the maintenance frequency.
+# =======================
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/123/
+
+Content-Type: application/json
+{
+    "technician": 456,  # ID of the technician (optional, if not provided, auto-assign from elevator's technician)
+    "next_schedule": "1_month",  # "1_month", "3_months", or "6_months" (Optional, frequency of the next maintenance)
+    "scheduled_date": "2024-12-31"  # The date when the maintenance is scheduled (Required)
+}
+
+# Success Response
+HTTP/1.1 201 Created
+{
+    "message": "Maintenance schedule created successfully",
+    "maintenance_schedule_id": 789
+}
+
+# Failure Response - Invalid Technician
+HTTP/1.1 400 Bad Request
+{
+    "detail": "Technician with ID 456 does not exist."
+}
+
+# Failure Response - Elevator Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Elevator with ID 123 does not exist."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/{schedule_id}/update/
+# Method: PUT
+# Description: Updates the status of a given maintenance schedule.
+# Use this endpoint to change the status of an existing maintenance schedule (e.g., from "scheduled" to "completed").
+# =======================
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/789/update/
+
+Content-Type: application/json
+{
+    "status": "completed",  # "completed", "overdue", or "scheduled" (Required)
+    "next_schedule": "3_months"  # "1_month", "3_months", "6_months", or "set_date" (Optional)
+}
+
+# Success Response
+HTTP/1.1 200 OK
+{
+    "id": 789,
+    "status": "completed",
+    "next_schedule": "3_months"
+}
+
+# Failure Response - Schedule Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Schedule not found."
+}
+
+# Failure Response - Invalid Status Update
+HTTP/1.1 400 Bad Request
+{
+    "detail": "Cannot update to the same status."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/{schedule_id}/remove/
+# Method: DELETE
+# Description: Removes a specific maintenance schedule by ID.
+# This endpoint allows you to delete an existing maintenance schedule.
+# =======================
+DELETE http://127.0.0.1:8000/api/jobs/maintenance-schedule/789/remove/
+
+# Success Response
+HTTP/1.1 204 No Content
+{
+    "detail": "Schedule deleted successfully."
+}
+
+# Failure Response - Schedule Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Schedule not found."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/technician/{technician_id}/
+# Method: GET
+# Description: List all maintenance schedules for a specific technician.
+# Use this endpoint to get all maintenance schedules assigned to a specific technician.
+# =======================
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/technician/456/
+
+# Success Response
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "elevator": 123,
+        "status": "scheduled",
+        "technician": 456,
+        "scheduled_date": "2024-12-31"
+    },
+    {
+        "id": 790,
+        "elevator": 124,
+        "status": "completed",
+        "technician": 456,
+        "scheduled_date": "2024-11-01"
+    }
+]
+
+# Failure Response - Technician Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Technician not found."
+}
+
+# Failure Response - No Schedules for Technician
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found for this technician."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/elevator/{elevator_id}/
+# Method: GET
+# Description: List all maintenance schedules for a specific elevator.
+# Use this endpoint to view all maintenance schedules assigned to a specific elevator.
+# =======================
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/elevator/123/
+
+# Success Response
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "status": "scheduled",
+        "technician": 456,
+        "scheduled_date": "2024-12-31"
+    }
+]
+
+# Failure Response - Elevator Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Elevator not found."
+}
+
+# Failure Response - No Schedules for Elevator
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found for this elevator."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/maintenance_company/{company_id}/
+# Method: GET
+# Description: List all maintenance schedules for a specific maintenance company.
+# Use this endpoint to see all maintenance schedules linked to a particular maintenance company.
+# =======================
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/1/
+
+# Success Response
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "status": "scheduled",
+        "elevator": 123,
+        "technician": 456,
+        "scheduled_date": "2024-12-31"
+    }
+]
+
+# Failure Response - Maintenance Company Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Maintenance company not found."
+}
+
+# Failure Response - No Schedules for Maintenance Company
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found for this maintenance company."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/developer/{developer_id}/
+# Method: GET
+# Description: List all maintenance schedules for a specific developer.
+# Use this endpoint to retrieve all maintenance schedules for a particular developer.
+# =======================
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/developer/123/
+
+# Success Response
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "status": "scheduled",
+        "technician": 456,
+        "scheduled_date": "2024-12-31",
+        "elevator": 123
+    }
+]
+
+# Failure Response - Developer Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Developer not found."
+}
+
+# Failure Response - No Schedules for Developer
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found for this developer."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/building/{building_id}/
+# Method: GET
+# Description: List all maintenance schedules for a specific building.
+# Use this endpoint to view all maintenance schedules associated with a specific building.
+# =======================
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/building/456/
+
+# Success Response
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "status": "scheduled",
+        "technician": 456,
+        "scheduled_date": "2024-12-31",
+        "elevator": 123
+    }
+]
+
+# Failure Response - Building Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Building not found."
+}
+
+# Failure Response - No Schedules for Building
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found for this building."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/change_technician/{schedule_id}/
+# Method: PUT
+# Description: Change the technician assigned to a specific maintenance schedule.
+# This endpoint allows you to reassign a technician to an existing maintenance schedule.
+# =======================
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/change_technician/789/
+
+Content-Type: application/json
+{
+    "technician_id": 567  # ID of the new technician
+}
+
+# Success Response
+HTTP/1.1 200 OK
+{
+    "message": "Technician has been changed to John Doe."
+}
+
+# Failure Response - Schedule Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Maintenance schedule not found."
+}
+
+# Failure Response - Technician Not Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "Technician with ID 567 does not exist."
+}
+
+# Failure Response - Completed Schedule
+HTTP/1.1 400 Bad Request
+{
+    "detail": "You cannot reassign a completed schedule."
+}
+
+
+# =======================
+# Endpoint: /api/jobs/maintenance-schedule/filter/
+# Method: PUT
+# Description: Filter and list all maintenance schedules based on provided filters.
+# Use this endpoint to filter and retrieve maintenance schedules based on various criteria such as technician, developer, elevator, and others.
+# =======================
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/filter/
+
+Content-Type: application/json
+{
+    "technician_id": 456,  # Optional: Filter by technician
+    "status": "scheduled",  # Optional: Filter by status
+    "developer_id": 123,  # Optional: Filter by developer
+    "elevator_id": 123,  # Optional: Filter by elevator
+    "building_id": 456,  # Optional: Filter by building
+    "scheduled_date": "2024-12-31",  # Optional: Filter by scheduled date
+    "next_schedule": "1_month"  # Optional: Filter by next scheduled date
+}
+
+# Success Response
+HTTP/1.1 200 OK
+[
+    {
+        "id": 789,
+        "status": "scheduled",
+        "technician": 456,
+        "scheduled_date": "2024-12-31"
+    }
+]
+
+# Failure Response - Invalid Date Format
+HTTP/1.1 400 Bad Request
+{
+    "detail": "Invalid date format. Please use YYYY-MM-DD."
+}
+
+# Failure Response - No Schedules Found
+HTTP/1.1 404 Not Found
+{
+    "detail": "No maintenance schedules found matching the criteria."
+}
