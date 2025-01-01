@@ -1,7 +1,43 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+    --bs-font-sans-serif: system-ui, 
+                          -apple-system, 
+                          "Segoe UI", 
+                          Roboto, 
+                          "Helvetica Neue", 
+                          "Noto Sans", 
+                          "Liberation Sans", 
+                          Arial, 
+                          sans-serif, 
+                          "Apple Color Emoji", 
+                          "Segoe UI Emoji", 
+                          "Segoe UI Symbol", 
+                          "Noto Color Emoji";
+}
 
-body {
-  margin: 0;
+html {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+
+/* my own personal css styles */
+/* style for password wrapper that will give it a position relative
+to enable it have the eye slashes absolutely placed well to see and hide password */
+
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* The following below is a shake animation that we will be applying whenever we want in different
+instances such as when there is an error */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
+}
+
+.shake-animation {
+    animation: shake 0.5s ease-in-out;
 }

@@ -1,0 +1,24 @@
+.card-black, .card-danger, .card-dark, .card-info, .card-primary, .card-secondary, .card-success, .card-warning {
+    color: #fff !important;
+    border: 0 !important;
+}
+
+.card-primary {
+    background: #1572e8 !important;
+}
+
+.card-info {
+    background: #48abf7 !important;
+}
+
+.card-success {
+    background: #31ce36 !important;
+}
+
+.card-secondary {
+    background: #6861ce !important;
+}
+
+.card-danger {
+    background: #f64e60 !important;
+}

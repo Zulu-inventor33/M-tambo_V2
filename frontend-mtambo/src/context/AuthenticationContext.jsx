@@ -1,78 +1,91 @@
-import React from 'react';
-import { createContext, useState, useEffect } from 'react';
+import React from "react";
+import { useContext, createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { notifyError, notifySuccess } from "../utils/notificationUtils";
 
-export const AuthContext = createContext();
 
+// manage the authentication state
+const AuthContext = createContext();
+
+// wrap the application and provide the authentication context to its child components
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [user, setUser] = useState(null);
+	const [token, setToken] = useState(localStorage.getItem("site") || "");
+	// Start in loading state
+	const [loading, setLoading] = useState(true);
 
-  // Session expiry duration in milliseconds (1 day = 86400000 ms)
-  const sessionExpiryDuration = 86400000; 
+	const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedAccessToken = localStorage.getItem('access_token');
-    const storedLoginTime = localStorage.getItem('login_time');
+	// Use useEffect to load user from localStorage when the app first mounts
+	useEffect(() => {
+		const storedUser = localStorage.getItem("user");
+		if (storedUser) {
+			setUser(JSON.parse(storedUser));
+		}
+		// Set loading to false once we've checked localStorage
+		setLoading(false);
+	}, []);
 
-    if (storedUser && storedAccessToken) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        
-        // Check if the session has expired
-        if (storedLoginTime && Date.now() - parseInt(storedLoginTime) > sessionExpiryDuration) {
-          // Session has expired, log the user out
-          localStorage.removeItem('user');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('login_time');
-          setUser(null);
-          setIsAuthenticated(false);
-        } else {
-          // Session is valid, set user state
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        // In case of error, log out the user
-        localStorage.removeItem('user');
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('login_time');
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-    } else {
-      // No user data or token in localStorage, user is not authenticated
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  }, []);
+	const loginAction = async (data) => {
+		try {
+			setLoading(true);
+			const response = await axios.post(`/api/login/`, JSON.stringify(data), {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
 
-  // Handle login
-  const login = (userData, accessToken, refreshToken) => {
-    const loginTime = Date.now();
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('login_time', loginTime.toString());
-    setUser(userData);
-    setIsAuthenticated(true);
-  };
+			if (response.status === 200) {
+				// Mocking the user details for now before api improved
+				const dummyUser = {
+					first_name: "Dummy",
+					last_name: "Dummy2",
+					email: "dummy@gmail.com",
+					phone_number: "1234567892",
+					account_type: "maintenance",
+					created_at: "2024-12-26 17:07:12.635736",
+					is_staff: 0
+				};
+				setUser(dummyUser);
+				setToken(response?.data?.access);
+				localStorage.setItem("site", response?.data?.access);
+				// Correctly store the user object as a string in localhost
+				localStorage.setItem("user", JSON.stringify(dummyUser));
+				setLoading(false);
 
-  // Handle logout
-  const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('login_time');
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+				notifySuccess("Welcome Back to M-tambo!");
+				navigate("/dashboard");
+				return;
+			}
+			throw new Error(response.message);
+		} catch (err) {
+			setLoading(false)
+			const errorMessage = err.response?.data?.error || 'Something went wrong!';
+			notifyError(errorMessage);
+			console.error(err);
+		}
+	};
 
-  return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+	const logOut = () => {
+		setUser(null);
+		setToken("");
+		localStorage.removeItem("site");
+		localStorage.removeItem("user");
+		navigate("/login");
+	};
+
+	return (
+		<AuthContext.Provider value={{ token, user, loginAction, logOut, loading }}>
+			{children}
+		</AuthContext.Provider>
+	);
 };
 
-export { AuthProvider };
+export default AuthProvider;
+
+// The useAuth custom hook utilizes useContext to access the authentication 
+// context from within components
+export const useAuth = () => {
+	return useContext(AuthContext);
+};
