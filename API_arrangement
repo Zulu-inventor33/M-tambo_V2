@@ -19,11 +19,15 @@ mtambo/
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/  # GET: Get technician details for a company
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/remove/  # DELETE: Delete a technician that is linked to the company.
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/add/  # POST a technician to a certain maintenance company.
+│   ├── /api/maintenance-companies/{company_id}/developers/  # GET: List of all developers under a specific company
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}  # GET: details of a certain developer linked to this specific company
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/buildings  # GET: all buildings registered to a certain developer linked to this specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/  # GET: List all buildings under a specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details (lifts, jobs, etc.)
 │   ├── /api/maintenance-companies/{company_id}/elevators/  # GET: List all elevators under a specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/elevators/  # GET: List all elevators within a specific building maintenaned by the maintenance company
 │   ├── /api/maintenance-companies/{company_id}/elevators/{elevator_id}/  # GET: Get elevator details of a specific elevator
+│   ├── /api/maintenance-companies/{company_id}/elevators/{machine_number}/  # GET: Get elevator details of a specific elevator based on machine number
 |
 │   ├── developers/                 # App for developer related views, models, serializers
 │   │   ├── urls.py             # URL routing for developer-related routes

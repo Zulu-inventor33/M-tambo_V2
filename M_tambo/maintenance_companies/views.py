@@ -10,12 +10,15 @@ from elevators.models import Elevator
 from account.models import User
 from buildings.serializers import BuildingSerializer
 from elevators.serializers import ElevatorSerializer
+from developers.serializers import DeveloperDetailSerializer
 from .serializers import MaintenanceSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from technicians.models import Technician
+from developers.models import Developer
 from technicians.serializers import TechnicianListSerializer,TechnicianDetailSerializer
 from rest_framework.exceptions import status,NotFound
+import logging
 
 # View to list all maintenance companies
 class MaintenanceCompanyListView(generics.ListAPIView):
@@ -306,19 +309,25 @@ class BuildingListView(generics.ListAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
-
 class BuildingDetailView(APIView):
-    permission_classes = [AllowAny]  # Adjust this as per your permissions
+    permission_classes = [AllowAny]  # Modify as necessary for permissions
 
     def get(self, request, company_id, building_id):
         try:
-            # Retrieve the maintenance company using the company_id
+            # Step 1: Retrieve the maintenance company using the company_id
             company = Maintenance.objects.get(id=company_id)
-            
-            # Retrieve the building using the building_id and check if it's linked to the developer of the company
-            building = Building.objects.get(id=building_id, developer=company.developer)
-            
-            # Serialize the building data and return it
+
+            # Step 2: Get all elevators under the given company
+            elevators = Elevator.objects.filter(maintenance_company=company)
+
+            # Step 3: Retrieve the building using the building_id
+            building = Building.objects.get(id=building_id)
+
+            # Step 4: Ensure the building has elevators linked to the company
+            if not elevators.filter(building=building).exists():
+                raise NotFound(detail="Building is not linked to the specified maintenance company.", code=404)
+
+            # Step 5: Serialize and return the building data
             serialized_data = BuildingSerializer(building)
             return Response(serialized_data.data, status=status.HTTP_200_OK)
 
@@ -329,10 +338,15 @@ class BuildingDetailView(APIView):
             )
         except Building.DoesNotExist:
             return Response(
-                {"error": "Building not found or not linked to the specified maintenance company."},
+                {"error": "Building not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
-        except Exception as e:
+        except NotFound as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception:
             return Response(
                 {"error": "An unexpected error occurred. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -374,27 +388,24 @@ class ElevatorsUnderCompanyView(APIView):
         
 
 class ElevatorsInBuildingView(APIView):
-    permission_classes = [AllowAny]  # Adjust this based on your permission needs
+    permission_classes = [AllowAny]  # Adjust based on your permission needs
 
     def get(self, request, company_id, building_id):
         try:
             # Step 1: Retrieve the maintenance company
             company = Maintenance.objects.get(id=company_id)
 
-            # Step 2: Retrieve the building and ensure it's linked to the maintenance company
-            building = Building.objects.get(id=building_id, developer__maintenance_profile=company)
+            # Step 2: Retrieve the building and ensure it's associated with the correct maintenance company
+            building = Building.objects.get(id=building_id)
 
-            # Step 3: Retrieve all elevators in the building
-            elevators = Elevator.objects.filter(building=building)
+            # Check if the building is linked to any elevators under the given maintenance company
+            elevators = Elevator.objects.filter(building=building, maintenance_company=company)
 
-            # Step 4: Handle the case when no elevators are found for the building
+            # Step 3: Handle case when no elevators are found for the building under the specified maintenance company
             if not elevators.exists():
-                return Response(
-                    {"message": "No elevators found for this building under the specified maintenance company."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                raise NotFound(detail="No elevators found for this building under the specified maintenance company.", code=404)
 
-            # Step 5: Serialize and return the elevator data
+            # Step 4: Serialize the elevator data
             serialized_data = ElevatorSerializer(elevators, many=True)
             return Response(serialized_data.data, status=status.HTTP_200_OK)
 
@@ -405,12 +416,18 @@ class ElevatorsInBuildingView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         except Building.DoesNotExist:
-            # Handle the case where the building does not exist or doesn't belong to the company
+            # Handle the case where the building does not exist
             return Response(
-                {"error": "Building not found under the specified maintenance company."},
+                {"error": "Building not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
-        except Exception as e:
+        except NotFound as e:
+            # Handle case where no elevators are found for the building under the maintenance company
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception:
             # Handle any unexpected errors
             return Response(
                 {"error": "An unexpected error occurred. Please try again later."},
@@ -443,6 +460,153 @@ class ElevatorDetailView(APIView):
             # Handle the case where the elevator does not exist or is not linked to the specified company
             return Response(
                 {"error": "Elevator not found or not linked to the specified maintenance company."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            # Handle any unexpected errors
+            return Response(
+                {"error": "An unexpected error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+class ElevatorDetailByMachineNumberView(APIView):
+    permission_classes = [AllowAny]  # Adjust permissions as needed
+
+    def get(self, request, company_id, machine_number):
+        try:
+            # Step 1: Retrieve the maintenance company
+            company = Maintenance.objects.get(id=company_id)
+
+            # Step 2: Retrieve the elevator by machine_number and ensure it belongs to the given maintenance company
+            elevator = Elevator.objects.get(machine_number=machine_number, maintenance_company=company)
+
+            # Step 3: Serialize the elevator data and return the response
+            serialized_data = ElevatorSerializer(elevator)
+            return Response(serialized_data.data, status=status.HTTP_200_OK)
+
+        except Maintenance.DoesNotExist:
+            # Handle the case where the maintenance company does not exist
+            return Response(
+                {"error": "Maintenance company not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Elevator.DoesNotExist:
+            # Handle the case where the elevator does not exist or is not linked to the maintenance company
+            return Response(
+                {"error": "Elevator with the specified machine number not found under this maintenance company."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            # Handle any unexpected errors
+            return Response(
+                {"error": "An unexpected error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+class DevelopersUnderCompanyView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, company_id):
+        """
+        Retrieve a list of all developers under a specific maintenance company.
+        
+        This view returns a list of developers associated with the buildings managed
+        by elevators linked to the provided maintenance company.
+        """
+        try:
+            # Step 1: Retrieve the maintenance company by its ID
+            company = Maintenance.objects.get(id=company_id)
+
+            # Step 2: Retrieve all elevators linked to this maintenance company
+            elevators = Elevator.objects.filter(maintenance_company=company)
+
+            # Step 3: Retrieve all buildings linked to these elevators
+            buildings = set([elevator.building for elevator in elevators])
+
+            # Step 4: Retrieve all developers related to these buildings via the building field
+            developers = Developer.objects.filter(buildings__in=buildings)
+
+            # Step 5: Handle the case when no developers are found
+            if not developers.exists():
+                return Response(
+                    {"message": "No developers found under this maintenance company."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Step 6: Serialize the developer data
+            serialized_data = DeveloperDetailSerializer(developers, many=True)
+
+            # Step 7: Return the serialized data as a response
+            return Response(serialized_data.data, status=status.HTTP_200_OK)
+
+        except Maintenance.DoesNotExist:
+            # Handle the case where the maintenance company doesn't exist
+            return Response(
+                {"error": "Maintenance company not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Elevator.DoesNotExist:
+            # Handle the case where no elevators are found for the maintenance company
+            return Response(
+                {"error": "No elevators found for the specified maintenance company."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Developer.DoesNotExist:
+            # Handle the case where no developers are found linked to the buildings managed by elevators
+            return Response(
+                {"message": "No developers found under this maintenance company."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            # Catch any unexpected errors and respond with a generic message
+            return Response(
+                {"error": "An unexpected error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+class DeveloperDetailUnderCompanyView(APIView):
+    permission_classes = [AllowAny]  # Adjust this based on your permission needs
+
+    def get(self, request, company_id, developer_id):
+        try:
+            # Step 1: Retrieve the maintenance company by its ID
+            company = Maintenance.objects.get(id=company_id)
+            
+            # Step 2: Retrieve the elevators linked to the given maintenance company
+            elevators = Elevator.objects.filter(maintenance_company=company)
+            
+            # Step 3: Get the buildings associated with these elevators
+            buildings = set([elevator.building for elevator in elevators])
+            
+            # Step 4: Check if the developer is linked to any of these buildings
+            developer = Developer.objects.get(id=developer_id)
+            developer_buildings = set([building for building in buildings if building.developer == developer])
+            
+            if not developer_buildings:
+                # If no buildings are found for the specified developer, return an error
+                return Response(
+                    {"error": "Developer not found or not linked to any buildings under the specified maintenance company."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Step 5: Serialize the developer data
+            serialized_data = DeveloperDetailSerializer(developer)
+
+            # Step 6: Return the serialized developer data
+            return Response(serialized_data.data, status=status.HTTP_200_OK)
+
+        except Maintenance.DoesNotExist:
+            # If the maintenance company doesn't exist
+            return Response(
+                {"error": "Maintenance company not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Developer.DoesNotExist:
+            # If the developer doesn't exist
+            return Response(
+                {"error": "Developer not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:

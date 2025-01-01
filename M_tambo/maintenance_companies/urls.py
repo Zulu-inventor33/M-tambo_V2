@@ -17,5 +17,8 @@ urlpatterns = [
     path('<int:company_id>/elevators/', ElevatorsUnderCompanyView.as_view(), name='elevators-under-company'),
     path('<int:company_id>/buildings/<int:building_id>/elevators/', ElevatorsInBuildingView.as_view(), name='elevators-in-building'),
     path('<int:company_id>/elevators/<int:elevator_id>/', ElevatorDetailView.as_view(), name='elevator-detail'),
+    path('<int:company_id>/elevators/<str:machine_number>/', ElevatorDetailByMachineNumberView.as_view(), name='elevator-detail-by-machine-number'),
+    path('<int:company_id>/developers/', DevelopersUnderCompanyView.as_view(), name='developers-under-company'),
+    path('<int:company_id>/developers/<int:developer_id>/', DeveloperDetailUnderCompanyView.as_view(), name='developer-detail-under-company'),
 ]
 

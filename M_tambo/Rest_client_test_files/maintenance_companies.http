@@ -476,3 +476,220 @@ Accept: application/json
 # {
 #   "error": "Elevator not linked to the specified maintenance company."
 # }
+
+### Success Case: Retrieve elevator details by valid machine number
+# Expected: Elevator details for the elevator with machine number "LIFT1" under maintenance company with ID 1.
+GET http://localhost:8000/api/maintenance-companies/1/elevators/LIFT1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Success):
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+# 
+# {
+#   "user_name": "LIFT1",
+#   "controller_type": "Digital",
+#   "machine_type": "gearless",
+#   "building": {
+#     "id": 1,
+#     "name": "Sundowners Towers",
+#     "address": "123 Sunset Boulevard, Los Angeles, CA",
+#     "contact": "555-12544",
+#     "developer": {
+#       "id": 1,
+#       "developer_name": "Alice Tech Solutions"
+#     }
+#   },
+#   "capacity": 1000,
+#   "manufacturer": "ElevatorCo",
+#   "installation_date": "2023-01-01",
+#   "maintenance_company": {
+#     "id": 1,
+#     "name": "Maintenance Co"
+#   }
+# }
+
+### Failure Case 1: Maintenance company not found
+# Expected: Error response indicating the maintenance company with ID 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/999999/elevators/LIFT1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 2: Elevator with specified machine number not found under the maintenance company
+# Expected: Error response indicating no elevator with machine number "LIFT1000" exists under the maintenance company with ID 1.
+GET http://localhost:8000/api/maintenance-companies/1/elevators/LIFT1000/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Elevator with the specified machine number not found under this maintenance company."
+# }
+
+### Failure Case 3: Elevator exists, but machine number does not match
+# Expected: Error response indicating that the elevator with machine number "LIFT1" exists, but it is linked to a different maintenance company.
+GET http://localhost:8000/api/maintenance-companies/2/elevators/LIFT1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Elevator with the specified machine number not found under this maintenance company."
+# }
+
+### Failure Case 4: Invalid Machine Number Format
+# Expected: Error response for an invalid machine number format (e.g., numeric values or special characters that don't exist).
+GET http://localhost:8000/api/maintenance-companies/1/elevators/12345/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Elevator with the specified machine number not found under this maintenance company."
+# }
+
+### Failure Case 5: Unexpected Error (Example - Server Error)
+# Expected: A generic error indicating an internal server error due to some unexpected failure (e.g., database issues).
+GET http://localhost:8000/api/maintenance-companies/1/elevators/LIFT1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: application/json
+#
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+
+### Success Case: Retrieve developers under a valid maintenance company
+# Expected: A list of developers associated with buildings managed by elevators under maintenance company with id 1.
+GET http://localhost:8000/api/maintenance-companies/1/developers/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Success):
+# [
+#   {
+#     "id": 1,
+#     "developer_name": "Alice Tech Solutions",
+#     "developer_profile": "profile-info",
+#     "buildings": [
+#       {
+#         "id": 1,
+#         "name": "Sundowners Towers"
+#       }
+#     ]
+#   }
+# ]
+
+### Failure Case 1: Maintenance company not found
+# Expected: Error response indicating maintenance company with id 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/999999/developers/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 2: No developers associated with the given maintenance company
+# Expected: A message indicating no developers found under the specified maintenance company.
+GET http://localhost:8000/api/maintenance-companies/2/developers/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "message": "No developers found under this maintenance company."
+# }
+
+### Failure Case 3: Elevator not found for the given maintenance company
+# Expected: Error response indicating no elevators found for maintenance company 3.
+GET http://localhost:8000/api/maintenance-companies/3/developers/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "No elevators found for the specified maintenance company."
+# }
+
+### Failure Case 4: Internal Server Error (Unexpected error)
+# This case tests a generic error that might occur during the processing (such as a database issue).
+# In production, this error should be handled, but for testing, you may trigger it by modifying data or setting up invalid data.
+GET http://localhost:8000/api/maintenance-companies/1/developers/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+
+
+### Success Case: Retrieve developer details by valid company ID and developer ID
+# Expected: Developer details for developer with id 1 under maintenance company 1.
+GET http://localhost:8000/api/maintenance-companies/1/developers/1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Success):
+# {
+#   "id": 1,
+#   "developer_name": "Alice Tech Solutions",
+#   "developer_profile": "Profile details here",
+#   "buildings": [
+#     {
+#       "id": 1,
+#       "name": "Sundowners Towers"
+#     }
+#   ]
+# }
+
+### Failure Case 1: Maintenance company not found
+# Expected: Error response indicating maintenance company with id 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/999999/developers/1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 2: Developer not found
+# Expected: Error response indicating developer with id 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/1/developers/999999/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Developer not found."
+# }
+
+### Failure Case 3: Developer not linked to the maintenance company
+# Expected: Error response indicating developer is not linked to any buildings under the specified maintenance company.
+GET http://localhost:8000/api/maintenance-companies/1/developers/2/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Developer not found or not linked to any buildings under the specified maintenance company."
+# }
+
+### Failure Case 4: Internal server error (unexpected issue, e.g., database problem)
+# Expected: Error response for unexpected issues like database failures.
+GET http://localhost:8000/api/maintenance-companies/1/developers/1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
