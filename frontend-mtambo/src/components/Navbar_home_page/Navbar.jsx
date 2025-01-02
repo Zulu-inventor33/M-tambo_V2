@@ -6,11 +6,14 @@ import './Navbar.css';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthenticationContext';
 import LoggedInUserProfile from './LoggedInUserProfile';
+import MobileMenu from './MobileMenuComponent';
 
 const Navbar = () => {
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
     //track the login state of the user
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+    // State to toggle the mobile menu
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     //update the when the user state from auth context updates after login
     useEffect(() => {
@@ -21,18 +24,18 @@ const Navbar = () => {
         }
     }, [user]);
 
-    console.log(isUserLoggedIn)
-    console.log(user)
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
 
     return (
         <nav className="nav_container">
             {/* Mobile button navigation section */}
             <div>
-                <button type="button" className="open_mobile_menu_btn">
+                <button type="button" className="open_mobile_menu_btn" onClick={toggleMenu}>
                     <FontAwesomeIcon icon={faBars} />
                 </button>
             </div>
-
             {/* Application Logo section */}
             <div className="logo_container">
                 <Link to="/" className="logo" aria-label="M-TAMBO">M-TAMBO</Link>
@@ -73,11 +76,18 @@ const Navbar = () => {
                     </li>
                 </ul>
             ) : (
-                // This section is shown when the user IS logged in
                 <ul className="user_logged_in_container_navbar_section">
                     <LoggedInUserProfile />
                 </ul>
             )}
+            {/* Mobile Menu Component */}
+            <MobileMenu 
+                isMenuOpen={isMenuOpen} 
+                toggleMenu={toggleMenu} 
+                isUserLoggedIn={isUserLoggedIn} 
+                user={user} 
+                logOut={logOut}
+            />
         </nav>
     );
 };

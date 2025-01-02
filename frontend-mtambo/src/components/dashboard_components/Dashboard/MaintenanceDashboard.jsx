@@ -19,17 +19,15 @@ const MaintenanceDashboard = () => {
     <div className='maintencance-dashboard'>
       <Sidebar sidebarLinks={maintenanceDashboardSidebarLinks} />
       <Header />
-      <div className="main-content">
-        {/* Define the dynamic routes for the content area */}
-        <Routes>
-          {/* Default route */}
-          <Route path="/" element={<DashboardMainContent />} />
-          <Route path="profile" element={<ProfileContent />} />
-          <Route path="job-management" element={<JobManagement />} />
-          <Route path="add-new-building" element={<AddNewBuilding />} />
-          <Route path="add-new-equipment" element={<AddNewEquipment />} />
-        </Routes>
-      </div>
+      {/* Define the dynamic routes for the content area */}
+      <Routes>
+        {/* Default route */}
+        <Route path="/" element={<DashboardMainContent />} />
+        <Route path="profile" element={<ProfileContent />} />
+        <Route path="job-management" element={<JobManagement />} />
+        <Route path="add-new-building" element={<AddNewBuilding />} />
+        <Route path="add-new-equipment" element={<AddNewEquipment />} />
+      </Routes>
       <Footer />
     </div>
   );

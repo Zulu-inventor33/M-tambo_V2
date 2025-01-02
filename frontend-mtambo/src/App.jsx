@@ -6,6 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import AuthProvider from './context/AuthenticationContext';
 import PrivateRoute from './router/PrivateRoute';
+import { SidebarToggleProvider } from './context/SidebarToggleContext';
 import { LoaderProvider } from './context/LoaderContext';
 import Loader from './components/LoaderComponent/Loader';
 import Home from './pages/Home';
@@ -30,7 +31,14 @@ const App = () => {
 								<Route path="/forgot-password" element={<ForgotPassword />} />
 								<Route path="/register" element={<Register />} />
 								<Route element={<PrivateRoute />}>
-									<Route path="/dashboard/*" element={<Dashboard />} />
+									<Route
+										path="/dashboard/*"
+										element={
+											<SidebarToggleProvider>
+												<Dashboard />
+											</SidebarToggleProvider>
+										}
+									/>
 								</Route>
 							</Routes>
 						</AuthProvider>

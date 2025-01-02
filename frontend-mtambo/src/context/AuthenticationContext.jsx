@@ -37,21 +37,24 @@ const AuthProvider = ({ children }) => {
 			});
 
 			if (response.status === 200) {
-				// Mocking the user details for now before api improved
-				const dummyUser = {
-					first_name: "Dummy",
-					last_name: "Dummy2",
-					email: "dummy@gmail.com",
-					phone_number: "1234567892",
-					account_type: "maintenance",
-					created_at: "2024-12-26 17:07:12.635736",
-					is_staff: 0
+				// Extract user data and tokens from the response
+				const userData = {
+					first_name: response.data.first_name,
+					last_name: response.data.last_name,
+					email: response.data.email,
+					phone_number: response.data.phone_number,
+					account_type: response.data.account_type,
+					created_at: response.data.created_at,
+					is_staff: response.data.is_staff,
 				};
-				setUser(dummyUser);
-				setToken(response?.data?.access);
-				localStorage.setItem("site", response?.data?.access);
-				// Correctly store the user object as a string in localhost
-				localStorage.setItem("user", JSON.stringify(dummyUser));
+				// Set user data and token in the state
+				setUser(userData);
+				setToken(response.data.access);
+
+				// Save the token and user data in localStorage
+				localStorage.setItem("site", response.data.access);
+				localStorage.setItem("user", JSON.stringify(userData));
+
 				setLoading(false);
 
 				notifySuccess("Welcome Back to M-tambo!");
