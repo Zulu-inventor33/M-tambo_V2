@@ -1,8 +1,10 @@
 import React from 'react';
-import { useState } from 'react';
+
 import MobileMenuBlock from './MobileMenuBlock';
 import MessagesDropdownSection from './MessagesDropdownSection';
 import UserProfileDropdownSection from './UserProfileDropdownSection';
+import FullscreenToggleButton from './FullscreenToggleButton';
+import NotificationsDropdown from './NotificationsDropdown';
 
 const TopBar = () => {
 	return (
@@ -14,6 +16,10 @@ const TopBar = () => {
 
 				<div className="ms-auto">
 					<ul className="list-unstyled">
+						{/* Notifications section */}
+						<NotificationsDropdown />
+						{/* fullscreen button toggler */}
+						<FullscreenToggleButton />
 						{/* Messages section */}
 						<MessagesDropdownSection />
 						{/* user profile section */}

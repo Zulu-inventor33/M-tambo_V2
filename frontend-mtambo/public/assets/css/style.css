@@ -4,14 +4,17 @@
   --bs-body-bg-rgb: 255, 255, 255;
   --pc-heading-color: #343a40;
   --pc-active-background: #e9ecef;
-  --pc-sidebar-background: #fff;
-  --pc-sidebar-color: #141414;
+  /* --pc-sidebar-background: #fff;
+  --pc-sidebar-color: #141414; */
+  --pc-sidebar-background: #181818;
+  --pc-sidebar-color: #e0e0e0;
   --pc-sidebar-color-rgb: 20, 20, 20;
   --pc-sidebar-active-color: var(--bs-primary);
   --pc-sidebar-shadow: 1px 0 0 0px rgb(240 240 240);
   --pc-sidebar-caption-color: #495057;
   --pc-header-background: #fff;
-  --pc-header-color: #141414;
+  /* --pc-header-color: #141414; */
+  --pc-header-color: #e0e0e0;
   --pc-header-shadow: 0 1px 0 0px rgb(240 240 240);
   --pc-card-box-shadow: none;
   --pc-header-submenu-background: #ffffff;
@@ -16707,7 +16710,7 @@ pre[class*=language-] > code {
   margin-right: 8px;
 }
 .pc-header .header-user-profile .pc-head-link .user-avtar {
-  width: 24px;
+  width: 30px;
   transition: all 0.08s cubic-bezier(0.37, 0.24, 0.53, 0.99);
 }
 @media (max-width: 575.98px) {

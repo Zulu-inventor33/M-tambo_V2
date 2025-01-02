@@ -1,7 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 import KeyPerformanceIndicators from './KeyPerformanceIndicators';
 import JobStatusSummary from './JobStatusSummary';
 import TechniciansAvailability from './TechniciansAvailability';
+import MainContentHeader from './MainContentHeader';
 
 const DashboardMainContent = () => {
     // Mock data (in the future, this data will come from the API)
@@ -45,35 +48,14 @@ const DashboardMainContent = () => {
                                 </div>
                                 <ul className="breadcrumb">
                                     <li className="breadcrumb-item">
-                                        <a href="../dashboard/index.html">Home</a>
-                                    </li>
-                                    <li className="breadcrumb-item">
-                                        <a href="javascript: void(0)">Dashboard</a>
-                                    </li>
-                                    <li className="breadcrumb-item" aria-current="page">
-                                        Home
+                                        <Link to="/dashboard">Dashboard</Link>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="d-flex flex-column flex-md-row justify-content-between w-100">
-                    {/* Section for the dashboard name with bold and big text */}
-                    <div className="d-flex align-items-center mb-2 mb-md-0">
-                        <h3 className="display-6 font-weight-bold m-0">Hassan's Company</h3>
-                    </div>
-
-                    {/* Section for buttons aligned to the right */}
-                    <div className="d-flex flex-wrap gap-2 ms-md-auto">
-                        <a href='/dashboard/add-new-building' className="d-flex align-items-center btn btn-shadow btn-primary">
-                            Add Building
-                        </a>
-                        <a href='/dashboard/add-new-equipment' className="d-flex align-items-center btn btn-shadow btn-success">
-                            Add Equipment
-                        </a>
-                    </div>
-                </div>
+                <MainContentHeader />
                 {/* key performance indicators section */}
                 <KeyPerformanceIndicators data={keyPerformanceData} />
                 {/* Job status quick summary section */}
