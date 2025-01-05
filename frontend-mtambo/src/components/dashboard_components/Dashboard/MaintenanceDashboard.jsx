@@ -12,6 +12,7 @@ import JobManagement from '../MaintenanceDashboardComponents/JobManagement';
 import ProfileContent from '../MaintenanceDashboardComponents/ProfileContent';
 import AddNewBuilding from '../MaintenanceDashboardComponents/AddNewBuilding';
 import AddNewEquipment from '../MaintenanceDashboardComponents/AddNewEquipment';
+import TechnicianDashboard from '../MaintenanceDashboardComponents/TechniciansDashboard';
 
 
 const MaintenanceDashboard = () => {
@@ -27,6 +28,7 @@ const MaintenanceDashboard = () => {
         <Route path="job-management" element={<JobManagement />} />
         <Route path="add-new-building" element={<AddNewBuilding />} />
         <Route path="add-new-equipment" element={<AddNewEquipment />} />
+        <Route path="technicians" element={<TechnicianDashboard />} />
       </Routes>
       <Footer />
     </div>

@@ -32,7 +32,7 @@ const UserProfileDropdownSection = () => {
 							<img src={user.avatar || "/images/avatar_placeholder.avif"} alt="user-image" className="user-avtar wid-35" />
 						</div>
 						<div className="flex-grow-1 ms-3">
-							<h6 className="mb-1">{user.email}</h6>
+							<h6 className="mb-1 email_long" title={user.email}>{user.email}</h6>
 							<span>{user.account_type}</span>
 						</div>
 						{/* Logout button */}

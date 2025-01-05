@@ -74,6 +74,7 @@ const Sidebar = ({ sidebarLinks }) => {
 												<label>Other</label>
 												<i className="ti ti-brand-chrome"></i>
 											</li>
+											{/* my profile sidebar section */}
 											<li className="pc-item">
 												<Link to="/profile" className='pc-link'>
 													<span className="pc-micon">
@@ -88,6 +89,7 @@ const Sidebar = ({ sidebarLinks }) => {
 													<span className="pc-mtext">My profile</span>
 												</Link>
 											</li>
+											{/* Logout sidebar link */}
 											<li className="pc-item">
 												<a href="../other/sample-page.html" className="pc-link">
 													<span className="pc-micon">
@@ -95,7 +97,8 @@ const Sidebar = ({ sidebarLinks }) => {
 															<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 															<path d="M7 6a7.75 7.75 0 1 0 10 0" />
 															<path d="M12 4l0 8" />
-														</svg>													</span>
+														</svg>
+													</span>
 													<span className="pc-mtext">Logout</span>
 												</a>
 											</li>
