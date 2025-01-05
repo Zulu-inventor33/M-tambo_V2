@@ -20,7 +20,7 @@ class MaintenanceSchedule(models.Model):
     
     elevator = models.ForeignKey(Elevator, on_delete=models.CASCADE, related_name="maintenance_schedules")
     technician = models.ForeignKey(Technician, on_delete=models.SET_NULL, null=True, related_name="maintenance_schedules")
-    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name="maintenance_schedules")
+    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.SET_NULL, null=True, related_name="maintenance_schedules")
     scheduled_date = models.DateTimeField()
     next_schedule = models.CharField(max_length=10, choices=SCHEDULE_CHOICES, default='set_date')
     description = models.TextField()

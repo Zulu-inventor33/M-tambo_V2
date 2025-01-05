@@ -64,7 +64,7 @@ class MaintenanceScheduleSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['elevator'] = instance.elevator.id
         representation['technician'] = instance.technician.id if instance.technician else None
-        representation['maintenance_company'] = instance.maintenance_company.id
+        representation['maintenance_company'] = instance.maintenance_company.id if instance.technician else None
         return representation
 
 

@@ -20,5 +20,15 @@ urlpatterns = [
     path('<int:company_id>/elevators/<str:machine_number>/', ElevatorDetailByMachineNumberView.as_view(), name='elevator-detail-by-machine-number'),
     path('<int:company_id>/developers/', DevelopersUnderCompanyView.as_view(), name='developers-under-company'),
     path('<int:company_id>/developers/<int:developer_id>/', DeveloperDetailUnderCompanyView.as_view(), name='developer-detail-under-company'),
+    path('<int:company_id>/developers/<int:developer_id>/buildings/', BuildingsUnderDeveloperView.as_view(), name='developer-buildings'),
+    path('<int:company_id>/elevators/technicians/<int:technician_id>/', ElevatorsUnderTechnicianView.as_view(), name='elevators_under_technician'),
+    path('<int:company_id>/technicians/<int:technician_id>/buildings/', BuildingsUnderTechnicianView.as_view(), name='buildings-under-technician'),
+    path('<int:company_id>/buildings/<int:building_id>/update_technician/', UpdateTechnicianOnBuildingsView.as_view(), name='update-technician-on-buildings'),
+    path('<int:company_id>/elevators/<int:elevator_id>/update_technician/', UpdateTechnicianOnElevatorView.as_view(), name='update-technician-on-elevator'),
+    path('<int:company_id>/buildings/add', AddBuildingView.as_view(), name='add-building'),
+    path('<int:company_id>/buildings/<int:building_id>/elevators/add', AddElevatorToBuildingView.as_view(), name='add-elevator-to-building'),
+    path('<int:company_id>/buildings/<int:building_id>/remove/', RemoveMaintenanceFromBuildingElevatorsView.as_view(), name='remove-maintenance-from-building-elevators'),
+    path('<int:company_id>/developers/<int:developer_id>/remove/', RemoveMaintenanceFromDeveloperElevatorsView.as_view(), name='remove-maintenance-from-developer-elevators'),
+    path('<int:company_id>/buildings/<int:building_id>/technicians/', TechnicianListForBuildingView.as_view(), name='technician-list-for-building'),
 ]
 

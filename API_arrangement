@@ -21,12 +21,20 @@ mtambo/
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/add/  # POST a technician to a certain maintenance company.
 │   ├── /api/maintenance-companies/{company_id}/developers/  # GET: List of all developers under a specific company
 │   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}  # GET: details of a certain developer linked to this specific company
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/remove  # DELETE: # DELETE: Remove the maintenance company ID and all its Technicians ID from all the Buildings in elevators linked to this building
 │   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/buildings  # GET: all buildings registered to a certain developer linked to this specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/  # GET: List all buildings under a specific company
-│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details (lifts, jobs, etc.)
+│   ├── /api/maintenance-companies/{company_id}/buildings/add  # PUT: add a building into the system.
+│   ├── /api/maintenance-companies/{company_id}/buildings/technicians{technician_id}  # GET: List all buildings where a certain Technician in the maintenance company is working on their elevators
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/remove  # DELETE: Remove the maintenance company ID and all its Technicians ID from all the elevators linked to this building
+│   ├── /api/maintenance-companies/{company_id}/buildings/{buiding_id}/elevators/add  # PUT: add an elevator to a given building.
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/update_technician/  # PUT: Change the Technician on all elevators in a certain building.
 │   ├── /api/maintenance-companies/{company_id}/elevators/  # GET: List all elevators under a specific company
+│   ├── /api/maintenance-companies/{company_id}/elevators/technicians{technician_id}  # GET: List all elevators under a certain Technician
 │   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/elevators/  # GET: List all elevators within a specific building maintenaned by the maintenance company
 │   ├── /api/maintenance-companies/{company_id}/elevators/{elevator_id}/  # GET: Get elevator details of a specific elevator
+│   ├── /api/maintenance-companies/{company_id}/elevators/{elevator_id}/update_technician/  # PUT: Change the Technician on a certain elevator.
 │   ├── /api/maintenance-companies/{company_id}/elevators/{machine_number}/  # GET: Get elevator details of a specific elevator based on machine number
 |
 │   ├── developers/                 # App for developer related views, models, serializers

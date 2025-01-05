@@ -693,3 +693,920 @@ Accept: application/json
 # {
 #   "error": "An unexpected error occurred. Please try again later."
 # }
+
+
+### Success Case: Retrieve developer details by valid company ID and developer ID
+# Expected: Developer details for developer with id 1 under maintenance company 1.
+GET http://localhost:8000/api/maintenance-companies/1/developers/1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Success):
+# {
+#   "id": 1,
+#   "developer_name": "Alice Tech Solutions",
+#   "developer_profile": "Profile details here",
+#   "buildings": [
+#     {
+#       "id": 1,
+#       "name": "Sundowners Towers"
+#     }
+#   ]
+# }
+
+### Failure Case 1: Maintenance company not found
+# Expected: Error response indicating maintenance company with id 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/999999/developers/1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 2: Developer not found
+# Expected: Error response indicating developer with id 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/1/developers/999999/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Developer not found."
+# }
+
+### Failure Case 3: Developer not linked to the maintenance company
+# Expected: Error response indicating developer is not linked to any buildings under the specified maintenance company.
+GET http://localhost:8000/api/maintenance-companies/1/developers/2/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Developer not found or not linked to any buildings under the specified maintenance company."
+# }
+
+### Failure Case 4: Internal server error (unexpected issue, e.g., database problem)
+# Expected: Error response for unexpected issues like database failures.
+GET http://localhost:8000/api/maintenance-companies/1/developers/1/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+
+### Success Case: Retrieve elevators under a specific technician for a specific maintenance company
+# Expected: Elevators linked to technician 5 under maintenance company 1.
+GET http://localhost:8000/api/maintenance-companies/1/elevators/technician5/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Success):
+# [
+#   {
+#     "id": 1,
+#     "user_name": "Elevator 1",
+#     "capacity": 1000,
+#     "manufacturer": "LiftCorp",
+#     "installation_date": "2020-01-01",
+#     "building": {
+#       "id": 1,
+#       "name": "Sundowners Towers"
+#     }
+#   },
+#   {
+#     "id": 2,
+#     "user_name": "Elevator 2",
+#     "capacity": 800,
+#     "manufacturer": "ElevatorCo",
+#     "installation_date": "2021-06-15",
+#     "building": {
+#       "id": 1,
+#       "name": "Sundowners Towers"
+#     }
+#   }
+# ]
+
+### Failure Case 1: Maintenance company not found
+# Expected: Error response indicating the maintenance company with ID 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/999999/elevators/technician5/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 2: Technician not found
+# Expected: Error response indicating the technician with ID 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/1/elevators/technician999999/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "Technician not found."
+# }
+
+### Failure Case 3: No elevators found under the technician for this maintenance company
+# Expected: Error response indicating no elevators are linked to this technician under the specified maintenance company.
+GET http://localhost:8000/api/maintenance-companies/1/elevators/technician999/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "message": "No elevators found under this technician for the specified maintenance company."
+# }
+
+### Failure Case 4: Internal server error (unexpected issue, e.g., database problem)
+# Expected: Error response for unexpected issues like database failures.
+GET http://localhost:8000/api/maintenance-companies/1/elevators/technician5/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+
+### Success Case: Retrieve all buildings under a technician working for a specific maintenance company
+# Expected: List of building details where the technician is working under the specified maintenance company
+GET http://localhost:8000/api/maintenance-companies/1/technicians/1/buildings/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Success):
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+#
+# [
+#   {
+#     "id": 1,
+#     "name": "Sundowners Towers",
+#     "address": "123 Sunset Boulevard, Los Angeles, CA",
+#     "developer": {
+#       "id": 1,
+#       "developer_name": "Alice Tech Solutions"
+#     },
+#     "elevators": [
+#       {
+#         "id": 1,
+#         "user_name": "LIFT1",
+#         "machine_type": "gearless",
+#         "capacity": 1000
+#       },
+#       {
+#         "id": 2,
+#         "user_name": "LIFT2",
+#         "machine_type": "hydraulic",
+#         "capacity": 1200
+#       }
+#     ]
+#   }
+# ]
+
+### Failure Case 1: Maintenance company not found
+# Expected: Error response indicating the maintenance company with ID 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/999999/technicians/1/buildings/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 2: Technician not found
+# Expected: Error response indicating the technician with ID 999999 doesn't exist.
+GET http://localhost:8000/api/maintenance-companies/1/technicians/999999/buildings/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Technician not found."
+# }
+
+### Failure Case 3: Technician not assigned to any buildings under the specified maintenance company
+# Expected: Error response indicating that the technician is not working on any elevators under the specified maintenance company.
+GET http://localhost:8000/api/maintenance-companies/1/technicians/2/buildings/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "message": "No buildings found under this technician for the specified maintenance company."
+# }
+
+### Failure Case 4: Invalid Technician ID Format
+# Expected: Error response indicating invalid technician ID format.
+GET http://localhost:8000/api/maintenance-companies/1/technicians/abcd/buildings/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Technician not found."
+# }
+
+### Failure Case 5: Unexpected Error (Example - Server Error)
+# Expected: A generic error indicating an internal server error due to some unexpected failure (e.g., database issues).
+GET http://localhost:8000/api/maintenance-companies/1/technicians/1/buildings/ HTTP/1.1
+Accept: application/json
+
+# Expected Output (Failure):
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: application/json
+#
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+### Success Case: Update the technician on all elevators in a building under a specified maintenance company
+# Expected: The technician on all elevators under the building "Sundowners Towers" is successfully updated.
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Success):
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+# 
+# [
+#   {
+#     "id": 1,
+#     "user_name": "Elevator A",
+#     "technician": {
+#       "id": 2,
+#       "name": "John Doe"
+#     },
+#     "capacity": 1000,
+#     "building": {
+#       "id": 1,
+#       "name": "Sundowners Towers"
+#     }
+#   },
+#   {
+#     "id": 2,
+#     "user_name": "Elevator B",
+#     "technician": {
+#       "id": 2,
+#       "name": "John Doe"
+#     },
+#     "capacity": 1500,
+#     "building": {
+#       "id": 1,
+#       "name": "Sundowners Towers"
+#     }
+#   }
+# ]
+
+### Failure Case 1: Technician ID is not provided in the request
+# Expected: Error response indicating the technician ID is required.
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{}
+
+# Expected Output (Failure):
+# HTTP/1.1 400 Bad Request
+# Content-Type: application/json
+#
+# {
+#   "error": "Technician ID is required."
+# }
+
+### Failure Case 2: Technician not found or doesn't belong to the specified maintenance company
+# Expected: Error response indicating the technician doesn't exist or doesn't belong to the maintenance company.
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 999999
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Technician not found or does not belong to this maintenance company."
+# }
+
+### Failure Case 3: Maintenance company not found
+# Expected: Error response indicating the maintenance company with ID 999999 doesn't exist.
+PUT http://localhost:8000/api/maintenance-companies/999999/buildings/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 4: Building not found or not linked to the specified maintenance company
+# Expected: Error response indicating the building is not found or not linked to the specified maintenance company.
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/999999/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Building not found or not linked to the specified maintenance company."
+# }
+
+### Failure Case 5: No elevators found under the specified building and maintenance company
+# Expected: Error response indicating that there are no elevators linked to the building under the maintenance company.
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/2/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "No elevators found under this building for the specified maintenance company."
+# }
+
+### Failure Case 6: Unexpected Error (Example - Server Error)
+# Expected: A generic error indicating an internal server error due to some unexpected failure (e.g., database issues).
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: application/json
+#
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+### Success Case: Change technician on a specific elevator
+# Expected: The technician for elevator "Elevator A" is updated to the technician with ID 2 under the specified maintenance company.
+PUT http://localhost:8000/api/maintenance-companies/1/elevators/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Success):
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+#
+# {
+#   "id": 1,
+#   "user_name": "Elevator A",
+#   "technician": {
+#     "id": 2,
+#     "name": "John Doe"
+#   },
+#   "capacity": 1000,
+#   "building": {
+#     "id": 1,
+#     "name": "Sundowners Towers"
+#   }
+# }
+
+### Failure Case 1: Technician ID is not provided in the request
+# Expected: Error response indicating the technician ID is required.
+PUT http://localhost:8000/api/maintenance-companies/1/elevators/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{}
+
+# Expected Output (Failure):
+# HTTP/1.1 400 Bad Request
+# Content-Type: application/json
+#
+# {
+#   "error": "Technician ID is required."
+# }
+
+### Failure Case 2: Technician not found or doesn't belong to the specified maintenance company
+# Expected: Error response indicating the technician doesn't exist or isn't linked to the given maintenance company.
+PUT http://localhost:8000/api/maintenance-companies/1/elevators/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 999999
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Technician not found or does not belong to this maintenance company."
+# }
+
+### Failure Case 3: Maintenance company not found
+# Expected: Error response indicating the maintenance company with ID 999999 doesn't exist.
+PUT http://localhost:8000/api/maintenance-companies/999999/elevators/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Maintenance company not found."
+# }
+
+### Failure Case 4: Elevator not found or not linked to the specified maintenance company
+# Expected: Error response indicating the elevator is not found or not linked to the specified maintenance company.
+PUT http://localhost:8000/api/maintenance-companies/1/elevators/999999/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json
+#
+# {
+#   "error": "Elevator not found or not linked to the specified maintenance company."
+# }
+
+### Failure Case 5: Unexpected Error (Example - Server Error)
+# Expected: A generic error response for an internal server error.
+PUT http://localhost:8000/api/maintenance-companies/1/elevators/1/update_technician/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "technician_id": 2
+}
+
+# Expected Output (Failure):
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: application/json
+#
+# {
+#   "error": "An unexpected error occurred. Please try again later."
+# }
+### Description of the API
+# This API is used to add a new building and register at least one elevator for that building.
+# The PUT request requires the following:
+# - Building data: The name, address, contact, and the developer's ID.
+# - Elevator data: At least one elevator's details, including user_name, capacity, machine_number, manufacturer, and installation_date.
+# The Maintenance company (provided through the URL) will be automatically linked to the building's elevator.
+# The technician (if provided) will be linked to the elevator.
+
+# The URL format is:
+# PUT /api/maintenance-companies/{company_id}/buildings/add
+# - company_id: The ID of the maintenance company registering the building.
+
+# The response will include:
+# - Full details of the registered building.
+# - Full details of the elevator(s) created under that building.
+
+# Example PUT request with required data:
+
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/add HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Sky Tower",
+  "address": "456 Sky Lane, Uptown City",
+  "contact": "987-654-3210",
+  "developer_id": 1,
+  "elevator": {
+    "user_name": "LIFT-001",
+    "capacity": 1000,
+    "machine_number": "M001",
+    "manufacturer": "LiftCo",
+    "installation_date": "2025-01-01"
+  }
+}
+
+### Sample Response - Success (Building and Elevator Created)
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Sky Tower",
+  "address": "456 Sky Lane, Uptown City",
+  "contact": "987-654-3210",
+  "developer": {
+    "id": 1,
+    "developer_name": "Developer A"
+  },
+  "developer_name": "Developer A",
+  "elevators": [
+    {
+      "id": 1,
+      "user_name": "LIFT-001",
+      "machine_number": "M001",
+      "capacity": 1000,
+      "manufacturer": "LiftCo",
+      "installation_date": "2025-01-01",
+      "maintenance_company": 1,
+      "technician": {
+        "id": 2,
+        "name": "Technician John Doe"
+      },
+      "developer": {
+        "id": 1,
+        "developer_name": "Developer A"
+      }
+    }
+  ]
+}
+
+### Sample Response - Error (Missing Developer ID)
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "Developer ID is required."
+}
+
+### Sample Response - Error (Missing Elevator Data)
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "All elevator fields (user_name, capacity, machine_number, manufacturer, installation_date) are required."
+}
+
+### Sample Response - Error (Technician Not Linked to Maintenance Company)
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Technician not found or not linked to the specified maintenance company."
+}
+
+### Sample Response - Error (Maintenance Company Not Found)
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Maintenance company not found."
+}
+
+### 
+# Add Elevator to Building
+# This API allows adding an elevator to a specified building under a given maintenance company.
+# The request requires the maintenance company id, building id, and elevator data, including
+# technician information (optional).
+# 
+# You must provide the following data:
+# - company_id: The maintenance company under which the elevator is being added.
+# - building_id: The building to which the elevator will be added.
+# - elevator details: user_name, capacity, machine_number, manufacturer, installation_date.
+# - technician_id (optional): A technician to be linked to the elevator. If provided, the technician must belong to the specified maintenance company.
+
+### PUT request to add an elevator to a building
+
+PUT http://localhost:8000/api/maintenance-companies/1/buildings/1/elevator/add HTTP/1.1
+Content-Type: application/json
+
+{
+  "user_name": "LIFT-003",           # Elevator identifier (e.g., LIFT-003)
+  "capacity": 1500,                  # Maximum weight capacity in kilograms
+  "machine_number": "M003",          # Unique machine identifier
+  "manufacturer": "ThyssenKrupp",    # Manufacturer of the elevator
+  "installation_date": "2025-12-01", # The date when the elevator was installed
+  "technician_id": 2                 # Optional: ID of the technician to be linked with the elevator
+}
+
+### Expected Response (Success - 201 Created)
+# If the request is successful, the server will return the newly created elevator's details,
+# including the elevator's ID, name, machine number, capacity, and associated entities.
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "id": 1,
+  "user_name": "LIFT-003",
+  "machine_number": "M003",
+  "capacity": 1500,
+  "manufacturer": "ThyssenKrupp",
+  "installation_date": "2025-12-01",
+  "maintenance_company": {
+    "id": 1,
+    "company_name": "XYZ Maintenance Co."
+  },
+  "technician": {
+    "id": 2,
+    "name": "John Doe"
+  },
+  "developer": {
+    "id": 1,
+    "developer_name": "Developer A"
+  },
+  "building": {
+    "id": 1,
+    "name": "Sky Tower"
+  }
+}
+
+### Expected Response (Failure - 404 Not Found: Maintenance Company Not Found)
+# If the provided company ID is invalid or the maintenance company doesn't exist,
+# the response will be a 404 Not Found with an error message.
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Maintenance company not found."
+}
+
+### Expected Response (Failure - 404 Not Found: Building Not Found)
+# If the provided building ID is invalid or the building doesn't exist,
+# the response will be a 404 Not Found with an error message.
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Building not found."
+}
+
+### Expected Response (Failure - 400 Bad Request: Missing Elevator Data)
+# If any required elevator fields are missing in the request body, the server will respond
+# with a 400 Bad Request error and an appropriate error message.
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "All elevator fields (user_name, capacity, machine_number, manufacturer, installation_date) are required."
+}
+
+### Expected Response (Failure - 404 Not Found: Technician Not Found or Not Linked to Maintenance Company)
+# If a technician ID is provided, and the technician is not found or doesn't belong to the maintenance company,
+# the response will be a 404 Not Found with an error message.
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "Technician not found or does not belong to the specified maintenance company."
+}
+
+### 
+# Remove Maintenance Company from Elevators Linked to a Building
+# This API allows removing the maintenance company from all elevators linked to a specific building.
+# 
+# Request requires the following:
+# - company_id: The maintenance company ID whose association needs to be removed.
+# - building_id: The building ID from which all linked elevators should be unlinked from the maintenance company.
+
+### DELETE request to remove maintenance company from elevators linked to a building
+# API Documentation: Remove Maintenance Company from Building Elevators
+
+### DELETE /api/maintenance-companies/{company_id}/buildings/{building_id}/remove
+# This API is used to remove a maintenance company from all elevators in a specific building,
+# but only from those elevators that are linked exclusively to the given maintenance company.
+
+# Request URL:
+DELETE http://localhost:8000/api/maintenance-companies/{company_id}/buildings/{building_id}/remove
+
+# URL Parameters:
+- {company_id} (int) - The unique identifier of the maintenance company to be removed from the elevators.
+- {building_id} (int) - The unique identifier of the building where the elevators are linked to the maintenance company.
+
+# Sample Request URL (replace `{company_id}` and `{building_id}` with actual values):
+DELETE http://localhost:8000/api/maintenance-companies/1/buildings/5/remove
+
+# Headers:
+Content-Type: application/json
+
+# Sample Response:
+
+## Success Response (200 OK):
+{
+  "message": "Successfully removed the maintenance company and technician from 3 elevator(s) and 5 maintenance schedule(s)."
+}
+
+## Error Response (404 Not Found - Maintenance Company Not Found):
+{
+  "error": "Maintenance company not found."
+}
+
+## Error Response (404 Not Found - Building Not Found):
+{
+  "error": "Building not found."
+}
+
+## Error Response (404 Not Found - No Elevators Found):
+{
+  "message": "No elevators linked to the provided maintenance company in this building."
+}
+
+## Error Response (500 Internal Server Error):
+{
+  "error": "An unexpected error occurred. Please try again later."
+}
+
+# Description:
+This endpoint removes a specified maintenance company and all its technicians from all the elevators in a specified building, but only for elevators linked exclusively to the provided maintenance company. Elevators linked to other maintenance companies in the same building are unaffected.
+1. The API first checks if the maintenance company exists by its ID.
+2. Then it checks if the building exists by its ID.
+3. If both the maintenance company and building are found, the API retrieves all elevators linked to the building.
+4. It filters the elevators to only affect those specifically linked to the provided maintenance company.
+5. The API removes the maintenance company and technician from the selected elevators and updates the maintenance schedules.
+
+The API will return a success message with the number of affected elevators and schedules. If there are any issues (such as the building or maintenance company not being found, or no elevators linked), appropriate error messages are returned.
+
+
+# API Documentation: Remove Maintenance Company from Developer's Elevators
+
+### DELETE /api/maintenance-companies/{company_id}/developers/{developer_id}/remove
+# This API is used to remove the maintenance company and all its technicians
+# from all the buildings in elevators linked to a specified developer,
+# but only for elevators that are linked to the specified maintenance company.
+
+# Request URL:
+DELETE http://localhost:8000/api/maintenance-companies/{company_id}/developers/{developer_id}/remove
+
+# URL Parameters:
+- {company_id} (int) - The unique identifier of the maintenance company to be removed from the developer's elevators.
+- {developer_id} (int) - The unique identifier of the developer whose elevators are affected.
+
+# Sample Request URL (replace `{company_id}` and `{developer_id}` with actual values):
+DELETE http://localhost:8000/api/maintenance-companies/1/developers/5/remove
+
+# Headers:
+Content-Type: application/json
+
+# Sample Response:
+
+## Success Response (200 OK):
+{
+  "message": "Successfully removed the maintenance company and technician from 3 elevator(s) and 5 maintenance schedule(s)."
+}
+
+## Error Response (404 Not Found - Maintenance Company Not Found):
+{
+  "error": "Maintenance company not found."
+}
+
+## Error Response (404 Not Found - Developer Not Found):
+{
+  "error": "Developer not found."
+}
+
+## Error Response (404 Not Found - No Elevators or Schedules Found):
+{
+  "message": "No elevators linked to the provided maintenance company for this developer."
+}
+
+## Error Response (500 Internal Server Error):
+{
+  "error": "An unexpected error occurred. Please try again later."
+}
+
+# Description:
+This endpoint removes a specified maintenance company and all its technicians from all the buildings in elevators linked to a developer,
+but only for elevators that are directly linked to the specified maintenance company. The API ensures that elevators associated with other maintenance companies are not affected.
+1. The API first checks if the maintenance company exists by its ID.
+2. Then it checks if the developer exists by their ID.
+3. If both the maintenance company and developer are found, the API retrieves all elevators linked to the developer's buildings.
+4. It filters the elevators to only affect those specifically linked to the provided maintenance company.
+5. The API proceeds to remove the maintenance company and technician from the selected elevators and updates the maintenance schedules.
+
+The API will return a success message with the number of elevators and schedules updated. If there are any issues (such as the developer or maintenance company not being found, or no elevators linked), appropriate error messages are returned.
+
+
+### Technician List for a Building (Maintenance Company)
+
+# This HTTP file demonstrates how to retrieve the list of technicians assigned to elevators in a specific building, 
+# which are managed by a specified maintenance company.
+
+# First, make sure the server is running and accessible on the URL provided in the requests.
+
+# Example: Retrieve technicians for Maintenance Company with ID=1 and Building with ID=1
+# Replace the `company_id` and `building_id` with the actual IDs for your use case.
+
+# Step 1: GET request to retrieve technicians for the specified maintenance company and building
+GET http://127.0.0.1:8000/api/maintenance-companies/1/buildings/1/technicians/
+
+# Expected Response:
+# HTTP/1.1 200 OK
+# {
+#     "technicians": [
+#         {
+#             "id": 1,
+#             "user": {
+#                 "id": 1,
+#                 "first_name": "John",
+#                 "last_name": "Doe",
+#                 "email": "john.doe@example.com"
+#             },
+#             "specialization": "Elevator Repair",
+#             "elevators": [
+#                 {
+#                     "id": 101,
+#                     "serial_number": "ELEV-001",
+#                     "building": {
+#                         "id": 1,
+#                         "name": "Building A"
+#                     }
+#                 },
+#                 {
+#                     "id": 102,
+#                     "serial_number": "ELEV-002",
+#                     "building": {
+#                         "id": 1,
+#                         "name": "Building A"
+#                     }
+#                 }
+#             ]
+#         },
+#         {
+#             "id": 2,
+#             "user": {
+#                 "id": 2,
+#                 "first_name": "Jane",
+#                 "last_name": "Smith",
+#                 "email": "jane.smith@example.com"
+#             },
+#             "specialization": "Elevator Installation",
+#             "elevators": [
+#                 {
+#                     "id": 103,
+#                     "serial_number": "ELEV-003",
+#                     "building": {
+#                         "id": 1,
+#                         "name": "Building A"
+#                     }
+#                 }
+#             ]
+#         }
+#     ]
+# }
+
+# Step 2: (Optional) Error Handling - if no technicians are found or no elevators are linked.
+# Example: When there are no technicians assigned to elevators in the building for the given maintenance company.
+
+GET http://127.0.0.1:8000/api/maintenance-companies/1/buildings/2/technicians/
+
+# Expected Response:
+# HTTP/1.1 404 Not Found
+# {
+#     "message": "No technicians assigned to the elevators in this building."
+# }
+
+# Step 3: (Optional) If the maintenance company or building does not exist:
+GET http://127.0.0.1:8000/api/maintenance-companies/999/buildings/1/technicians/
+
+# Expected Response:
+# HTTP/1.1 404 Not Found
+# {
+#     "error": "Maintenance company not found."
+# }
+
+GET http://127.0.0.1:8000/api/maintenance-companies/1/buildings/999/technicians/
+
+# Expected Response:
+# HTTP/1.1 404 Not Found
+# {
+#     "error": "Building not found."
+# }
