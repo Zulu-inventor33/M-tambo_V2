@@ -7,11 +7,11 @@ import Header from '../Header/TopBar';
 import Sidebar from '../Sidebar/Sidebar';
 import './dashboard.css';
 
-import DashboardMainContent from '../MaintenanceDashboard/DashboardMainContent';
-import JobManagement from '../MaintenanceDashboard/JobManagement';
-import ProfileContent from '../MaintenanceDashboard/ProfileContent';
-import AddNewBuilding from '../MaintenanceDashboard/AddNewBuilding';
-import AddNewEquipment from '../MaintenanceDashboard/AddNewEquipment';
+import DashboardMainContent from '../MaintenanceDashboardComponents/DashboardMainContent';
+import JobManagement from '../MaintenanceDashboardComponents/JobManagement';
+import ProfileContent from '../MaintenanceDashboardComponents/ProfileContent';
+import AddNewBuilding from '../MaintenanceDashboardComponents/AddNewBuilding';
+import AddNewEquipment from '../MaintenanceDashboardComponents/AddNewEquipment';
 
 
 const MaintenanceDashboard = () => {

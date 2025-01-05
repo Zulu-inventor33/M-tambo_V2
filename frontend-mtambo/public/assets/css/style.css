@@ -17047,7 +17047,7 @@ pre[class*=language-] > code {
   display: inline-flex;
   margin-bottom: 0;
   background: transparent;
-  font-size: 13px;
+  font-size: 15px;
 }
 .page-header .breadcrumb a {
   color: var(--bs-body-color);

@@ -39,9 +39,9 @@ const FullscreenToggleButton = () => {
     };
 
     return (
-        <li class="pc-h-item">
+        <li className="pc-h-item">
             <a
-                class="pc-head-link arrow-none me-0"
+                className="pc-head-link arrow-none me-0"
                 href="#"
                 role="button"
                 aria-haspopup="false"
