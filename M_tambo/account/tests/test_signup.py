@@ -30,7 +30,8 @@ class SignUpViewTest(APITestCase):
                 'company_name': 'Test Maintenance',
                 'company_address': 'Test Street, City',
                 'company_registration_number': '123456',
-                'maintenance_company_id': 1
+                'maintenance_company_id': 1,
+                'specialization': 'Elevators',
                 }
 
         self.valid_technician_data = {
@@ -107,7 +108,8 @@ class SignUpViewTest(APITestCase):
             'account_type': 'maintenance',
             'company_name': 'Test Maintenance',
             'company_address': 'Test Street, City',
-            'company_registration_number': '123456'
+            'company_registration_number': '123456',
+            'specialization': 'Elevators'
         }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

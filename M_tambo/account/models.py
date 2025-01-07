@@ -2,6 +2,9 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model
 
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
@@ -66,6 +69,7 @@ class Maintenance(models.Model):
     company_registration_number = models.CharField(max_length=100)
     specialization = models.CharField(max_length=100)  # Directly store the specialization as a string
 
+    
     def __str__(self):
         return f"{self.company_name} - {self.specialization}"
 
@@ -75,6 +79,7 @@ class Technician(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='technician_profile')
     specialization = models.CharField(max_length=100)  # Directly store the specialization as a string
     maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name='technicians', null=True)
+    is_approved = models.BooleanField(default=False)    
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.maintenance_company}"

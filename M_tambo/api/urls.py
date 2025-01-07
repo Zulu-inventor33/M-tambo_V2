@@ -1,5 +1,5 @@
 from django.urls import path,include
-from account.views import SignUpView, LoginView, SpecializationListView, MaintenanceListView
+from account.views import SignUpView, LoginView, SpecializationListView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [

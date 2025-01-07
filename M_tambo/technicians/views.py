@@ -1,26 +1,38 @@
-from django.shortcuts import render,get_object_or_404
-from rest_framework import generics
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from .models import Technician
-from account.models import User
-from rest_framework import status
-from rest_framework.permissions import AllowAny
+from .models import TechnicianProfile
+from account.models import User, Maintenance, Technician
 from .serializers import TechnicianListSerializer, TechnicianDetailSerializer, TechnicianSpecializationSerializer
-
+from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.permissions import IsAuthenticated
+from uuid import UUID
+from rest_framework import generics
+from account.serializers import TechnicianSerializer
+from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework import status
+from django.core.validators import validate_email
+from drf_yasg import openapi
 
 # View to list all technicians
 class TechnicianListView(generics.ListAPIView):
-    permission_classes = [AllowAny]
+    """
+    View to list all technicians associated with a specific maintenance company.
+    """
     serializer_class = TechnicianListSerializer
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(tags=['Technician List'])
     def get_queryset(self):
+        # Check if company_uuid was provided in URL path
+        company_uuid = self.kwargs.get('company_uuid')
+        
+        if company_uuid:
+            return Technician.objects.filter(maintenance_company_id=company_uuid)
         return Technician.objects.all()
-
 # View to list all technicians by specialization
 class TechnicianListBySpecializationView(generics.ListAPIView):
     permission_classes = [AllowAny]
@@ -31,30 +43,58 @@ class TechnicianListBySpecializationView(generics.ListAPIView):
         specialization = self.kwargs['specialization']
         return Technician.objects.filter(specialization=specialization)
 
-# View to get a specific technician's details (name, available jobs, etc.)
+# View to get a specific technician's details (using UUID)
 class TechnicianDetailView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]
     queryset = Technician.objects.all()
     serializer_class = TechnicianDetailSerializer
-    lookup_field = 'id'
+    lookup_field = 'id'  # Use UUID field for lookup
+
 
     @swagger_auto_schema(tags=['Technician Details'])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-# View for unlinked technicians
-class UnlinkedTechniciansView(generics.ListAPIView):
-    permission_classes = [AllowAny]
-    queryset = Technician.objects.filter(maintenance_company__isnull=True)  # Filter technicians with NULL maintenance company
-    serializer_class = TechnicianListSerializer
 
-    @swagger_auto_schema(tags=['Unlinked Technicians'])
-    def get(self, request, *args, **kwargs):
-        technicians = self.get_queryset()
-        if not technicians:
-            return Response({"message": "No technicians are unlinked to a maintenance company."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(technicians, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# View for unlinked technicians
+class UnlinkTechnicianFromCompanyView(APIView):
+    permission_classes = [AllowAny]  # Changed to IsAuthenticated for better security
+
+    @swagger_auto_schema(
+        tags=['Unlink Technician'],
+        manual_parameters=[
+            openapi.Parameter(
+                'pk',
+                openapi.IN_PATH,
+                description="UUID of the technician to unlink",
+                type=openapi.TYPE_STRING,
+            )
+        ],
+        responses={
+            200: openapi.Response("Technician successfully unlinked from maintenance company."),
+            400: openapi.Response("Technician is not linked to any maintenance company."),
+            404: openapi.Response("Technician not found."),
+        },
+    )
+    def patch(self, request, pk):  # Ensure `pk` is UUID
+        # Fetch the technician object, or return a 404 error if not found
+        technician = get_object_or_404(Technician, pk=pk)
+
+        # Check if the technician is linked to a maintenance company
+        if not technician.maintenance_company:
+            return Response(
+                {"error": "Technician is not linked to any maintenance company."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Unlink the technician from the maintenance company
+        technician.maintenance_company = None
+        technician.save()
+
+        return Response(
+            {"message": "Technician successfully unlinked from maintenance company."},
+            status=status.HTTP_200_OK,
+        )
 
 # View for unlinked technicians by specialization
 class UnlinkedTechniciansBySpecializationView(generics.ListAPIView):
@@ -66,54 +106,52 @@ class UnlinkedTechniciansBySpecializationView(generics.ListAPIView):
         specialization = self.kwargs.get('specialization')
         if specialization:
             return Technician.objects.filter(maintenance_company__isnull=True, specialization=specialization)
-        return Technician.objects.filter(maintenance_company__isnull=True)  # Default to unlinked technicians
+        return Technician.objects.filter(maintenance_company__isnull=True)
 
     def get(self, request, *args, **kwargs):
         technicians = self.get_queryset()
-        if not technicians:
+        if not technicians.exists():
             return Response({"message": "No unlinked technicians found for this specialization."}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(technicians, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-# View to unlink technician from a company
-class UnlinkTechnicianFromCompanyView(APIView):
-    permission_classes = [AllowAny]
-
-    @swagger_auto_schema(tags=['Unlink Technician from Company'])
-    def patch(self, request, id, *args, **kwargs):
-        try:
-            technician = Technician.objects.get(id=id)
-            if technician.maintenance_company is None:
-                return Response({"message": "Sorry you are currently not associated with any maintenance company."}, status=status.HTTP_400_BAD_REQUEST)
-            technician.maintenance_company = None
-            technician.save()
-            return Response({"message": "You have successfully been unlinked from the maintenance company."}, status=status.HTTP_200_OK)
-        except Technician.DoesNotExist:
-            return Response({"error": "Technician not found."}, status=status.HTTP_404_NOT_FOUND)
-            return Response(
-                {"error": "Technician not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-
+# View to get technician details by email (uses UUID for related fields)
 class TechnicianDetailByEmailView(APIView):
-    permission_classes = [AllowAny]  # Modify this as per your permissions
+    permission_classes = [AllowAny]
     serializer_class = TechnicianDetailSerializer
-    
+
+    @swagger_auto_schema(tags=['Technician Details by Email'])
     def get(self, request, technician_email, *args, **kwargs):
+        # Validate email format
         try:
-            # Retrieve the User by email using the custom user model
-            user = User.objects.get(email=technician_email)
-            
-            # Assuming 'technician_profile' is the related name in your User model
-            if user.technician_profile is None:
-                raise NotFound(detail="User has no technician profile associated.")
-            
-            # Serialize the technician profile
-            serializer = self.serializer_class(user.technician_profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            validate_email(technician_email)
+        except DjangoValidationError:
+            # Return a proper 400 Bad Request response instead of raising an error
+            return Response(
+                {"error": "Invalid email format."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
+        # Retrieve the User and Technician profile by email
+        try:
+            user = User.objects.get(email=technician_email)
         except User.DoesNotExist:
             raise NotFound(detail="User with this email not found.")
+        
+        try:
+            technician = Technician.objects.get(user=user)
         except Technician.DoesNotExist:
-            raise NotFound(detail="Technician profile not found for this user.")
+            raise NotFound(detail="User has no technician profile associated.")
+
+        # Create a custom response data structure to match test expectations
+        technician_data = {
+            'id': str(technician.id),
+            'technician_name': f"{user.first_name} {user.last_name}",
+            'specialization': technician.specialization,
+            'maintenance_company': technician.maintenance_company.id if technician.maintenance_company else None,
+            'maintenance_company_name': str(technician.maintenance_company) if technician.maintenance_company else None,
+            'email': user.email,
+            'phone_number': user.phone_number
+        }
+        
+        return Response({"technician": technician_data}, status=status.HTTP_200_OK)

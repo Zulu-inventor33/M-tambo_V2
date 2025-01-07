@@ -2,7 +2,6 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import User, Developer, Maintenance, Technician
 
-
 # User Serializer for account creation and validation
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +35,9 @@ class UserSerializer(serializers.ModelSerializer):
                 user=user,
                 company_name=self.initial_data.get('company_name'),
                 company_address=self.initial_data.get('company_address'),
-                company_registration_number=self.initial_data.get('company_registration_number')
+                company_registration_number=self.initial_data.get('company_registration_number'),
+                specialization=self.initial_data.get('specialization')
+        
             )
         elif account_type == 'technician':
             Technician.objects.create(
@@ -102,9 +103,9 @@ class LoginSerializer(serializers.Serializer):
     email_or_phone = serializers.CharField()  # Allow email or phone number as login identifier
     password = serializers.CharField()
 
+class SpecializationSerializer(serializers.Serializer):
+    key = serializers.CharField()  # For the dictionary key, like "option1"
+    value = serializers.CharField()  # For the specialization value, like "Elevators"
 
-# Maintenance List Serializer (For listing maintenance companies)
-class MaintenanceListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Maintenance
-        fields = ['id', 'company_name']
+
+

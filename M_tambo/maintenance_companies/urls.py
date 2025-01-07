@@ -1,18 +1,31 @@
 from django.urls import path
-from .views import *
-
+from .views import (
+    MaintenanceCompanyListView,
+    MaintenanceCompanyDetailView,
+    MaintenanceCompanyTechniciansView,
+    RemoveTechnicianFromCompanyView,
+    CompanyAddTechnicianView,
+    ListPendingTechniciansView,
+    UpdateMaintenanceCompanyView,
+    MaintenanceCompanyBySpecializationView,
+)
 urlpatterns = [
-#NON-PROTECTED ENDPOINTS:
     path('', MaintenanceCompanyListView.as_view(), name='maintenance_company_list'),
-    path('<str:specialization>/', MaintenanceCompanyBySpecializationView.as_view(), name='maintenance_company_by_specialization'),
-    
-#PROTECTED ENDPOINTS
-    path('id/<int:company_id>/', MaintenanceCompanyDetailView.as_view(), name='maintenance_company_detail'),
-    path('email/<str:email>/', MaintenanceCompanyByEmailView.as_view(), name='maintenance-company-by-email'),
-    path('update/<int:company_id>/', UpdateMaintenanceCompanyView.as_view(), name='update_maintenance_company'),
-    path('<int:company_id>/technicians/', MaintenanceCompanyTechniciansView.as_view(), name='company_technicians_list'),
-    path('<int:company_id>/technicians/<int:technician_id>/remove/', RemoveTechnicianFromCompanyView.as_view(), name='remove_technician_from_company'),
-    path('<int:company_id>/technicians/<int:technician_id>/add/', AddTechnicianToCompanyView.as_view(), name='add_technician_to_company'),
-    path('<int:company_id>/technicians/<int:technician_id>/', TechnicianDetailForCompanyView.as_view(), name='technician_detail_for_company'),
+    path('<uuid:uuid_id>/', MaintenanceCompanyDetailView.as_view(), name='maintenance-company-detail'),
+    path('<uuid:uuid_id>/technicians/', MaintenanceCompanyTechniciansView.as_view(), name='technicians-list'),
+    path(
+        'maintenance-companies/<uuid:uuid_id>/technicians/<uuid:technician_id>/',
+        RemoveTechnicianFromCompanyView.as_view(),
+        name='remove-technician-from-company'
+    ),
+    path('companies/technicians/<uuid:technician_id>/approve/', 
+     CompanyAddTechnicianView.as_view(), 
+     name='company-add-technician'),
+    path('companies/<uuid:company_id>/technicians/pending/', 
+     ListPendingTechniciansView.as_view(), 
+     name='list-pending-technicians'),
+    path('maintenance-companies/<uuid:uuid_id>/', 
+         UpdateMaintenanceCompanyView.as_view(), 
+         name='update-maintenance-company'),
+    path('specialization/<str:specialization>/', MaintenanceCompanyBySpecializationView.as_view(), name='maintenance_company_by_specialization'),
 ]
-

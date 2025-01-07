@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/tinayo001/M-tambo_V2/M_tambo/venv
+set -gx VIRTUAL_ENV /home/tinayo001/M-tambo_Tinayobranch/M_tambo/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
