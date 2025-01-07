@@ -1,0 +1,226 @@
+### 1. Test: Get List of All Developers
+# URL: /api/developers/
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output (Success):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "specialization": "Backend Developer",
+    "experience": "5 years"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "janesmith@example.com",
+    "specialization": "Frontend Developer",
+    "experience": "3 years"
+  }
+]
+
+### Failure Scenario: Unauthorized Access (Invalid Token)
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <INVALID_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 2. Test: Get Developer Details by ID
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/1/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output (Success):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "specialization": "Backend Developer",
+  "experience": "5 years",
+  "projects": [
+    {
+      "project_id": 101,
+      "project_name": "E-commerce Website",
+      "status": "Completed"
+    },
+    {
+      "project_id": 102,
+      "project_name": "API for Mobile App",
+      "status": "In Progress"
+    }
+  ]
+}
+
+### Failure Scenario: Developer Not Found by ID
+GET http://localhost:8000/api/developers/999/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Developer not found"
+}
+
+---
+
+### 3. Test: Get Developer Details by Email
+# URL: /api/developers/email/{developer_email}/
+GET http://localhost:8000/api/developers/email/johndoe@example.com/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output (Success):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "specialization": "Backend Developer",
+  "experience": "5 years",
+  "projects": [
+    {
+      "project_id": 101,
+      "project_name": "E-commerce Website",
+      "status": "Completed"
+    },
+    {
+      "project_id": 102,
+      "project_name": "API for Mobile App",
+      "status": "In Progress"
+    }
+  ]
+}
+
+### Failure Scenario: Developer Not Found by Email
+GET http://localhost:8000/api/developers/email/nonexistentemail@example.com/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Developer with this email not found."
+}
+
+---
+
+### 4. Test: Get Developer Details by Invalid Email Format
+# URL: /api/developers/email/{developer_email}/
+GET http://localhost:8000/api/developers/email/invalidemail/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid email format."
+}
+
+---
+
+### 5. Test: No Developers in the Database
+# URL: /api/developers/
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "No developers found."
+}
+
+---
+
+### 6. Test: Get Developer Details by ID (Not Existing Developer)
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/1000/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Developer not found"
+}
+
+---
+
+### 7. Test: Invalid ID in Get Developer by ID Request
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/abc/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid ID format."
+}
+
+---
+
+### 8. Test: Get Developer Details with Missing Authorization Token
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/1/ HTTP/1.1
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 9. Test: Get Developer by Email with Missing Authorization Token
+# URL: /api/developers/email/{developer_email}/
+GET http://localhost:8000/api/developers/email/johndoe@example.com/ HTTP/1.1
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 10. Test: Get List of All Developers (Unauthorized Access)
+# URL: /api/developers/
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <INVALID_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}

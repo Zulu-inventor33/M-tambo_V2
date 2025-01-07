@@ -139,4 +139,8 @@ urlpatterns = [
     path('developers/', include('developers.urls')),
     path('buildings/', include('buildings.urls')),
     path('elevators/', include('elevators.urls')),
+<<<<<<< HEAD
+=======
+    path('jobs/', include('jobs.urls')),
+>>>>>>> 599bc3919ee2d2b1d710c4b3cba10c43d769a0fb
 ]

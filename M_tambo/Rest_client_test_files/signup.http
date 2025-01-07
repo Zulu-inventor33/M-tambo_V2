@@ -215,7 +215,7 @@ Content-Type: application/json
     "maintenance_company_id": 1
 }
 
-### Sign Up - Technician 2 (HVAC) Linked to Maintenance Company ID 12
+### Sign Up - Technician 2 (Elevators) Linked to Maintenance Company ID 12
 POST http://localhost:8000/api/signup/ HTTP/1.1
 Content-Type: application/json
 
@@ -226,8 +226,13 @@ Content-Type: application/json
     "phone_number": "56799012334",
     "password": "password123",
     "account_type": "technician",
+<<<<<<< HEAD
     "specialization": "HVAC",
     "maintenance_company_id": 3
+=======
+    "specialization": "Elevators",
+    "maintenance_company_id": 1
+>>>>>>> 599bc3919ee2d2b1d710c4b3cba10c43d769a0fb
 }
 
 # Description:

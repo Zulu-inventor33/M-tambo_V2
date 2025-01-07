@@ -7,8 +7,13 @@ class ElevatorSerializer(serializers.ModelSerializer):
         model = Elevator
         fields = [
             'id', 'user_name', 'controller_type', 'machine_type', 'building', 'machine_number', 
+<<<<<<< HEAD
             'capacity', 'manufacturer', 'installation_date', 'maintenance_company_profile', 
             'developer_profile', 'technician_profile'
+=======
+            'capacity', 'manufacturer', 'installation_date', 'maintenance_company', 
+            'developer', 'technician'
+>>>>>>> 599bc3919ee2d2b1d710c4b3cba10c43d769a0fb
         ]
 
     def validate_machine_number(self, value):

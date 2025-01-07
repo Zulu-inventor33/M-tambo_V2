@@ -12,16 +12,38 @@ mtambo/
 │   ├── urls.py                 # URL routing for maintenance companies (buildings, lifts, technicians)
 │   ├── /api/maintenance-companies/  # GET: List all maintenance companies
 │   ├── /api/maintenance-companies/{specialization}/ #GET : list all companies in a certain specialization. Should return company name and ID
-│   ├── /api/maintenance-companies/{company_id}/  # GET: Get details of a specific maintenance company
+│   ├── /api/maintenance-companies/id/{company_id}/  # GET: Get details of a specific maintenance company
+│   ├── /api/maintenance-companies/email/{company_email}/  # GET: Get details of a specific maintenance company based on email
 │   ├── /api/maintenance-companies/update/{company_id}/  # PATCH and PUT: Alter both singular and multiple fields of the details of a maintenance company
 │   ├── /api/maintenance-companies/{company_id}/technicians/  # GET: List technicians for a company
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/  # GET: Get technician details for a company
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/remove/  # DELETE: Delete a technician that is linked to the company.
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/add/  # POST a technician to a certain maintenance company.
+│   ├── /api/maintenance-companies/{company_id}/developers/  # GET: List of all developers under a specific company
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}  # GET: details of a certain developer linked to this specific company
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/remove  # DELETE: # DELETE: Remove the maintenance company ID and all its Technicians ID from all the Buildings in elevators linked to this building
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/buildings  # GET: all buildings registered to a certain developer linked to this specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/  # GET: List all buildings under a specific company
-│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details (lifts, jobs, etc.)
-│   ├── /api/maintenance-companies/{company_id}/lifts/  # GET: List all lifts under a specific company
-│   ├── /api/maintenance-companies/{company_id}/lifts/{lift_id}/  # GET: Get lift details (maintenance, jobs, etc.)
+│   ├── /api/maintenance-companies/{company_id}/buildings/add  # PUT: add a building into the system.
+│   ├── /api/maintenance-companies/{company_id}/buildings/technicians{technician_id}  # GET: List all buildings where a certain Technician in the maintenance company is working on their elevators
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/remove  # DELETE: Remove the maintenance company ID and all its Technicians ID from all the elevators linked to this building
+│   ├── /api/maintenance-companies/{company_id}/buildings/{buiding_id}/elevators/add  # PUT: add an elevator to a given building.
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/update_technician/  # PUT: Change the Technician on all elevators in a certain building.
+│   ├── /api/maintenance-companies/{company_id}/elevators/  # GET: List all elevators under a specific company
+│   ├── /api/maintenance-companies/{company_id}/elevators/technicians{technician_id}  # GET: List all elevators under a certain Technician
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/elevators/  # GET: List all elevators within a specific building maintenaned by the maintenance company
+│   ├── /api/maintenance-companies/{company_id}/elevators/{elevator_id}/  # GET: Get elevator details of a specific elevator
+│   ├── /api/maintenance-companies/{company_id}/elevators/{elevator_id}/update_technician/  # PUT: Change the Technician on a certain elevator.
+│   ├── /api/maintenance-companies/{company_id}/elevators/{machine_number}/  # GET: Get elevator details of a specific elevator based on machine number
+|
+│   ├── developers/                 # App for developer related views, models, serializers
+│   │   ├── urls.py             # URL routing for developer-related routes
+│   │   ├── /api/developers/        # GET: List all developers
+│   │   ├── /api/developers/id/{developer_id} # GET: Details of a ceratin developer via his ID
+│   │   ├── /api/developers/email/{developer_email}/  # GET: Get specific developer details by E-mail.
+│   │   ├── /api/claims/{claim_id}/  # GET: Get specific claim details (building, technician, job ID)
+│   │   ├── /api/claims/file/   # POST: File a claim for a completed job
 │
 ├── api/                        # Folder to store all API endpoint routes for the project
 │   ├── dashboard/              # Dashboard-related views, models, serializers
@@ -34,8 +56,17 @@ mtambo/
 │   ├── jobs/                   # Job-related views, models, serializers
 │   │   ├── urls.py             # URL routing for Job-related routes
 │   │   ├── /api/jobs/          # GET: List all jobs (with filters for date, job status, etc.)
-│   │   ├── /api/jobs/{job_id}/  # GET: Get specific job details (description, building, lift, status, etc.)
-│   │   ├── /api/jobs/create/    # POST: Create a new job (with building, lift, technician, job details)
+│   │   ├── /api/jobs/maintenance-schedule/# GET: list all maintenance schedule's
+│|||||||├── /api/jobs/maintenance-schedule/filter/# PUT: filter and list all maintenance schedule's according to the data given. 
+│   │   ├── /api/jobs/maintenance-schedule/change_technician{schedule_id}/  # PUT: Change the technician assigned to a specific maintenance schedule.
+│   │   ├── /api/jobs/maintenance-schedule/create/elevator/{elevator_id}    # POST: Create a new maintenance schedule for a given elevator id
+│   │   ├── /api/jobs/maintenance-schedule/{schedule_id}/update/  # PUT: Update a schedule's status (e.g., from scheduled to overdue or Completed)
+│   │   ├── /api/jobs/maintenance-schedule/{schedule_id}/remove/  # DELETE: delete a specific maintenance-schedule
+│   │   ├── /api/jobs/maintenance-schedule/technician/{technician_id}/  # GET: list all the maintenance-schedules of a specific technician
+│   │   ├── /api/jobs/maintenance-schedule/elevator/{elevator_id}/  # GET: list all the maintenance-schedules of a specific elevator
+│   │   ├── /api/jobs/maintenance-schedule/maintenance_company/{company_id}/  # GET: list all the maintenance-schedules of a specific maintenance_company
+│   │   ├── /api/jobs/maintenance-schedule/developer/{developer_id}/  # GET: list all the maintenance-schedules of a specific developer
+│   │   ├── /api/jobs/maintenance-schedule/building/{building_id}/  # GET: list all the maintenance-schedules of a specific building
 │   │   ├── /api/jobs/{job_id}/update/  # PUT: Update a job's status (e.g., from Pending to Completed)
 │   │   ├── /api/jobs/{job_id}/log/  # GET: Get the maintenance log of a job
 │   │   ├── /api/jobs/{job_id}/claim/  # POST: File a claim for a completed job
@@ -46,7 +77,8 @@ mtambo/
 │   │   ├── /api/technicians/unlinked/  # GET: List all technicians that are not listed to any Maintenace company
 │   │   ├── /api/technicians/unlinked/{specialization}/   # GET: List all technicians not linked to any maintenance company based on specialization
 │   │   ├── /api/technicians/{specialization}/ #GET : list all technicians in a certain specialization. Should return technician name, Id and maintenance_company he is linked to
-│   │   ├── /api/technicians/{technician_id}/  # GET: Get specific technician details (completed jobs, pending jobs, etc.)
+│   │   ├── /api/technicians/id/{technician_id}/  # GET: Get specific technician details by ID (completed jobs, pending jobs, etc.)
+│   │   ├── /api/technicians/email/{technician_email}/  # GET: Get specific technician details by E-mail (completed jobs, pending jobs, etc.)
 │   |   ├── /api/technicians/{technician_id}/unlink/  # PATCH: An API for a technician to unlink himself from any Maintenace company
 │   │   ├── /api/technicians/{technician_id}/jobs/  # GET: Get all jobs assigned to a specific technician
 │   │   ├── /api/technicians/{technician_id}/update/  # PUT: Update technician info (job completion, status, etc.)
@@ -54,10 +86,24 @@ mtambo/
 │   ├── buildings/              # Building-related views, models, serializers
 │   │   ├── urls.py             # URL routing for Building-related routes
 │   │   ├── /api/buildings/     # GET: List all buildings
-│   │   ├── /api/buildings/{building_id}/  # GET: Get building details (lifts, jobs, contact info)
+│   │   ├── /api/buildings/add     # POST: Register a building
+│   │   ├── /api/buildings/{building_id}/  # GET: Get building details (contact info)
+│   │   ├── /api/buildings/developer/{developer_id}/  # GET: Get all buildings belonging to a certain developer.
 │   │   ├── /api/buildings/{building_id}/jobs/  # GET: Get all jobs for a building (by job status)
-│   │   ├── /api/buildings/{building_id}/lifts/  # GET: Get all lifts in a specific building
-│   │   ├── /api/buildings/{building_id}/lifts/{lift_id}/  # GET: Get lift-specific job history and issues
+│   │   ├── /api/buildings/{building_id}/elevators/  # GET: Get all elevators in a specific building
+│   │   ├── /api/buildings/{building_id}/elevators/{elevators_id}/  # GET: Get lift-specific job history and issues
+|
+│   ├── elevators/                 # Elevator-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Claim-related routes
+│   │   ├── /api/elevators/       # GET: List all elevators
+│   |   ├── /api/elevators/id/{elevator_id}  # GET: Give the details of a given Elevator based on ID
+│   |   ├── /api/elevators/machine_number/{machine_number}  # GET: Give the details of a given Elevator based on machine number
+│   │   ├── /api/elevators/add        # POST: register/add an elevator
+│   │   ├── /api/elevators/delete/{id} # DELETE: DELETE a given elevator based on the id
+│   │   ├── /api/elevators/update/{id} # PUT and PATCH: Update the details of given elevator based on the id. You could either pass one value or many values.
+│   |   ├── /api/elevators/building/{building_id}  # GET: Get all elevators in a given building
+│   │   ├── /api/claims/{claim_id}/  # GET: Get specific claim details (building, technician, job ID)
+│   │   ├── /api/claims/file/   # POST: File a claim for a completed job
 │
 │   ├── claims/                 # Claims-related views, models, serializers
 │   │   ├── urls.py             # URL routing for Claim-related routes
