@@ -73,30 +73,63 @@ class MaintenanceCompanyTechniciansView(generics.ListAPIView):
         company_id = self.kwargs['company_id']
         return Technician.objects.filter(maintenance_company__id=company_id)
 
-class RemoveTechnicianFromCompanyView(generics.GenericAPIView):
+class RemoveTechnicianFromCompanyView(APIView):
     permission_classes = [AllowAny]
+
     def delete(self, request, company_id, technician_id):
+        # Retrieve the maintenance company
+        maintenance_company = self.get_object(Maintenance, company_id)
+        if not maintenance_company:
+            return Response({"error": "Maintenance company not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Retrieve the technician linked to the company
+        technician = self.get_object(Technician, technician_id)
+        if not technician or technician.maintenance_company != maintenance_company:
+            return Response({"error": "Technician not found or not linked to this company."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Step 1: Update MaintenanceSchedule for affected elevators
+        # Get all elevators linked to this maintenance company and this technician
+        affected_elevators = Elevator.objects.filter(
+            maintenance_company=maintenance_company,
+            technician=technician
+        )
+
+        # Get maintenance schedules that are linked to these elevators and have status 'scheduled' or 'overdue'
+        affected_schedules = MaintenanceSchedule.objects.filter(
+            elevator__in=affected_elevators,
+            status__in=['scheduled', 'overdue']
+        )
+
+        # Set technician to None in the affected maintenance schedules
+        affected_schedules_updated = affected_schedules.update(technician=None)
+
+        # Step 2: Update affected elevators (set technician to None)
+        affected_elevators_updated = affected_elevators.update(technician=None)
+
+        # Step 3: Remove the technician from the maintenance company
+        technician.maintenance_company = None
+        technician.save()
+
+        # Return a success response
+        return Response(
+            {
+                "message": f"Successfully removed technician from the maintenance company. "
+                           f"Technician was removed from {affected_elevators_updated} elevator(s) "
+                           f"and {affected_schedules_updated} maintenance schedule(s)."
+            },
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    def get_object(self, model, object_id):
+        """
+        Helper method to get an object by its ID and handle DoesNotExist exceptions.
+        Returns the object if found, otherwise None.
+        """
         try:
-            # Retrieve the maintenance company
-            company = Maintenance.objects.get(id=company_id)
-            
-            # Retrieve the technician linked to the company
-            technician = Technician.objects.get(id=technician_id, maintenance_company=company)
-            
-            # Disassociate technician from the maintenance company
-            technician.maintenance_company = None
-            technician.save()
+            return model.objects.get(id=object_id)
+        except model.DoesNotExist:
+            return None
 
-            return Response(
-                {"message": "Technician removed from the maintenance company."},
-                status=status.HTTP_204_NO_CONTENT
-            )
-
-        except Maintenance.DoesNotExist:
-            raise NotFound(detail="Maintenance company not found.")
-        except Technician.DoesNotExist:
-            raise NotFound(detail="Technician not found or not linked to this company.")
-        
 class AddTechnicianToCompanyView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     def post(self, request, company_id, technician_id):
@@ -936,8 +969,13 @@ class AddBuildingView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Step 4: Retrieve and validate the technician if provided
-            technician_id = request.data.get("technician_id", None)
+            # Step 4: Parse the elevator data from the request
+            elevator_data = request.data.get("elevator", None)
+            if not elevator_data:
+                return Response({"error": "Elevator data is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Step 5: Retrieve technician if provided in the elevator data
+            technician_id = elevator_data.get("technician_id", None)
             technician = None
             if technician_id:
                 try:
@@ -948,7 +986,7 @@ class AddBuildingView(APIView):
                         status=status.HTTP_404_NOT_FOUND
                     )
 
-            # Step 5: Create the building
+            # Step 6: Create the building
             new_building = Building.objects.create(
                 name=building_name,
                 address=building_address,
@@ -957,36 +995,33 @@ class AddBuildingView(APIView):
                 developer_name=developer.developer_name  # Use developer's name
             )
 
-            # Step 6: Create the elevator and associate it with the new building
-            elevator_data = request.data.get("elevator", None)
-            if elevator_data:
-                user_name = elevator_data.get("user_name")
-                capacity = elevator_data.get("capacity")
-                machine_number = elevator_data.get("machine_number")
-                manufacturer = elevator_data.get("manufacturer")
-                installation_date = elevator_data.get("installation_date")
+            # Step 7: Parse elevator fields and validate them
+            user_name = elevator_data.get("user_name")
+            capacity = elevator_data.get("capacity")
+            machine_number = elevator_data.get("machine_number")
+            manufacturer = elevator_data.get("manufacturer")
+            installation_date = elevator_data.get("installation_date")
 
-                # Validate elevator fields
-                if not all([user_name, capacity, machine_number, manufacturer, installation_date]):
-                    return Response(
-                        {"error": "All elevator fields (user_name, capacity, machine_number, manufacturer, installation_date) are required."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                # Create the elevator and assign the developer to it
-                new_elevator = Elevator.objects.create(
-                    user_name=user_name,
-                    capacity=capacity,
-                    machine_number=machine_number,
-                    manufacturer=manufacturer,
-                    installation_date=installation_date,
-                    building=new_building,  # Associate the elevator with the building
-                    maintenance_company=company,  # Link the elevator to the Maintenance company
-                    technician=technician,  # Link the elevator to the technician if provided
-                    developer=developer  # Link the elevator to the Developer
+            if not all([user_name, capacity, machine_number, manufacturer, installation_date]):
+                return Response(
+                    {"error": "All elevator fields (user_name, capacity, machine_number, manufacturer, installation_date) are required."},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Step 7: Prepare the data to return in the response
+            # Step 8: Create the elevator and associate it with the new building and technician (if provided)
+            new_elevator = Elevator.objects.create(
+                user_name=user_name,
+                capacity=capacity,
+                machine_number=machine_number,
+                manufacturer=manufacturer,
+                installation_date=installation_date,
+                building=new_building,  # Associate the elevator with the building
+                maintenance_company=company,  # Link the elevator to the Maintenance company
+                technician=technician,  # Link the elevator to the technician if provided
+                developer=developer  # Link the elevator to the Developer
+            )
+
+            # Step 9: Prepare the data to return in the response
             building_data = {
                 "id": new_building.id,
                 "name": new_building.name,
@@ -1018,7 +1053,7 @@ class AddBuildingView(APIView):
                 ] if 'new_elevator' in locals() else []
             }
 
-            # Step 8: Return the response with the new building and elevator data
+            # Step 10: Return the response with the new building and elevator data
             return Response(building_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:

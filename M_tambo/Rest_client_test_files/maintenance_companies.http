@@ -1203,21 +1203,21 @@ Content-Type: application/json
 # - Full details of the elevator(s) created under that building.
 
 # Example PUT request with required data:
-
 PUT http://localhost:8000/api/maintenance-companies/1/buildings/add HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Sky Tower",
-  "address": "456 Sky Lane, Uptown City",
-  "contact": "987-654-3210",
   "developer_id": 1,
+  "name": "Sunrise Plaza",
+  "address": "456 Sun Road, Nairobi, Kenya",
+  "contact": "+254 987 654 321",
   "elevator": {
-    "user_name": "LIFT-001",
-    "capacity": 1000,
-    "machine_number": "M001",
-    "manufacturer": "LiftCo",
-    "installation_date": "2025-01-01"
+    "user_name": "Elevator B",
+    "capacity": 15,
+    "machine_number": "M67890",
+    "manufacturer": "Kone",
+    "installation_date": "2025-02-10",
+    "technician_id": 2
   }
 }
 
@@ -1227,9 +1227,9 @@ Content-Type: application/json
 
 {
   "id": 1,
-  "name": "Sky Tower",
-  "address": "456 Sky Lane, Uptown City",
-  "contact": "987-654-3210",
+  "name": "Sunrise Plaza",
+  "address": "456 Sun Road, Nairobi, Kenya",
+  "contact": "+254 987 654 321",
   "developer": {
     "id": 1,
     "developer_name": "Developer A"
@@ -1238,11 +1238,11 @@ Content-Type: application/json
   "elevators": [
     {
       "id": 1,
-      "user_name": "LIFT-001",
-      "machine_number": "M001",
-      "capacity": 1000,
-      "manufacturer": "LiftCo",
-      "installation_date": "2025-01-01",
+      "user_name": "Elevator B",
+      "machine_number": "M67890",
+      "capacity": 15,
+      "manufacturer": "Kone",
+      "installation_date": "2025-02-10",
       "maintenance_company": 1,
       "technician": {
         "id": 2,

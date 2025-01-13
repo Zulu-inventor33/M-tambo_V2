@@ -391,3 +391,152 @@ HTTP/1.1 404 Not Found
 {
     "detail": "No maintenance schedules found matching the criteria."
 }
+
+
+### 1. Test for Schedule Already Completed
+# This test checks if the schedule is already marked as 'completed'.
+# The content is optional, and only the PUT request is required to check the status.
+
+PUT http://localhost:8000/api/jobs/maintenance-schedule/1/completed/ HTTP/1.1
+
+### 2. Test for Overdue Schedule - Quiet Update to Completed
+# This test checks if the schedule is 'overdue' and is marked as 'completed' quietly without creating a new schedule.
+# The content is optional, and only the PUT request is required to check the status.
+
+PUT http://localhost:8000/api/jobs/maintenance-schedule/2/completed/ HTTP/1.1
+
+### 3. Test for Scheduled Schedule - Change to Completed and Create New Schedule
+# This test checks if the schedule is 'scheduled', marks it as 'completed', and triggers the creation of a new schedule.
+# The content is optional, and only the PUT request is required to check the status.
+
+PUT http://localhost:8000/api/jobs/maintenance-schedule/3/completed/ HTTP/1.1
+
+### 4. Test for Non-existent Schedule
+# This test checks the case when the provided schedule_id does not exist.
+# The content is optional, and only the PUT request is required to check the status.
+
+PUT http://localhost:8000/api/jobs/maintenance-schedule/9999/completed/ HTTP/1.1
+
+
+### Scenario 1: Valid Request - Creating a maintenance schedule for today
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/11/
+Content-Type: application/json
+
+{
+    "next_schedule": "1_month",
+    "scheduled_date": "2025-01-12",
+    "description": "Monthly Maintenance"
+}
+
+###
+
+### Scenario 2: Past Date - Trying to create a maintenance schedule with a past date (should fail)
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/11/
+Content-Type: application/json
+
+{
+    "next_schedule": "1_month",
+    "scheduled_date": "2025-01-11",  # This is a past date
+    "description": "Monthly Maintenance"
+}
+
+###
+
+### Scenario 3: Missing Required Fields - Missing next_schedule, scheduled_date, or description
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/11/
+Content-Type: application/json
+
+{
+    "next_schedule": "1_month",
+    "description": "Monthly Maintenance"
+}
+
+###
+
+### Scenario 4: Invalid Date Format - Providing an invalid date format (should fail)
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/11/
+Content-Type: application/json
+
+{
+    "next_schedule": "1_month",
+    "scheduled_date": "2025-12-12T25:00:00Z",  # Invalid time part (25:00:00 is not valid)
+    "description": "Monthly Maintenance"
+}
+
+###
+
+### Scenario 5: Providing Technician and Maintenance Company in Request - Should use elevator's values if provided values contradict
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/11/
+Content-Type: application/json
+
+{
+    "next_schedule": "1_month",
+    "scheduled_date": "2025-01-12",
+    "description": "Monthly Maintenance",
+    "technician": 5,  # Invalid technician, as elevator has its own technician (should reject)
+    "maintenance_company": 3  # Invalid maintenance company, should be taken from elevator (should reject)
+}
+
+###
+
+### Scenario 6: Providing Technician and Maintenance Company, but Elevator has Null Values
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/12/  # Elevator with no technician and no maintenance company
+Content-Type: application/json
+
+{
+    "next_schedule": "1_month",
+    "scheduled_date": "2025-01-12",
+    "description": "Monthly Maintenance"
+}
+
+###
+
+
+### Scenario 1: Filter by Maintenance Company (ID 2) where technician is null
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/null_technician/
+Content-Type: application/json
+
+{
+    "maintenance_company_id": 2
+}
+
+###
+
+### Scenario 2: Filter by Building (ID 5) where technician is null
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/null_technician/
+Content-Type: application/json
+
+{
+    "building_id": 5
+}
+
+###
+
+### Scenario 3: Filter by Developer (ID 3) where technician is null
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/null_technician/
+Content-Type: application/json
+
+{
+    "developer_id": 3
+}
+
+###
+
+### Scenario 4: Filter by Maintenance Company and Developer where technician is null
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/null_technician/
+Content-Type: application/json
+
+{
+    "maintenance_company_id": 1,
+    "developer_id": 2
+}
+
+###
+
+### Scenario 5: Filter by Scheduled Date (2025-01-12) where technician is null
+PUT http://127.0.0.1:8000/api/jobs/maintenance-schedule/null_technician/
+Content-Type: application/json
+
+{
+    "scheduled_date": "2025-01-12"
+}

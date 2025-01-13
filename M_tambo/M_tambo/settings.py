@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'jobs',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 REST_FRAMEWORK = {
@@ -145,3 +147,20 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Redis backend for results
+
+from celery.schedules import crontab
+
+# Configure Celery Beat Schedule to run the task every 5 minutes
+CELERY_BEAT_SCHEDULE = {
+    'check-overdue-schedules-every-5-minutes': {
+        'task': 'jobs.tasks.check_overdue_schedules',  # Task path (module + function)
+        'schedule': crontab(minute='*/5'),  # Run every 5 minutes
+    },
+}

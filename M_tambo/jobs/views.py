@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from .utils import get_next_scheduled_date
-from .utils import _generate_new_schedule
+from .utils import update_schedule_status_and_create_new_schedule
 from .models import *
 from .serializers import *
 from .serializers import MaintenanceScheduleSerializer
@@ -16,9 +16,10 @@ from developers.models import Developer
 from buildings.models import Building
 from maintenance_companies.models import Maintenance
 from datetime import datetime
+from django.utils import timezone
 
 
-class CreateMaintenanceScheduleView(APIView):
+class CreateRoutineMaintenanceScheduleView(APIView):
     permission_classes = [AllowAny]  # Allow unrestricted access
 
     def post(self, request, elevator_id):
@@ -30,53 +31,91 @@ class CreateMaintenanceScheduleView(APIView):
             elevator = Elevator.objects.get(id=elevator_id)
         except Elevator.DoesNotExist:
             raise NotFound(f"Elevator with ID {elevator_id} does not exist.")
-
-        # Handle technician: Validate if provided, else auto-assign
-        technician_data = request.data.get('technician', None)
-        if technician_data:
-            try:
-                technician = Technician.objects.get(id=technician_data)
-                if technician.maintenance_company != elevator.maintenance_company_profile:
-                    return Response(
-                        {"detail": "Technician does not belong to the same maintenance company as the elevator."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            except Technician.DoesNotExist:
-                return Response(
-                    {"detail": f"Technician with ID {technician_data} does not exist."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        else:
-            technician = elevator.technician
-            if technician:
-                technician_data = technician.id
-            else:
-                return Response(
-                    {"detail": "No technician found linked to this elevator."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        # Handle maintenance company: Auto-assign based on the elevator's linked maintenance company
+        
+        # Extract maintenance company and technician from the elevator
         maintenance_company = elevator.maintenance_company
-        if maintenance_company:
-            maintenance_company_data = maintenance_company.id
-        else:
+        technician = elevator.technician
+
+        # Handle technician: Validate if provided, else auto-assign from elevator
+        technician_data = request.data.get('technician', None)  # technician should not be passed in the request
+        if technician_data:
             return Response(
-                {"detail": "No maintenance company found linked to this elevator."},
+                {"detail": "Technician should not be provided in the request. The system will use the elevator's technician."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Handle maintenance company: Validate if provided, else auto-assign from elevator
+        maintenance_company_data = request.data.get('maintenance_company', None)  # maintenance company should not be passed
+        if maintenance_company_data:
+            return Response(
+                {"detail": "Maintenance company should not be provided in the request. The system will use the elevator's maintenance company."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         # Prepare the request data by ensuring elevator_id, technician_id, and maintenance_company_id are set
-        request.data['technician'] = technician_data
+        request.data['technician'] = technician.id if technician else None
         request.data['elevator'] = elevator.id
-        request.data['maintenance_company'] = maintenance_company_data
+        request.data['maintenance_company'] = maintenance_company.id if maintenance_company else None
 
-        # Adding the elevator_id to the context for the serializer to access
+        # Ensure that the necessary fields are present in the request
+        next_schedule = request.data.get('next_schedule', None)
+        scheduled_date = request.data.get('scheduled_date', None)
+        description = request.data.get('description', None)
+
+        # Validate that required fields (next_schedule, scheduled_date, and description) are present
+        if not next_schedule or not scheduled_date or not description:
+            return Response(
+                {"detail": "Missing required fields: next_schedule, scheduled_date or description."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Handle scheduled_date
+        try:
+            # Ensure the scheduled_date is in the correct format
+            if len(scheduled_date) == 10:  # Format is 'YYYY-MM-DD'
+                scheduled_date = datetime.strptime(scheduled_date, "%Y-%m-%d")
+            else:  # Format is 'YYYY-MM-DDTHH:MM:SSZ'
+                scheduled_date = datetime.strptime(scheduled_date, "%Y-%m-%dT%H:%M:%SZ")
+
+            # Convert to timezone-aware datetime
+            if timezone.is_naive(scheduled_date):
+                scheduled_date = timezone.make_aware(scheduled_date)
+
+            # Get the current date in the timezone (ignoring time)
+            now = timezone.now().date()
+
+            # Compare only the date part, ignore the time
+            if scheduled_date.date() < now:
+                return Response(
+                    {"detail": "The scheduled date cannot be in the past. Please choose a future date."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        except ValueError:
+            return Response(
+                {"detail": "Invalid date format. Please provide a valid date in the format 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SSZ'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # If everything is valid, add the scheduled_date to the request data
+        request.data['scheduled_date'] = scheduled_date
+
+        # Create the serializer and validate the data
         serializer = MaintenanceScheduleSerializer(data=request.data, context={'elevator_id': elevator_id})
 
         # Validate the serializer and create the schedule if valid
         if serializer.is_valid():
             schedule = serializer.save()
+
+            # Ensure that the new schedule is linked with the correct technician and maintenance company
+            if not schedule.technician:
+                schedule.technician = technician
+                schedule.save()
+
+            if not schedule.maintenance_company:
+                schedule.maintenance_company = maintenance_company
+                schedule.save()
+
             return Response({
                 "message": "Maintenance schedule created successfully",
                 "maintenance_schedule_id": schedule.id
@@ -84,8 +123,9 @@ class CreateMaintenanceScheduleView(APIView):
 
         # Return validation errors if serializer is not valid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-class MaintenanceScheduleStatusUpdateView(APIView):
+
+
+class ChangeMaintenanceScheduleToCompletedView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this view
 
     def put(self, request, schedule_id):
@@ -95,29 +135,30 @@ class MaintenanceScheduleStatusUpdateView(APIView):
         except MaintenanceSchedule.DoesNotExist:
             return Response({"detail": "Schedule not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Deserialize the request data to update the status
-        serializer = MaintenanceScheduleStatusUpdateSerializer(maintenance_schedule, data=request.data, partial=True)
-        if serializer.is_valid():
-            updated_schedule = serializer.save()  # Update the status
+        # Check the current status of the schedule
+        if maintenance_schedule.status == 'completed':
+            # If the schedule is already completed, return a message saying so
+            return Response({"detail": "Sorry, this maintenance schedule has already been completed!"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Only check for new schedules if the status has changed to 'completed' or 'overdue'
-            if updated_schedule.status in ['completed', 'overdue']:
-                # If the status was already 'completed', skip further updates
-                if maintenance_schedule.status == updated_schedule.status:
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+        elif maintenance_schedule.status == 'overdue':
+            # If the status is 'overdue', change it to 'completed' quietly (without creating a new schedule)
+            # Use the `update()` method to prevent triggering additional logic
+            MaintenanceSchedule.objects.filter(id=schedule_id).update(status='completed')
 
-                # Calculate the next scheduled date based on the 'next_schedule' field
-                if updated_schedule.next_schedule != 'set_date':
-                    months_to_add = 1 if updated_schedule.next_schedule == '1_month' else 3 if updated_schedule.next_schedule == '3_months' else 6
-                    next_scheduled_date = get_next_scheduled_date(updated_schedule.scheduled_date, months_to_add)
+            return Response({"detail": "The maintenance schedule was overdue and has now been marked as completed."}, status=status.HTTP_200_OK)
 
-                    # Correctly call the function from utils.py
-                    _generate_new_schedule(updated_schedule, next_scheduled_date)  # Call the function
+        elif maintenance_schedule.status == 'scheduled':
+            # If the status is 'scheduled', change it to 'completed' and create a new schedule for next month
+            maintenance_schedule.status = 'completed'
+            maintenance_schedule.save()
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Create a new maintenance schedule for the next month
+            update_schedule_status_and_create_new_schedule(maintenance_schedule)
 
+            return Response({"detail": "The maintenance schedule has been completed, and a new schedule has been created"}, status=status.HTTP_200_OK)
+
+        # Default case, shouldn't be needed, but handle any unexpected status
+        return Response({"detail": "Unexpected status."}, status=status.HTTP_400_BAD_REQUEST)
 
 class MaintenanceScheduleListView(APIView):
     permission_classes = [AllowAny]  # Set to AllowAny if you want public access, otherwise use other permissions like IsAuthenticated
@@ -417,6 +458,85 @@ class MaintenanceScheduleFilterView(APIView):
             queryset = queryset.filter(next_schedule=next_schedule)
             if not queryset.exists():
                 return Response({"detail": f"No schedules found with next schedule of {next_schedule}."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if any results match the filters
+        if not queryset.exists():
+            return Response({"detail": "No maintenance schedules found matching the criteria."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize the filtered queryset
+        serializer = FullMaintenanceScheduleSerializer(queryset, many=True)
+
+        # Return the serialized data
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class MaintenanceScheduleNullTechnicianFilterView(APIView):
+    permission_classes = [AllowAny]
+
+    def put(self, request):
+        """
+        Fetch maintenance schedules where the technician field is null.
+        The user can filter based on developer, building, maintenance company, or elevator.
+        """
+        # Extract filters from the request data
+        developer_id = request.data.get('developer_id')
+        building_id = request.data.get('building_id')
+        scheduled_date = request.data.get('scheduled_date')
+        maintenance_company_id = request.data.get('maintenance_company_id')
+        elevator_id = request.data.get('elevator_id')
+
+        # Start with the base queryset for maintenance schedules where the technician is null
+        queryset = MaintenanceSchedule.objects.filter(technician__isnull=True)
+
+        # 1. Filter by Developer
+        if developer_id:
+            try:
+                # Find the developer, then get buildings related to the developer
+                developer = Developer.objects.get(id=developer_id)
+                buildings = Building.objects.filter(developer=developer)
+                # Get elevators related to those buildings
+                elevators = Elevator.objects.filter(building__in=buildings)
+                # Apply the filter for maintenance schedules related to those elevators
+                queryset = queryset.filter(elevator__in=elevators)
+            except Developer.DoesNotExist:
+                return Response({"detail": f"Developer with ID {developer_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # 2. Filter by Building
+        if building_id:
+            try:
+                # Get the building, then get elevators related to this building
+                building = Building.objects.get(id=building_id)
+                elevators = Elevator.objects.filter(building=building)
+                queryset = queryset.filter(elevator__in=elevators)
+            except Building.DoesNotExist:
+                return Response({"detail": f"Building with ID {building_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # 3. Filter by Scheduled Date
+        if scheduled_date:
+            try:
+                # Convert the date string to a date object and filter the maintenance schedules
+                scheduled_date = datetime.strptime(scheduled_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(scheduled_date=scheduled_date)
+            except ValueError:
+                return Response({"detail": "Invalid date format. Please use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 4. Filter by Maintenance Company
+        if maintenance_company_id:
+            try:
+                # Find the maintenance company and apply filter
+                maintenance_company = Maintenance.objects.get(id=maintenance_company_id)
+                queryset = queryset.filter(maintenance_company=maintenance_company)
+            except Maintenance.DoesNotExist:
+                return Response({"detail": f"Maintenance company with ID {maintenance_company_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # 5. Filter by Elevator
+        if elevator_id:
+            try:
+                # Get the specific elevator and filter based on that
+                elevator = Elevator.objects.get(id=elevator_id)
+                queryset = queryset.filter(elevator=elevator)
+            except Elevator.DoesNotExist:
+                return Response({"detail": f"Elevator with ID {elevator_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if any results match the filters
         if not queryset.exists():

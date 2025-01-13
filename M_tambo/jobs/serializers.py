@@ -3,17 +3,13 @@ from elevators.models import Elevator
 from technicians.models import Technician
 from maintenance_companies.models import Maintenance
 from .models import MaintenanceSchedule
-from .models import *
-from .models import *
-from .models import *
-from .utils import update_schedule_status_and_create_new_schedule
 from rest_framework.exceptions import ValidationError
-
+from .utils import update_schedule_status_and_create_new_schedule
 
 class MaintenanceScheduleSerializer(serializers.ModelSerializer):
     elevator = serializers.PrimaryKeyRelatedField(queryset=Elevator.objects.all())
     technician = serializers.PrimaryKeyRelatedField(queryset=Technician.objects.all(), required=False, allow_null=True)
-    maintenance_company = serializers.PrimaryKeyRelatedField(queryset=Maintenance.objects.all())
+    maintenance_company = serializers.PrimaryKeyRelatedField(queryset=Maintenance.objects.all(), required=False, allow_null=True)
 
     class Meta:
         model = MaintenanceSchedule
@@ -22,23 +18,22 @@ class MaintenanceScheduleSerializer(serializers.ModelSerializer):
     def validate(self, data):
         elevator = data.get('elevator')
         technician = data.get('technician')
-        maintenance_company = elevator.maintenance_company  # Get the maintenance company linked to the elevator
+        maintenance_company = data.get('maintenance_company')
 
-        # Validate that the technician belongs to the same maintenance company as the elevator
+        # If technician is provided, it should belong to the same maintenance company as the elevator
         if technician:
-            if technician.maintenance_company != maintenance_company:
+            if technician.maintenance_company != elevator.maintenance_company:
                 raise ValidationError("Technician does not belong to the same maintenance company as the elevator.")
-
-        else:
-            # Auto-assign technician if not provided
-            technician = elevator.technician_profile
-            if technician:
-                data['technician'] = technician
-            else:
-                raise ValidationError("No technician found linked to this elevator.")
+        elif not technician:
+            # Auto-assign technician if not provided, or leave as NULL
+            technician = elevator.technician if elevator.technician else None
+            data['technician'] = technician
 
         # Set the maintenance company from the elevator if not provided
+        if not maintenance_company:
+            maintenance_company = elevator.maintenance_company
         data['maintenance_company'] = maintenance_company
+
         return data
 
     def create(self, validated_data):
@@ -64,7 +59,7 @@ class MaintenanceScheduleSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['elevator'] = instance.elevator.id
         representation['technician'] = instance.technician.id if instance.technician else None
-        representation['maintenance_company'] = instance.maintenance_company.id if instance.technician else None
+        representation['maintenance_company'] = instance.maintenance_company.id if instance.maintenance_company else None
         return representation
 
 

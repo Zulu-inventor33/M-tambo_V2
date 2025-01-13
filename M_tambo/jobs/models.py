@@ -49,10 +49,15 @@ class MaintenanceSchedule(models.Model):
         """
         Override save to handle automatic status update, and schedule generation logic.
         """
-        # Call the utility function to handle status update and potentially create a new schedule
-        update_schedule_status_and_create_new_schedule(self)
-        
-        # Save the instance after logic has been applied
+        if not self.pk:  # If the object is new (don't trigger status update for new schedules)
+            super().save(*args, **kwargs)
+            return
+
+        # Avoid recursion by checking if the status has already been updated
+        if self.status != 'overdue':  # Ensure we only update if it's not already 'overdue'
+            update_schedule_status_and_create_new_schedule(self)
+
+        # Save the instance after the logic has been applied
         super().save(*args, **kwargs)
 
     def get_next_scheduled_date(self, current_date, months_to_add):
@@ -61,7 +66,6 @@ class MaintenanceSchedule(models.Model):
         and months to add.
         """
         return current_date + relativedelta(months=+months_to_add)
-
 
 # Represents a log of a maintenance activity done on an elevator
 class MaintenanceLog(models.Model):
