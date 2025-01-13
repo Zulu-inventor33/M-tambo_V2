@@ -124,7 +124,6 @@ class CreateRoutineMaintenanceScheduleView(APIView):
         # Return validation errors if serializer is not valid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class ChangeMaintenanceScheduleToCompletedView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this view
 
@@ -134,6 +133,10 @@ class ChangeMaintenanceScheduleToCompletedView(APIView):
             maintenance_schedule = MaintenanceSchedule.objects.get(id=schedule_id)
         except MaintenanceSchedule.DoesNotExist:
             return Response({"detail": "Schedule not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the technician is assigned to the maintenance schedule
+        if maintenance_schedule.technician is None:
+            return Response({"detail": "This maintenance schedule cannot be completed as no technician has been assigned."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check the current status of the schedule
         if maintenance_schedule.status == 'completed':
@@ -152,13 +155,11 @@ class ChangeMaintenanceScheduleToCompletedView(APIView):
             maintenance_schedule.status = 'completed'
             maintenance_schedule.save()
 
-            # Create a new maintenance schedule for the next month
-            update_schedule_status_and_create_new_schedule(maintenance_schedule)
-
             return Response({"detail": "The maintenance schedule has been completed, and a new schedule has been created"}, status=status.HTTP_200_OK)
 
         # Default case, shouldn't be needed, but handle any unexpected status
         return Response({"detail": "Unexpected status."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class MaintenanceScheduleListView(APIView):
     permission_classes = [AllowAny]  # Set to AllowAny if you want public access, otherwise use other permissions like IsAuthenticated
@@ -328,8 +329,8 @@ class ChangeTechnicianView(APIView):
         Additionally, it checks if the status of the maintenance schedule is 'completed',
         in which case reassignment is not allowed.
         """
+        # Fetch the MaintenanceSchedule object using the schedule_id from kwargs
         try:
-            # Fetch the MaintenanceSchedule object using the schedule_id
             schedule = MaintenanceSchedule.objects.get(id=schedule_id)
         except MaintenanceSchedule.DoesNotExist:
             return Response({"detail": "Maintenance schedule not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -359,9 +360,12 @@ class ChangeTechnicianView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Update the technician for the schedule
-        schedule.technician = technician
-        schedule.save()
+        # Use update() instead of save() to avoid triggering additional logic
+        rows_updated = MaintenanceSchedule.objects.filter(id=schedule_id).update(technician=technician)
+
+        # Check if the update was successful
+        if rows_updated == 0:
+            return Response({"detail": "Failed to update the technician."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Return success response
         return Response(
@@ -380,6 +384,17 @@ class MaintenanceScheduleFilterView(APIView):
         Returns a specific message for each filter if no results are found.
         """
 
+        # Allowed fields in the request
+        allowed_fields = [
+            'technician_id', 'status', 'developer_id', 'elevator_id', 
+            'building_id', 'scheduled_date', 'next_schedule', 'maintenance_company_id'
+        ]
+        
+        # Check for invalid keys in the request data
+        invalid_fields = [key for key in request.data if key not in allowed_fields]
+        if invalid_fields:
+            return Response({"detail": f"Invalid fields: {', '.join(invalid_fields)}"}, status=status.HTTP_400_BAD_REQUEST)
+
         # Extract filters from the request data
         technician_id = request.data.get('technician_id')
         status_filter = request.data.get('status')
@@ -388,58 +403,74 @@ class MaintenanceScheduleFilterView(APIView):
         building_id = request.data.get('building_id')
         scheduled_date = request.data.get('scheduled_date')
         next_schedule = request.data.get('next_schedule')
+        maintenance_company_id = request.data.get('maintenance_company_id')
 
         # Start with the base queryset for maintenance schedules
         queryset = MaintenanceSchedule.objects.all()
 
-        # Step-by-step checks for each filter
+        # Valid status options
+        valid_statuses = ['scheduled', 'overdue', 'completed']
+        valid_next_schedules = ['1_month', '3_months', '6_months', 'set_date']
+
+        # Helper function to safely convert ID fields to integers
+        def get_int_value(value):
+            if isinstance(value, int):
+                return value
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return None
 
         # 1. Filter by Technician
         if technician_id:
+            technician_id = get_int_value(technician_id)
+            if technician_id is None:
+                return Response({"detail": "Invalid technician ID format."}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 technician = Technician.objects.get(id=technician_id)
                 queryset = queryset.filter(technician=technician)
-                if not queryset.exists():
-                    return Response({"detail": f"No schedules found for technician with ID {technician_id}."}, status=status.HTTP_404_NOT_FOUND)
             except Technician.DoesNotExist:
                 return Response({"detail": f"Technician with ID {technician_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # 2. Filter by Status
         if status_filter:
+            if status_filter not in valid_statuses:
+                return Response({"detail": f"Invalid status '{status_filter}'. Valid options are: {', '.join(valid_statuses)}."}, status=status.HTTP_400_BAD_REQUEST)
             queryset = queryset.filter(status=status_filter)
-            if not queryset.exists():
-                return Response({"detail": f"No {status_filter} schedules found."}, status=status.HTTP_404_NOT_FOUND)
 
         # 3. Filter by Developer
         if developer_id:
+            developer_id = get_int_value(developer_id)
+            if developer_id is None:
+                return Response({"detail": "Invalid developer ID format."}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 developer = Developer.objects.get(id=developer_id)
                 buildings = Building.objects.filter(developer=developer)
                 elevators = Elevator.objects.filter(building__in=buildings)
                 queryset = queryset.filter(elevator__in=elevators)
-                if not queryset.exists():
-                    return Response({"detail": f"No schedules found for developer with ID {developer_id}."}, status=status.HTTP_404_NOT_FOUND)
             except Developer.DoesNotExist:
                 return Response({"detail": f"Developer with ID {developer_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # 4. Filter by Elevator
         if elevator_id:
+            elevator_id = get_int_value(elevator_id)
+            if elevator_id is None:
+                return Response({"detail": "Invalid elevator ID format."}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 elevator = Elevator.objects.get(id=elevator_id)
                 queryset = queryset.filter(elevator=elevator)
-                if not queryset.exists():
-                    return Response({"detail": f"No schedules found for elevator with ID {elevator_id}."}, status=status.HTTP_404_NOT_FOUND)
             except Elevator.DoesNotExist:
                 return Response({"detail": f"Elevator with ID {elevator_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # 5. Filter by Building
         if building_id:
+            building_id = get_int_value(building_id)
+            if building_id is None:
+                return Response({"detail": "Invalid building ID format."}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 building = Building.objects.get(id=building_id)
                 elevators = Elevator.objects.filter(building=building)
                 queryset = queryset.filter(elevator__in=elevators)
-                if not queryset.exists():
-                    return Response({"detail": f"No schedules found for building with ID {building_id}."}, status=status.HTTP_404_NOT_FOUND)
             except Building.DoesNotExist:
                 return Response({"detail": f"Building with ID {building_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -448,16 +479,25 @@ class MaintenanceScheduleFilterView(APIView):
             try:
                 scheduled_date = datetime.strptime(scheduled_date, '%Y-%m-%d').date()
                 queryset = queryset.filter(scheduled_date=scheduled_date)
-                if not queryset.exists():
-                    return Response({"detail": f"No schedules found for the date {scheduled_date}."}, status=status.HTTP_404_NOT_FOUND)
             except ValueError:
                 return Response({"detail": "Invalid date format. Please use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
         # 7. Filter by Next Schedule
         if next_schedule:
+            if next_schedule not in valid_next_schedules:
+                return Response({"detail": f"Invalid next_schedule '{next_schedule}'. Valid options are: {', '.join(valid_next_schedules)}."}, status=status.HTTP_400_BAD_REQUEST)
             queryset = queryset.filter(next_schedule=next_schedule)
-            if not queryset.exists():
-                return Response({"detail": f"No schedules found with next schedule of {next_schedule}."}, status=status.HTTP_404_NOT_FOUND)
+
+        # 8. Filter by Maintenance Company
+        if maintenance_company_id:
+            maintenance_company_id = get_int_value(maintenance_company_id)
+            if maintenance_company_id is None:
+                return Response({"detail": "Invalid maintenance company ID format."}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                maintenance_company = Maintenance.objects.get(id=maintenance_company_id)
+                queryset = queryset.filter(maintenance_company=maintenance_company)
+            except Maintenance.DoesNotExist:
+                return Response({"detail": f"Maintenance company with ID {maintenance_company_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if any results match the filters
         if not queryset.exists():
@@ -468,7 +508,7 @@ class MaintenanceScheduleFilterView(APIView):
 
         # Return the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class MaintenanceScheduleNullTechnicianFilterView(APIView):
     permission_classes = [AllowAny]
@@ -478,6 +518,14 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
         Fetch maintenance schedules where the technician field is null.
         The user can filter based on developer, building, maintenance company, or elevator.
         """
+        # Allowed fields for filtering
+        allowed_fields = ['developer_id', 'building_id', 'scheduled_date', 'maintenance_company_id', 'elevator_id']
+        
+        # Check for invalid keys in the request data
+        invalid_fields = [key for key in request.data if key not in allowed_fields]
+        if invalid_fields:
+            return Response({"detail": f"Invalid fields: {', '.join(invalid_fields)}"}, status=status.HTTP_400_BAD_REQUEST)
+
         # Extract filters from the request data
         developer_id = request.data.get('developer_id')
         building_id = request.data.get('building_id')
@@ -491,12 +539,9 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
         # 1. Filter by Developer
         if developer_id:
             try:
-                # Find the developer, then get buildings related to the developer
                 developer = Developer.objects.get(id=developer_id)
                 buildings = Building.objects.filter(developer=developer)
-                # Get elevators related to those buildings
                 elevators = Elevator.objects.filter(building__in=buildings)
-                # Apply the filter for maintenance schedules related to those elevators
                 queryset = queryset.filter(elevator__in=elevators)
             except Developer.DoesNotExist:
                 return Response({"detail": f"Developer with ID {developer_id} not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -504,7 +549,6 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
         # 2. Filter by Building
         if building_id:
             try:
-                # Get the building, then get elevators related to this building
                 building = Building.objects.get(id=building_id)
                 elevators = Elevator.objects.filter(building=building)
                 queryset = queryset.filter(elevator__in=elevators)
@@ -514,7 +558,6 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
         # 3. Filter by Scheduled Date
         if scheduled_date:
             try:
-                # Convert the date string to a date object and filter the maintenance schedules
                 scheduled_date = datetime.strptime(scheduled_date, '%Y-%m-%d').date()
                 queryset = queryset.filter(scheduled_date=scheduled_date)
             except ValueError:
@@ -523,7 +566,6 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
         # 4. Filter by Maintenance Company
         if maintenance_company_id:
             try:
-                # Find the maintenance company and apply filter
                 maintenance_company = Maintenance.objects.get(id=maintenance_company_id)
                 queryset = queryset.filter(maintenance_company=maintenance_company)
             except Maintenance.DoesNotExist:
@@ -532,7 +574,6 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
         # 5. Filter by Elevator
         if elevator_id:
             try:
-                # Get the specific elevator and filter based on that
                 elevator = Elevator.objects.get(id=elevator_id)
                 queryset = queryset.filter(elevator=elevator)
             except Elevator.DoesNotExist:
@@ -540,7 +581,7 @@ class MaintenanceScheduleNullTechnicianFilterView(APIView):
 
         # Check if any results match the filters
         if not queryset.exists():
-            return Response({"detail": "No maintenance schedules found matching the criteria."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "No Non-assigned maintenance schedules found matching the criteria."}, status=status.HTTP_404_NOT_FOUND)
 
         # Serialize the filtered queryset
         serializer = FullMaintenanceScheduleSerializer(queryset, many=True)
