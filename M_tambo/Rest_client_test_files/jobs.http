@@ -540,3 +540,896 @@ Content-Type: application/json
 {
     "scheduled_date": "2025-01-12"
 }
+
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ ###
+# Test to file an elevator condition and maintenance log for a specific maintenance schedule.
+# This POST request handles both regular and ad-hoc maintenance schedules and marks the schedule as completed.
+
+POST http://127.0.0.1:8000/api/maintenance-schedule/1/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "schedule_type": "regular",
+  "condition_report": {
+    "alarm_bell": "Working fine",
+    "noise_during_motion": "No noise",
+    "cabin_lights": "All lights operational",
+    "position_indicators": "All working",
+    "hall_lantern_indicators": "All indicators functional",
+    "cabin_flooring": "No damage",
+    "additional_comments": "Elevator condition is optimal"
+  },
+  "maintenance_log": {
+    "check_machine_gear": true,
+    "check_machine_brake": true,
+    "check_controller_connections": true,
+    "blow_dust_from_controller": true,
+    "clean_machine_room": true,
+    "clean_guide_rails": true,
+    "observe_operation": true,
+    "description": "All maintenance tasks completed successfully.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Success: Regular Schedule) ###
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "detail": "Regular maintenance schedule successfully completed."
+}
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ ###
+# Test for an ad-hoc maintenance schedule
+
+POST http://127.0.0.1:8000/api/maintenance-schedule/1/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "schedule_type": "adhoc",
+  "condition_report": {
+    "components_checked": "Doors, Motor, Safety Brakes",
+    "condition": "Doors are slightly misaligned, motor running smoothly, safety brakes functional."
+  },
+  "maintenance_log": {
+    "summary_title": "Door Realignment and Motor Inspection",
+    "description": "Realigned elevator doors and inspected the motor for wear. Adjustments were made to improve alignment.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Success: Ad-Hoc Schedule) ###
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "detail": "Adhoc maintenance schedule successfully completed."
+}
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ (No Schedule Type) ###
+# Test when schedule_type is missing in the request
+POST http://127.0.0.1:8000/api/maintenance-schedule/1/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "condition_report": {
+    "alarm_bell": "Working fine",
+    "noise_during_motion": "No noise",
+    "cabin_lights": "All lights operational"
+  },
+  "maintenance_log": {
+    "description": "All maintenance tasks completed successfully.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Failure: No Schedule Type) ###
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Schedule type is required."
+}
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ (Invalid Schedule Type) ###
+# Test with an invalid schedule type
+POST http://127.0.0.1:8000/api/maintenance-schedule/1/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "schedule_type": "invalid",
+  "condition_report": {
+    "alarm_bell": "Working fine"
+  },
+  "maintenance_log": {
+    "description": "Tasks completed.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Failure: Invalid Schedule Type) ###
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid schedule type."
+}
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ (Schedule Not Found) ###
+# Test when the schedule ID does not exist
+POST http://127.0.0.1:8000/api/maintenance-schedule/999/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "schedule_type": "regular",
+  "condition_report": {
+    "alarm_bell": "Working fine"
+  },
+  "maintenance_log": {
+    "description": "Tasks completed.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Failure: Schedule Not Found) ###
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Maintenance schedule not found."
+}
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ (No Technician Assigned) ###
+# Test when no technician is assigned
+POST http://127.0.0.1:8000/api/maintenance-schedule/1/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "schedule_type": "regular",
+  "condition_report": {
+    "alarm_bell": "Working fine"
+  },
+  "maintenance_log": {
+    "description": "Tasks completed.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Failure: No Technician Assigned) ###
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "This maintenance schedule cannot be completed as no technician has been assigned."
+}
+
+### POST /api/maintenance-schedule/{schedule_id}/file_maintenance_log/ (Missing Condition Report) ###
+POST http://127.0.0.1:8000/api/maintenance-schedule/1/file_maintenance_log/
+Content-Type: application/json
+
+{
+  "schedule_type": "regular",
+  "maintenance_log": {
+    "description": "Tasks completed.",
+    "overseen_by": "John Doe"
+  }
+}
+
+### Response Example (Failure: Missing Condition Report) ###
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Condition report data is required."
+}
+
+
+### Change Technician for Maintenance Schedule (Regular or Ad-Hoc)
+# Replace `base_url` with the actual base URL of your API server
+@base_url = http://127.0.0.1:8000/api/jobs
+
+### Change Technician for Regular Schedule
+PUT {{base_url}}/maintenance-schedule/change_technician/regular/1/
+Content-Type: application/json
+
+{
+  "technician_id": 10
+}
+
+### Change Technician for Ad-Hoc Schedule
+PUT {{base_url}}/maintenance-schedule/change_technician/adhoc/1/
+Content-Type: application/json
+
+{
+  "technician_id": 15
+}
+
+### Possible Inputs:
+# 1. `schedule_type` (str) - The type of schedule: `regular` or `adhoc`.
+# 2. `schedule_id` (int) - The ID of the schedule to update. Replace `{{schedule_id}}` with the actual schedule ID.
+# 3. `technician_id` (int) - The ID of the technician to assign to the schedule. Replace `10` or `15` with the actual technician ID.
+
+### Possible Responses:
+
+#### 200 OK
+# Technician successfully changed.
+{
+  "message": "Technician has been changed to John Doe."
+}
+
+#### 400 Bad Request
+# Example reasons:
+# - Invalid schedule type.
+# - Technician ID not provided.
+# - Technician does not belong to the same maintenance company.
+{
+  "detail": "Technician ID must be provided."
+}
+
+#### 404 Not Found
+# Example reasons:
+# - Schedule not found.
+# - Technician not found.
+{
+  "detail": "Maintenance schedule not found."
+}
+
+
+### GET - Upcoming Jobs for Technician ID 1
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/technician/1/upcoming_jobs/ HTTP/1.1
+Accept: application/json
+
+###
+
+### Expected Response for Upcoming Jobs
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "regular_schedules": [
+    {
+      "id": 1,
+      "schedule_type": "normal",
+      "elevator": 101,
+      "technician": 1,
+      "technician_full_name": "John Doe",
+      "maintenance_company": 5,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-20T10:00:00Z",
+      "description": "Scheduled maintenance check",
+      "status": "scheduled",
+      "building": {"id": 10, "name": "Building A"},
+      "developer": {"id": 2, "name": "ABC Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ],
+  "adhoc_schedules": [
+    {
+      "id": 101,
+      "schedule_type": "adhoc",
+      "elevator": 201,
+      "technician": 1,
+      "technician_full_name": "John Doe",
+      "maintenance_company": 5,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-20T14:00:00Z",
+      "description": "Ad-hoc maintenance repair",
+      "status": "scheduled",
+      "building": {"id": 20, "name": "Building B"},
+      "developer": {"id": 3, "name": "XYZ Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ]
+}
+
+###
+
+### GET - Overdue Jobs for Technician ID 1
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/technician/1/overdue_jobs/ HTTP/1.1
+Accept: application/json
+
+###
+
+### Expected Response for Overdue Jobs
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "regular_schedules": [
+    {
+      "id": 2,
+      "schedule_type": "normal",
+      "elevator": 102,
+      "technician": 1,
+      "technician_full_name": "John Doe",
+      "maintenance_company": 5,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-10T10:00:00Z",
+      "description": "Overdue scheduled maintenance",
+      "status": "overdue",
+      "building": {"id": 10, "name": "Building A"},
+      "developer": {"id": 2, "name": "ABC Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ],
+  "adhoc_schedules": [
+    {
+      "id": 102,
+      "schedule_type": "adhoc",
+      "elevator": 202,
+      "technician": 1,
+      "technician_full_name": "John Doe",
+      "maintenance_company": 5,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-10T14:00:00Z",
+      "description": "Overdue ad-hoc repair",
+      "status": "overdue",
+      "building": {"id": 20, "name": "Building B"},
+      "developer": {"id": 3, "name": "XYZ Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ]
+}
+
+###
+
+### GET - Completed Jobs for Technician ID 1
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/technician/1/completed_jobs/ HTTP/1.1
+Accept: application/json
+
+###
+
+### Expected Response for Completed Jobs
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "regular_schedules": [
+    {
+      "id": 3,
+      "schedule_type": "normal",
+      "elevator": 103,
+      "technician": 1,
+      "technician_full_name": "John Doe",
+      "maintenance_company": 5,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-05T10:00:00Z",
+      "description": "Completed scheduled maintenance",
+      "status": "completed",
+      "building": {"id": 10, "name": "Building A"},
+      "developer": {"id": 2, "name": "ABC Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ],
+  "adhoc_schedules": [
+    {
+      "id": 103,
+      "schedule_type": "adhoc",
+      "elevator": 203,
+      "technician": 1,
+      "technician_full_name": "John Doe",
+      "maintenance_company": 5,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-05T14:00:00Z",
+      "description": "Completed ad-hoc repair",
+      "status": "completed",
+      "building": {"id": 20, "name": "Building B"},
+      "developer": {"id": 3, "name": "XYZ Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ]
+}
+
+###
+
+### GET - Invalid Job Status ("invalid_status") for Technician ID 1
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/technician/1/invalid_status/ HTTP/1.1
+Accept: application/json
+
+###
+
+### Expected Error Response for Invalid Job Status
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid job_status provided. Valid options are 'upcoming_jobs', 'overdue_jobs', and 'completed_jobs'."
+}
+
+###
+
+### GET - Technician Not Found
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/technician/9999/upcoming_jobs/ HTTP/1.1
+Accept: application/json
+
+###
+
+### Expected Error Response for Technician Not Found
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Technician with ID 9999 not found."
+}
+
+
+### 1. GET Upcoming Jobs for Maintenance Company with ID 1
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/1/upcoming_jobs/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Success (200 OK)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "regular_schedules": [
+    {
+      "id": 1,
+      "schedule_type": "normal",
+      "elevator": 101,
+      "technician": 1,
+      "maintenance_company": 1,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-20T10:00:00Z",
+      "description": "Scheduled maintenance check",
+      "status": "scheduled",
+      "building": {"id": 10, "name": "Building A"},
+      "developer": {"id": 2, "name": "ABC Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ],
+  "adhoc_schedules": [
+    {
+      "id": 101,
+      "schedule_type": "adhoc",
+      "elevator": 201,
+      "technician": 1,
+      "maintenance_company": 1,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-20T14:00:00Z",
+      "description": "Ad-hoc maintenance repair",
+      "status": "scheduled",
+      "building": {"id": 20, "name": "Building B"},
+      "developer": {"id": 3, "name": "XYZ Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ]
+}
+
+### 2. GET Overdue Jobs for Maintenance Company with ID 1
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/1/overdue_jobs/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Success (200 OK)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "regular_schedules": [
+    {
+      "id": 2,
+      "schedule_type": "normal",
+      "elevator": 102,
+      "technician": 1,
+      "maintenance_company": 1,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-10T10:00:00Z",
+      "description": "Overdue scheduled maintenance",
+      "status": "overdue",
+      "building": {"id": 10, "name": "Building A"},
+      "developer": {"id": 2, "name": "ABC Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ],
+  "adhoc_schedules": [
+    {
+      "id": 102,
+      "schedule_type": "adhoc",
+      "elevator": 202,
+      "technician": 1,
+      "maintenance_company": 1,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-10T14:00:00Z",
+      "description": "Overdue ad-hoc repair",
+      "status": "overdue",
+      "building": {"id": 20, "name": "Building B"},
+      "developer": {"id": 3, "name": "XYZ Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ]
+}
+
+### 3. GET Completed Jobs for Maintenance Company with ID 1
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/1/completed_jobs/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Success (200 OK)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "regular_schedules": [
+    {
+      "id": 3,
+      "schedule_type": "normal",
+      "elevator": 103,
+      "technician": 1,
+      "maintenance_company": 1,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-05T10:00:00Z",
+      "description": "Completed scheduled maintenance",
+      "status": "completed",
+      "building": {"id": 10, "name": "Building A"},
+      "developer": {"id": 2, "name": "ABC Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ],
+  "adhoc_schedules": [
+    {
+      "id": 103,
+      "schedule_type": "adhoc",
+      "elevator": 203,
+      "technician": 1,
+      "maintenance_company": 1,
+      "maintenance_company_name": "Elevator Maint Co.",
+      "scheduled_date": "2025-01-05T14:00:00Z",
+      "description": "Completed ad-hoc repair",
+      "status": "completed",
+      "building": {"id": 20, "name": "Building B"},
+      "developer": {"id": 3, "name": "XYZ Developers"},
+      "condition_report": [],
+      "maintenance_log": []
+    }
+  ]
+}
+
+### 4. GET Invalid Job Status for Maintenance Company with ID 1
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/1/invalid_status/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Bad Request (400)
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid job_status provided. Valid options are 'upcoming_jobs', 'overdue_jobs', and 'completed_jobs'."
+}
+
+### 5. GET Upcoming Jobs for Maintenance Company with ID 999 (Non-Existing Company)
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/999/upcoming_jobs/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Not Found (404)
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Maintenance company with ID 999 not found."
+}
+
+### 6. GET Overdue Jobs for Maintenance Company with ID 999 (Non-Existing Company)
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/999/overdue_jobs/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Not Found (404)
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Maintenance company with ID 999 not found."
+}
+
+### 7. GET Completed Jobs for Maintenance Company with ID 999 (Non-Existing Company)
+
+GET http://127.0.0.1:8000/api/jobs/maintenance-schedule/maintenance_company/999/completed_jobs/ HTTP/1.1
+Accept: application/json
+
+### Expected Response: Not Found (404)
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Maintenance company with ID 999 not found."
+}
+
+
+### 1. Create Building Ad-hoc Maintenance Schedule - Success (Minimal Input: Description Only)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/1/create_building_adhoc
+Content-Type: application/json
+
+{
+    "description": "Emergency maintenance required."
+}
+
+# Expected Response:
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+    "id": 1,
+    "building": {
+        "id": 1,
+        "name": "Sundowners Towers"
+    },
+    "technician": {
+        "id": 1,
+        "full_name": "Charlie Brown"
+    },
+    "maintenance_company": {
+        "id": 1,
+        "company_name": "Johnson Elevators Co."
+    },
+    "description": "Emergency maintenance required.",
+    "scheduled_date": "2025-01-19T00:00:00Z",
+    "status": "scheduled"
+}
+
+### 2. Create Building Ad-hoc Maintenance Schedule - Success (Full Input with Building, Technician, Maintenance Company, Date, and Status)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/1/create_building_adhoc
+Content-Type: application/json
+
+{
+    "building": 1,
+    "technician": 2,
+    "maintenance_company": 3,
+    "scheduled_date": "2025-01-16T10:30:00Z",
+    "description": "Emergency maintenance required.",
+    "status": "scheduled"
+}
+
+# Expected Response:
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+    "id": 2,
+    "building": {
+        "id": 1,
+        "name": "Sundowners Towers"
+    },
+    "technician": {
+        "id": 2,
+        "full_name": "Jane Smith"
+    },
+    "maintenance_company": {
+        "id": 3,
+        "company_name": "Elevator Solutions"
+    },
+    "description": "Emergency maintenance required.",
+    "scheduled_date": "2025-01-16T10:30:00Z",
+    "status": "scheduled"
+}
+
+### 3. Create Building Ad-hoc Maintenance Schedule - Missing Description (Error Case)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/1/create_building_adhoc
+Content-Type: application/json
+
+{
+    "description": ""
+}
+
+# Expected Response:
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+    "detail": "Description is required."
+}
+
+### 4. Create Building Ad-hoc Maintenance Schedule - Non-Existent Building (Error Case)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/999/create_building_adhoc
+Content-Type: application/json
+
+{
+    "description": "Emergency maintenance required."
+}
+
+# Expected Response:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "Building with ID 999 not found."
+}
+
+### 5. Create Building Ad-hoc Maintenance Schedule - No Elevators in Building (Error Case)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/2/create_building_adhoc
+Content-Type: application/json
+
+{
+    "description": "Emergency maintenance required."
+}
+
+# Expected Response:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "No elevators found for Building with ID 2."
+}
+
+### 6. Create Building Ad-hoc Maintenance Schedule - Elevator Without Technician (Error Case)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/1/create_building_adhoc
+Content-Type: application/json
+
+{
+    "description": "Emergency maintenance required."
+}
+
+# Expected Response:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "No technician assigned to Elevator with ID 1."
+}
+
+### 7. Create Building Ad-hoc Maintenance Schedule - Elevator Without Maintenance Company (Error Case)
+POST http://yourdomain.com/jobs/maintenance-schedule/building/1/create_building_adhoc
+Content-Type: application/json
+
+{
+    "description": "Emergency maintenance required."
+}
+
+# Expected Response:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "No maintenance company assigned to Elevator with ID 1."
+}
+
+
+### CompleteBuildingScheduleView API Test (.http File) ###
+# This section is for testing the CompleteBuildingScheduleView API endpoint.
+# The endpoint is responsible for completing the building-level maintenance schedule by generating
+# Ad-Hoc Maintenance Schedules for elevators, and creating Condition Reports and Maintenance Logs.
+
+# The request below simulates a POST request to complete the building maintenance schedule for elevators.
+# It includes the elevator information for processing, such as condition reports and maintenance logs.
+
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/13/complete_building_adhoc/ 
+Content-Type: application/json
+
+{
+  "elevators": [
+    {
+      "elevator_id": 1,  # The ID of the elevator to be processed.
+      "condition_report": {
+        "components_checked": "Doors, Motor, Safety Brakes",  # List of elevator components inspected.
+        "condition": "Doors are slightly misaligned, motor running smoothly, safety brakes functional."  # Condition of the components checked.
+      },
+      "maintenance_log": {
+        "summary_title": "Door Realignment and Motor Inspection",  # Summary title of the maintenance performed.
+        "description": "Realigned elevator doors and inspected the motor for wear. Adjustments were made to improve alignment.",  # Detailed description of the maintenance performed.
+        "overseen_by": "John Doe"  # The technician overseeing the maintenance.
+      }
+    },
+    {
+      "elevator_id": 2,  # Another elevator to be processed.
+      "condition_report": {
+        "components_checked": "Cabin, Safety Brakes",  # Components checked during this maintenance.
+        "condition": "Cabin is slightly scratched, safety brakes functional."  # Condition of these components.
+      },
+      "maintenance_log": {
+        "summary_title": "Cabin Maintenance and Safety Brake Inspection",  # Summary title of this maintenance task.
+        "description": "Cleaned and repaired cabin scratches and tested the safety brakes.",  # Detailed description of the work performed.
+        "overseen_by": "Jane Smith"  # Name of the technician who supervised the work.
+      }
+    }
+  ]
+}
+
+### Explanation of the View's Functionality and Responses ###
+
+# 1. **Checking if the Building Schedule is Completed**:
+#    The API first checks whether the building-level maintenance schedule (with ID `building_schedule_id` passed in the URL) has already been completed.
+#    If the schedule is already marked as `completed`, the API will return a message like:
+#    ```json
+#    {
+#      "message": "This building schedule has already been marked as completed."
+#    }
+#    ```
+#    If this is the case, no further action is taken, and the API terminates the process.
+
+# 2. **Validating Elevators**:
+#    - The API checks if each elevator provided in the request belongs to the building associated with the current building-level maintenance schedule.
+#    - If an elevator does **not** belong to the building, the process terminates immediately, and the API will return a response with a message like:
+#    ```json
+#    {
+#      "message": "Elevator LIFT3 does not belong to the building associated with this schedule. Please check the elevator assignments.",
+#      "failed_elevators": ["LIFT3"]
+#    }
+#    ```
+#    - The API will **not** proceed with creating Ad-Hoc Maintenance Schedules, Condition Reports, or Maintenance Logs for any invalid elevators.
+
+# 3. **Creating Ad-Hoc Maintenance Schedules**:
+#    - If an elevator is valid and belongs to the building, the API will create an `AdHocMaintenanceSchedule` for that elevator using the data from the building-level schedule.
+#    - The description for the maintenance schedule will be system-generated and will reference the building schedule date and purpose.
+#    - Example description format:
+#    ```
+#    A system-generated schedule based on the building schedule of {scheduled_date} whose intention was to {building_schedule.description}.
+#    ```
+#    - Once the schedule is created, the status of the Ad-Hoc Maintenance Schedule is set to `completed`.
+
+# 4. **Creating Condition Reports and Maintenance Logs**:
+#    - After creating the Ad-Hoc Maintenance Schedule, the API will create a `ConditionReport` and a `MaintenanceLog` for each valid elevator.
+#    - The `ConditionReport` will capture the elevator's inspected components and their condition.
+#    - The `MaintenanceLog` will include the summary of work, a description of the tasks performed, and the technician's oversight information.
+
+# 5. **Completing the Building Schedule**:
+#    - After processing all valid elevators, the API will mark the building-level maintenance schedule as `completed`.
+
+# 6. **Final Response**:
+#    If the operation is successful, the API will return a response like:
+#    ```json
+#    {
+#      "message": "2 elevators (LIFT1, LIFT2) were successfully checked during this building schedule and their condition reports and maintenance logs were generated and recorded.",
+#      "failed_elevators": []
+#    }
+#    ```
+#    This indicates that two elevators were processed successfully, and their reports and logs were created.
+
+#    If there are any failed elevators (e.g., invalid elevators, missing data), the response would look like this:
+#    ```json
+#    {
+#      "message": "The elevator_id '5' is missing the condition_report or maintenance_log data. Please provide the required fields.",
+#      "failed_elevators": ["LIFT5"]
+#    }
+#    ```
+#    This message would indicate the missing data for the elevator with ID '5', and the process would not continue for this elevator.
+
+# 7. **Failure Scenarios**:
+#    The following are potential failure scenarios:
+#    - **Building Schedule Already Completed**:
+#      If the building-level schedule has already been marked as `completed`, no further action will be performed, and the response will indicate that:
+#      ```json
+#      {
+#        "message": "This building schedule has already been marked as completed."
+#      }
+#      ```
+#    - **Elevator Not Assigned to Building**:
+#      If an elevator does not belong to the building associated with the schedule, the response will look like:
+#      ```json
+#      {
+#        "message": "Elevator LIFT3 does not belong to the building associated with this schedule. Please check the elevator assignments.",
+#        "failed_elevators": ["LIFT3"]
+#      }
+#      ```
+#    - **Missing or Invalid Data**:
+#      If the request body is missing required fields (e.g., `condition_report` or `maintenance_log`), the response will indicate which elevators failed due to missing data:
+#      ```json
+#      {
+#        "message": "The elevator_id '5' is missing the condition_report or maintenance_log data. Please provide the required fields.",
+#        "failed_elevators": ["LIFT5"]
+#      }
+#      ```
+
+### Response Summary:
+
+- **Success**: A list of successfully processed elevators and a message indicating that their condition reports and maintenance logs were generated.
+- **Failure (Building Schedule Already Completed)**: A message indicating the building schedule is already completed.
+- **Failure (Elevator Not Assigned)**: A message indicating which elevator(s) don't belong to the building, with a list of failed elevators.
+- **Failure (Missing or Invalid Input)**: A message indicating which elevator(s) are missing required data, with a list of failed elevators.
+
+# End of Test Case for CompleteBuildingScheduleView API

@@ -3,8 +3,19 @@ from elevators.models import Elevator
 from technicians.models import Technician
 from maintenance_companies.models import Maintenance
 from .models import MaintenanceSchedule
+from .models import *
 from rest_framework.exceptions import ValidationError
 from .utils import update_schedule_status_and_create_new_schedule
+
+
+class BaseScheduleSerializer(serializers.ModelSerializer):
+    """
+    A base serializer to provide common fields for both MaintenanceSchedule and AdHocMaintenanceSchedule.
+    """
+    schedule_type = serializers.SerializerMethodField()
+
+    def get_schedule_type(self, obj):
+        return "normal" if isinstance(obj, MaintenanceSchedule) else "adhoc"
 
 class MaintenanceScheduleSerializer(serializers.ModelSerializer):
     elevator = serializers.PrimaryKeyRelatedField(queryset=Elevator.objects.all())
@@ -105,3 +116,244 @@ class FullMaintenanceScheduleSerializer(serializers.ModelSerializer):
         building = obj.elevator.building
         developer = building.developer  # Assuming `Building` has a `developer` field
         return {'id': developer.id, 'name': developer.developer_name}
+    
+
+class AdHocMaintenanceScheduleSerializer(BaseScheduleSerializer):
+    """
+    Serializer for the Ad-Hoc Maintenance Schedule.
+    """
+    class Meta:
+        model = AdHocMaintenanceSchedule
+        fields = [
+            'id',
+            'schedule_type',
+            'elevator',
+            'technician',
+            'maintenance_company',
+            'scheduled_date',
+            'description',
+            'status',
+        ]
+
+
+class ElevatorConditionReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ElevatorConditionReport
+        fields = [
+            'id',
+            'maintenance_schedule',
+            'technician',
+            'date_inspected',
+            'alarm_bell',
+            'noise_during_motion',
+            'cabin_lights',
+            'position_indicators',
+            'hall_lantern_indicators',
+            'cabin_flooring',
+            'additional_comments',
+        ]
+
+class ScheduledMaintenanceLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScheduledMaintenanceLog
+        fields = [
+            'id',
+            'maintenance_schedule',
+            'technician',
+            'condition_report',
+            'date_completed',
+            'check_machine_gear',
+            'check_machine_brake',
+            'check_controller_connections',
+            'blow_dust_from_controller',
+            'clean_machine_room',
+            'clean_guide_rails',
+            'observe_operation',
+            'description',
+            'overseen_by',
+            'approved_by',
+        ]
+
+
+class AdHocElevatorConditionReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdHocElevatorConditionReport
+        fields = ['id', 'ad_hoc_schedule', 'technician', 'date_inspected', 'components_checked', 'condition']
+
+
+class AdHocMaintenanceLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdHocMaintenanceLog
+        fields = [
+            'id', 'ad_hoc_schedule', 'technician', 'condition_report', 'date_completed',
+            'summary_title', 'description', 'overseen_by', 'approved_by'
+        ]
+
+
+class CompleteMaintenanceScheduleSerializer(BaseScheduleSerializer):
+    """
+    Serializer for handling both normal and ad-hoc maintenance schedules with nested reports and logs.
+    """
+    building = serializers.SerializerMethodField()
+    developer = serializers.SerializerMethodField()
+    technician_full_name = serializers.SerializerMethodField()
+    maintenance_company_name = serializers.SerializerMethodField()
+    condition_report = serializers.SerializerMethodField()
+    maintenance_log = serializers.SerializerMethodField()
+    elevator_details = serializers.SerializerMethodField()  # New field for elevator details
+
+    class Meta:
+        model = MaintenanceSchedule
+        fields = [
+            'id',
+            'schedule_type',
+            'elevator',
+            'elevator_details',  # Include elevator details in fields
+            'technician',
+            'technician_full_name',
+            'maintenance_company',
+            'maintenance_company_name',
+            'scheduled_date',
+            'description',
+            'status',
+            'building',
+            'developer',
+            'condition_report',
+            'maintenance_log',
+        ]
+
+    def get_building(self, obj):
+        building = obj.elevator.building
+        return {'id': building.id, 'name': building.name} if building else None
+
+    def get_developer(self, obj):
+        building = obj.elevator.building
+        developer = building.developer if building else None
+        return {'id': developer.id, 'name': developer.developer_name} if developer else None
+
+    def get_technician_full_name(self, obj):
+        technician = obj.technician
+        return f"{technician.user.first_name} {technician.user.last_name}" if technician else None
+
+    def get_maintenance_company_name(self, obj):
+        maintenance_company = obj.maintenance_company
+        return maintenance_company.company_name if maintenance_company else None
+
+    def get_condition_report(self, obj):
+        """
+        Returns the associated condition report for the schedule.
+        Handles both normal and ad-hoc schedules.
+        """
+        if isinstance(obj, MaintenanceSchedule):
+            reports = ElevatorConditionReport.objects.filter(maintenance_schedule=obj)
+            serializer = ElevatorConditionReportSerializer(reports, many=True)
+        else:
+            reports = AdHocElevatorConditionReport.objects.filter(ad_hoc_schedule=obj)
+            serializer = AdHocElevatorConditionReportSerializer(reports, many=True)
+        return serializer.data
+
+    def get_maintenance_log(self, obj):
+        """
+        Returns the associated maintenance log for the schedule.
+        Handles both normal and ad-hoc schedules.
+        """
+        if isinstance(obj, MaintenanceSchedule):
+            logs = ScheduledMaintenanceLog.objects.filter(maintenance_schedule=obj)
+            serializer = ScheduledMaintenanceLogSerializer(logs, many=True)
+        else:
+            logs = AdHocMaintenanceLog.objects.filter(ad_hoc_schedule=obj)
+            serializer = AdHocMaintenanceLogSerializer(logs, many=True)
+        return serializer.data
+
+    def get_elevator_details(self, obj):
+        """
+        Returns the elevator details, including user_name and machine_number.
+        """
+        elevator = obj.elevator
+        if elevator:
+            return {
+                'id': elevator.id,
+                'user_name': elevator.user_name,
+                'machine_number': elevator.machine_number
+            }
+        return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        # Organize the response structure
+        result = {
+            'maintenance_schedule': {
+                'id': data['id'],
+                'schedule_type': data['schedule_type'],
+                'elevator': data.get('elevator_details', None),  # Add elevator details here
+                'technician': data['technician'],
+                'technician_full_name': data['technician_full_name'],
+                'maintenance_company': data['maintenance_company'],
+                'maintenance_company_name': data['maintenance_company_name'],
+                'scheduled_date': data['scheduled_date'],
+                'description': data['description'],
+                'status': data['status'],
+                'building': data['building'],
+                'developer': data['developer'],
+                'condition_report': data.get('condition_report', None),
+                'maintenance_log': data.get('maintenance_log', None),
+            }
+        }
+
+        return result
+    
+
+
+class BuildingLevelAdhocScheduleSerializer(serializers.ModelSerializer):
+    building_name = serializers.SerializerMethodField()
+    technician_name = serializers.SerializerMethodField()
+    elevators = serializers.SerializerMethodField()
+    developer = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BuildingLevelAdhocSchedule
+        fields = [
+            'id',
+            'building',
+            'building_name',
+            'technician',
+            'technician_name',
+            'maintenance_company',
+            'scheduled_date',
+            'description',
+            'status',
+            'elevators',
+            'developer'
+        ]
+        read_only_fields = [
+            'building_name',
+            'technician_name',
+            'elevators',
+            'developer'
+        ]
+
+    def get_building_name(self, obj):
+        """Retrieve the name of the building."""
+        return obj.building.name if obj.building else None
+
+    def get_technician_name(self, obj):
+        """Retrieve the name of the technician."""
+        return f"{obj.technician.user.first_name} {obj.technician.user.last_name}" if obj.technician else None
+
+    def get_elevators(self, obj):
+        """Retrieve all elevators in the building with their usernames and IDs."""
+        if not obj.building:
+            return []
+        elevators = Elevator.objects.filter(building=obj.building)
+        return [
+            {
+                "id": elevator.id,
+                "username": elevator.user_name,
+                "machine_number": elevator.machine_number
+            }
+            for elevator in elevators
+        ]
+    def get_developer(self, obj):
+        developer = obj.building.developer if obj.building else None
+        return {'id': developer.id, 'name': developer.developer_name} if developer else None

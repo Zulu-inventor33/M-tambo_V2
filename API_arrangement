@@ -21,12 +21,13 @@ mtambo/
 │   ├── /api/maintenance-companies/{company_id}/technicians/{technician_id}/add/  # POST a technician to a certain maintenance company.
 │   ├── /api/maintenance-companies/{company_id}/developers/  # GET: List of all developers under a specific company
 │   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}  # GET: details of a certain developer linked to this specific company
-│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/remove  # DELETE: # DELETE: Remove the maintenance company ID and all its Technicians ID from all the Buildings in elevators linked to this building
+│   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/remove  # DELETE: # DELETE: Remove the maintenance company ID and all its Technicians ID from all the Buildings in elevators linked to this Developers
 │   ├── /api/maintenance-companies/{company_id}/developers/{developer_id}/buildings  # GET: all buildings registered to a certain developer linked to this specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/  # GET: List all buildings under a specific company
 │   ├── /api/maintenance-companies/{company_id}/buildings/add  # PUT: add a building into the system.
 │   ├── /api/maintenance-companies/{company_id}/buildings/technicians{technician_id}  # GET: List all buildings where a certain Technician in the maintenance company is working on their elevators
-│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details
+│   ├── /api/maintenance-companies/{company_id}/buildings/technicians  # GET: List all Technicians who are assigned to the elevators within a given building
+│   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/  # GET: Get building details of a certain building
 │   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/remove  # DELETE: Remove the maintenance company ID and all its Technicians ID from all the elevators linked to this building
 │   ├── /api/maintenance-companies/{company_id}/buildings/{buiding_id}/elevators/add  # PUT: add an elevator to a given building.
 │   ├── /api/maintenance-companies/{company_id}/buildings/{building_id}/update_technician/  # PUT: Change the Technician on all elevators in a certain building.
@@ -40,7 +41,8 @@ mtambo/
 │   ├── developers/                 # App for developer related views, models, serializers
 │   │   ├── urls.py             # URL routing for developer-related routes
 │   │   ├── /api/developers/        # GET: List all developers
-│   │   ├── /api/developers/id/{developer_id} # GET: Details of a ceratin developer via his ID
+│   │   ├── /api/developers/id/{developer_id} # GET: Details of a ceratin developer via his 
+│   |   ├── /api/developers/{developer_id}/approve-maintenance-logs/ # GET and  PUT: Get all the maintenance logs that have been complete and use POST to approve them
 │   │   ├── /api/developers/email/{developer_email}/  # GET: Get specific developer details by E-mail.
 │   │   ├── /api/claims/{claim_id}/  # GET: Get specific claim details (building, technician, job ID)
 │   │   ├── /api/claims/file/   # POST: File a claim for a completed job
@@ -59,14 +61,22 @@ mtambo/
 │   │   ├── /api/jobs/maintenance-schedule/# GET: list all maintenance schedule's
 │|||||||├── /api/jobs/maintenance-schedule/filter/# PUT: filter and list all maintenance schedule's according to the data given. 
 │   │   ├── /api/jobs/maintenance-schedule/change_technician{schedule_id}/  # PUT: Change the technician assigned to a specific maintenance schedule.
-│   │   ├── /api/jobs/maintenance-schedule/create/elevator/{elevator_id}    # POST: Create a new maintenance schedule for a given elevator id
+│   │   ├── /api/jobs/maintenance-schedule/null_technician/  # PUT: Fetch the maintenance schedules without a technician. Filtering them based on; developer, maintenance company or elevator 
+│   │   ├── /api/jobs/maintenance-schedule/elevator/{elevator_id}/create_initial_schedule    # POST: Create a the initial maintenance schedule for a given elevator id, from which schedule auto generation will start
+│   │   ├── /api/jobs/maintenance-schedule/elevator/{elevator_id}/create_adhoc    # POST: Create a new adhoc maintenance schedule for a given elevator id
+│   │   ├── /api/jobs/maintenance-schedule/building/{building_id}/create_building_adhoc    # POST: Create a new building specific adhoc maintenance schedule for a given building id
 │   │   ├── /api/jobs/maintenance-schedule/{schedule_id}/update/  # PUT: Update a schedule's status (e.g., from scheduled to overdue or Completed)
 │   │   ├── /api/jobs/maintenance-schedule/{schedule_id}/remove/  # DELETE: delete a specific maintenance-schedule
+│   │   ├── /api/jobs/maintenance-schedule/{schedule_id}/file_maintenance_log/  # POST: File the details of the elevator condition and maintenance log for a certain schedule
+│   │   ├── /api/jobs/maintenance-schedule/{Adhoc_building_schedule_id}/complete_building_adhoc/  # POST: It will create an adhoc maintenance schedule for each elevator worked on in the building and the log the elevator condition and maintenance log for every schedule created for each elevator
 │   │   ├── /api/jobs/maintenance-schedule/technician/{technician_id}/  # GET: list all the maintenance-schedules of a specific technician
+│   │   ├── /api/jobs/maintenance-schedule/technician/{technician_id}/{job_status}  # GET: list all the maintenance-schedules of a specific technician based on their status
 │   │   ├── /api/jobs/maintenance-schedule/elevator/{elevator_id}/  # GET: list all the maintenance-schedules of a specific elevator
 │   │   ├── /api/jobs/maintenance-schedule/maintenance_company/{company_id}/  # GET: list all the maintenance-schedules of a specific maintenance_company
+│   │   ├── /api/jobs/maintenance-schedule/maintenance_company/{company_id}/{job_status}  # GET: list all the maintenance-schedules of a specific maintenance company based on their status
 │   │   ├── /api/jobs/maintenance-schedule/developer/{developer_id}/  # GET: list all the maintenance-schedules of a specific developer
 │   │   ├── /api/jobs/maintenance-schedule/building/{building_id}/  # GET: list all the maintenance-schedules of a specific building
+│   │   ├── /api/jobs/maintenance-schedule/elevator/{elevator_id}/history  # GET: list all the maintenance-schedules whose status is completed together with their conditional reports and maintenance logs and list them starting with the most recent
 │   │   ├── /api/jobs/{job_id}/update/  # PUT: Update a job's status (e.g., from Pending to Completed)
 │   │   ├── /api/jobs/{job_id}/log/  # GET: Get the maintenance log of a job
 │   │   ├── /api/jobs/{job_id}/claim/  # POST: File a claim for a completed job

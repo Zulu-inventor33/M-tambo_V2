@@ -164,3 +164,5 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*/5'),  # Run every 5 minutes
     },
 }
+
+

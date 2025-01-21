@@ -224,3 +224,178 @@ Content-Type: application/json
 {
   "detail": "Authentication credentials were not provided."
 }
+
+
+### GET /api/developers/{developer_id}/approve-maintenance-logs/ ###
+# Test to fetch unapproved maintenance logs for a developer, including both regular and adhoc schedules
+GET http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Accept: application/json
+
+### Response Example (Successful GET) ###
+# Example response for GET request when there are unapproved maintenance schedules.
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "unapproved_regular_schedules": [
+    {
+      "maintenance_schedule": {
+        "id": 35,
+        "elevator": 1,
+        "technician": 1,
+        "technician_full_name": "Charlie Brown",
+        "maintenance_company": 1,
+        "maintenance_company_name": "Johnson Elevators Co.",
+        "scheduled_date": "2025-01-15T00:00:00Z",
+        "next_schedule": "1_month",
+        "description": "Monthly Maintenance",
+        "status": "completed",
+        "building": {
+          "id": 1,
+          "name": "Sundowners Towers"
+        },
+        "developer": {
+          "id": 1,
+          "name": "Alice Tech Solutions"
+        },
+        "condition_report": [
+          {
+            "id": 6,
+            "maintenance_schedule": 35,
+            "technician": 1,
+            "date_inspected": "2025-01-16T14:51:01.244439Z",
+            "alarm_bell": "Working fine",
+            "noise_during_motion": "No noise",
+            "cabin_lights": "All lights operational",
+            "position_indicators": "All working",
+            "hall_lantern_indicators": "All indicators functional",
+            "cabin_flooring": "No damage",
+            "additional_comments": "Elevator condition is optimal"
+          }
+        ],
+        "maintenance_log": [
+          {
+            "id": 6,
+            "maintenance_schedule": 35,
+            "technician": 1,
+            "condition_report": 6,
+            "date_completed": "2025-01-16T14:51:01.563700Z",
+            "check_machine_gear": true,
+            "check_machine_brake": true,
+            "check_controller_connections": true,
+            "blow_dust_from_controller": true,
+            "clean_machine_room": true,
+            "clean_guide_rails": true,
+            "observe_operation": true,
+            "description": "All maintenance tasks completed successfully.",
+            "overseen_by": "John Doe",
+            "approved_by": null
+          }
+        ]
+      }
+    }
+  ],
+  "unapproved_adhoc_schedules": [
+    {
+      "maintenance_schedule": {
+        "id": 1,
+        "schedule_type": "adhoc",
+        "elevator": 1,
+        "technician": 1,
+        "technician_full_name": "Charlie Brown",
+        "maintenance_company": 1,
+        "maintenance_company_name": "Johnson Elevators Co.",
+        "scheduled_date": "2025-01-17T14:10:59.863476Z",
+        "description": "Ad-hoc maintenance to check for system issues.",
+        "status": "completed",
+        "building": {
+          "id": 1,
+          "name": "Sundowners Towers"
+        },
+        "developer": {
+          "id": 1,
+          "name": "Alice Tech Solutions"
+        },
+        "condition_report": [
+          {
+            "id": 1,
+            "ad_hoc_schedule": 1,
+            "technician": 1,
+            "date_inspected": "2025-01-17T14:51:10.510579Z",
+            "components_checked": "Doors, Motor, Safety Brakes",
+            "condition": "Doors are slightly misaligned, motor running smoothly, safety brakes functional."
+          }
+        ],
+        "maintenance_log": [
+          {
+            "id": 1,
+            "ad_hoc_schedule": 1,
+            "technician": 1,
+            "condition_report": 1,
+            "date_completed": "2025-01-17T14:51:10.780526Z",
+            "summary_title": "Door Realignment and Motor Inspection",
+            "description": "Realigned elevator doors and inspected the motor for wear. Adjustments were made to improve alignment.",
+            "overseen_by": "Senior Technician John Doe",
+            "approved_by": null
+          }
+        ]
+      }
+    }
+  ]
+}
+
+### PUT /api/developers/{developer_id}/approve-maintenance-logs/ ###
+# Test to approve maintenance logs for both regular and adhoc schedules
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+# Approving a mix of regular and adhoc logs
+{
+  "regular_maintenance_log_ids": [6],
+  "adhoc_maintenance_log_ids": [1]
+}
+
+### PUT (Single Adhoc Log) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "adhoc_maintenance_log_ids": 1
+}
+
+### PUT (Single Regular Log) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": 6
+}
+
+### PUT (No Logs Provided) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": [],
+  "adhoc_maintenance_log_ids": []
+}
+
+### PUT (Non-Existent Logs) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": [999],
+  "adhoc_maintenance_log_ids": [998]
+}
+
+### PUT (Already Approved Logs) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": [6],  # Assuming this log is already approved
+  "adhoc_maintenance_log_ids": [1]    # Assuming this log is already approved
+}
+
