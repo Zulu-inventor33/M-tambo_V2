@@ -8,6 +8,12 @@ from rest_framework.generics import DestroyAPIView
 from .models import Elevator
 from buildings.models import Building
 from .serializers import ElevatorSerializer
+from .models import ElevatorIssueLog
+from jobs.models import AdHocMaintenanceSchedule
+from .serializers import ElevatorIssueLogSerializer
+from jobs.serializers import AdHocMaintenanceScheduleSerializer
+from datetime import datetime
+from django.utils import timezone
 
 class AddElevatorView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this view
@@ -163,3 +169,108 @@ class DeleteElevatorView(DestroyAPIView):
             # Raise a 404 error if the elevator doesn't exist
             raise NotFound(detail="Elevator not found.")
 
+
+class LogElevatorIssueView(APIView):
+    """
+    Record an issue for a specific elevator.
+    If a predefined message is passed (e.g., "Urgency": "Technician needed Urgently"),
+    create both an elevator issue and an ad-hoc maintenance schedule.
+    """
+    permission_classes = [AllowAny]  # Allow any user to log issues
+    
+    def put(self, request, elevator_id, *args, **kwargs):
+        try:
+            # Attempt to retrieve the elevator by its ID
+            elevator = Elevator.objects.get(id=elevator_id)
+        except Elevator.DoesNotExist:
+            return Response({"detail": "Elevator not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Extract the issue description from the request data
+        issue_description = request.data.get('issue_description')
+        if not issue_description:
+            return Response({"detail": "Issue description is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the issue log (ElevatorIssueLog)
+        issue_log = ElevatorIssueLog.objects.create(
+            elevator=elevator,
+            developer=elevator.developer,
+            building=elevator.building,
+            issue_description=issue_description
+        )
+
+        # Check if an urgency message is provided
+        urgency_message = request.data.get('Urgency', None)
+
+        # If an urgency message is provided, create an ad-hoc maintenance schedule
+        if urgency_message:
+            # Prepare the description for the ad-hoc maintenance schedule
+            maintenance_description = f"A system-generated maintenance schedule based on a Logged Elevator Issue of {timezone.now().date()}, the description of the issue is: { {issue_description} }"
+
+            # Create an AdHocMaintenanceSchedule
+            maintenance_schedule_data = {
+                'elevator': elevator.id,
+                'maintenance_company': elevator.maintenance_company.id if elevator.maintenance_company else None,
+                'technician': elevator.technician.id if elevator.technician else None,
+                'scheduled_date': timezone.now(),
+                'description': maintenance_description
+            }
+
+            # Validate and create the ad-hoc maintenance schedule
+            schedule_serializer = AdHocMaintenanceScheduleSerializer(data=maintenance_schedule_data)
+            if schedule_serializer.is_valid():
+                schedule = schedule_serializer.save()
+
+                # Link the created schedule to the technician and maintenance company
+                if not schedule.technician:
+                    schedule.technician = elevator.technician
+                    schedule.save()
+
+                if not schedule.maintenance_company:
+                    schedule.maintenance_company = elevator.maintenance_company
+                    schedule.save()
+
+                # Return success response with issue and maintenance schedule details
+                return Response({
+                    "message": "Issue logged and ad-hoc maintenance schedule created successfully.",
+                    "issue_id": issue_log.id,
+                    "maintenance_schedule_id": schedule.id
+                }, status=status.HTTP_201_CREATED)
+
+            return Response(schedule_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # If no urgency message is provided, just return the created issue
+        return Response({
+            "message": "Issue logged successfully.",
+            "issue_id": issue_log.id
+        }, status=status.HTTP_201_CREATED)
+    
+
+
+class LoggedElevatorIssuesView(APIView):
+    """
+    List all the logged issues for a specific elevator.
+    """
+    permission_classes = [AllowAny]  # Adjust permissions as needed
+
+    def get(self, request, elevator_id, *args, **kwargs):
+        """
+        Get a list of all issues logged for a specific elevator.
+        """
+        try:
+            # Attempt to retrieve the elevator by its ID
+            elevator = Elevator.objects.get(id=elevator_id)
+        except Elevator.DoesNotExist:
+            return Response({"detail": "Elevator not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get all logged issues for this elevator
+        issues = ElevatorIssueLog.objects.filter(elevator=elevator)
+
+        # If no issues are found, return a message
+        if not issues.exists():
+            return Response({"detail": "No issues logged for this elevator."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize the issues data
+        serializer = ElevatorIssueLogSerializer(issues, many=True)
+
+        # Return the list of logged issues
+        return Response(serializer.data, status=status.HTTP_200_OK)

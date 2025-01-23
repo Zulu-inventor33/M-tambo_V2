@@ -213,4 +213,249 @@ HTTP/1.1 204 No Content
 ---
 
 
+# Log Elevator Issue - PUT Request
+
+### 1. Log an Issue Without Urgency ###
+
+# This example demonstrates how to log an issue for a specific elevator without an urgency field.
+# It will create an issue entry in the `ElevatorIssueLog` model only.
+
+PUT http://127.0.0.1:8000/api/elevators/1/log_an_issue/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "issue_description": "The elevator is stuck on the 3rd floor and cannot move."
+}
+
+### Expected Response ###
+# If the elevator exists and the issue description is valid, a new issue will be logged.
+# Response: Status 201 Created, with the details of the created issue.
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "message": "Issue logged successfully.",
+  "issue_id": 123
+}
+
+# The issue has been logged successfully with ID 123.
+# The field "message" provides a status message confirming the action.
+
+---
+
+### 2. Log an Issue With Urgency ###
+
+# This example shows how to log an issue and also trigger the creation of an ad-hoc maintenance schedule.
+# It includes an urgency message, which will trigger the creation of both the issue and the maintenance schedule.
+
+PUT http://127.0.0.1:8000/api/elevators/1/log_an_issue/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "issue_description": "The elevator is making a strange noise when moving up.",
+  "Urgency": "Technician needed Urgently"
+}
+
+### Expected Response ###
+# In this case, because the "Urgency" field is provided, the system will not only log the issue,
+# but also create an ad-hoc maintenance schedule.
+# The response will include the created issue and the created maintenance schedule details.
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "message": "Issue logged and ad-hoc maintenance schedule created successfully.",
+  "issue_id": 124,
+  "maintenance_schedule_id": 456
+}
+
+# The issue has been logged successfully with ID 124.
+# Additionally, an ad-hoc maintenance schedule has been created with ID 456.
+# The maintenance schedule description will reference the logged issue's description.
+
+---
+
+### 3. Log an Issue with Missing Description (Error Case) ###
+
+# This example demonstrates what happens if the `issue_description` is not provided in the request.
+# The API will return a Bad Request response because the description is required.
+
+PUT http://127.0.0.1:8000/api/elevators/1/log_an_issue/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "Urgency": "Technician needed Urgently"
+}
+
+### Expected Response ###
+# Since the issue description is missing, the server will return a 400 Bad Request error.
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Issue description is required."
+}
+
+# The response clearly indicates that the issue description is required, and the request has been rejected.
+
+---
+
+### 4. Log an Issue for Non-Existent Elevator (Error Case) ###
+
+# This example demonstrates what happens if the elevator ID provided in the URL does not exist in the system.
+# In this case, the API will return a 404 Not Found response.
+
+PUT http://127.0.0.1:8000/api/elevators/999/log_an_issue/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "issue_description": "The elevator doors won't close."
+}
+
+### Expected Response ###
+# Since the elevator with ID 999 does not exist, the server will return a 404 error.
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Elevator not found."
+}
+
+# The server responds with a 404 status code and a message indicating that the elevator with ID 999 was not found.
+
+---
+
+### 5. Log an Issue for Unauthorized User (Error Case) ###
+
+# This example demonstrates the behavior of the API when the logged-in user does not have permission to log an issue for the elevator.
+# Since we are using `AllowAny` permissions, this case is not directly applicable here. However, if permissions were restricted,
+# this request could fail with a 403 Forbidden error.
+
+# Assume that the user is not the developer associated with the elevator (this can be simulated by adjusting permissions).
+PUT http://127.0.0.1:8000/api/elevators/1/log_an_issue/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "issue_description": "Elevator buttons are not responding."
+}
+
+### Expected Response ###
+# If the `permission_classes` were to restrict access based on the developer, this could return:
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+
+{
+  "detail": "You do not have permission to log issues for this elevator."
+}
+
+# This case would occur if permissions were more restrictive. However, since we have `AllowAny` permissions,
+# this scenario will not occur unless access control is customized further.
+---
+
+### 6. Log an Issue with Invalid Elevator ID (Error Case) ###
+
+# This example demonstrates what happens when a non-numeric value is passed for the elevator ID, which is not a valid integer.
+# The server will return a 404 Not Found response because it cannot find a matching elevator.
+
+PUT http://127.0.0.1:8000/api/elevators/abc/log_an_issue/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "issue_description": "The elevator's light is flickering."
+}
+
+### Expected Response ###
+# The server will return a 404 error as the elevator ID is not a valid number.
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Elevator not found."
+}
+
+# The server responds with a 404 status code because it could not find an elevator with ID "abc".
+
+
+
+# This is the .http file that demonstrates how to interact with the GET endpoint
+# for retrieving all logged issues of a specific elevator.
+
+### Retrieve all logged issues for elevator with ID 1 ###
+GET http://127.0.0.1:8000/api/elevators/1/logged_issues HTTP/1.1
+Accept: application/json
+
+###
+
+### Retrieve all logged issues for elevator with ID 2 ###
+GET http://127.0.0.1:8000/api/elevators/2/logged_issues HTTP/1.1
+Accept: application/json
+
+###
+
+### Elevator not found (non-existent elevator ID) ###
+GET http://127.0.0.1:8000/api/elevators/999/logged_issues HTTP/1.1
+Accept: application/json
+
+###
+
+### No issues found for elevator with ID 1 ###
+# This request simulates a case where the elevator exists, but there are no logged issues.
+GET http://127.0.0.1:8000/api/elevators/1/logged_issues HTTP/1.1
+Accept: application/json
+
+###
+
+# Sample response for the first request (valid elevator with logged issues)
+
+### Response (if issues are logged for elevator with ID 1) ###
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "issue_description": "The elevator is stuck on the 3rd floor.",
+    "developer": 1,
+    "building": 2,
+    "created_at": "2025-01-21T15:00:00Z"
+  },
+  {
+    "id": 2,
+    "issue_description": "The elevator doors are malfunctioning.",
+    "developer": 1,
+    "building": 2,
+    "created_at": "2025-01-22T10:30:00Z"
+  }
+]
+
+###
+
+# Sample response for a non-existent elevator (ID 999)
+
+### Response (Elevator not found) ###
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Elevator not found."
+}
+
+###
+
+# Sample response when no issues exist for elevator with ID 1
+
+### Response (No issues logged for this elevator) ###
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "No issues logged for this elevator."
+}
+
+
 

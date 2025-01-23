@@ -9,4 +9,6 @@ urlpatterns = [
     path('building/<int:building_id>/', views.ElevatorsInBuildingView.as_view(), name='elevators_in_building'),
     path('update/<int:id>/', views.UpdateElevatorView.as_view(), name='update_elevator'),
     path('delete/<int:id>/', views.DeleteElevatorView.as_view(), name='delete_elevator'),
+    path('<int:elevator_id>/log_an_issue/', views.LogElevatorIssueView.as_view(), name='log_elevator_issue'),
+    path('<int:elevator_id>/logged_issues/', views.LoggedElevatorIssuesView.as_view(), name='logged_elevator_issues'),
 ]
