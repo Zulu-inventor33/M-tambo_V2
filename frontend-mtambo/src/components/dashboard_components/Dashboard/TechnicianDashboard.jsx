@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import { maintenanceDashboardSidebarLinks } from '../Sidebar/sidebarData';
+import { technicianDashboardSidebarLinks } from '../Sidebar/sidebarData';
 import Footer from '../Footer';
 import Header from '../Header/TopBar';
 import Sidebar from '../Sidebar/Sidebar';
@@ -9,10 +9,10 @@ import './dashboard.css';
 
 import TechnicianMainContentSection from '../TechniciansDashboardComponents/TechnicianMainContentSection';
 
-const DeveloperDashboard = () => {
+const TechnicianDashboard = () => {
   return (
     <div className='maintencance-dashboard'>
-      <Sidebar sidebarLinks={maintenanceDashboardSidebarLinks} />
+      <Sidebar sidebarLinks={technicianDashboardSidebarLinks} />
       <Header />
       {/* Define the dynamic routes for the content area */}
       <Routes>
@@ -24,4 +24,4 @@ const DeveloperDashboard = () => {
   );
 };
 
-export default  DeveloperDashboard;
+export default TechnicianDashboard;

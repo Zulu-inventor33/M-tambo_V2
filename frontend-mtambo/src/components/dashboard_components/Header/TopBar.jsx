@@ -5,6 +5,7 @@ import MessagesDropdownSection from './MessagesDropdownSection';
 import UserProfileDropdownSection from './UserProfileDropdownSection';
 import FullscreenToggleButton from './FullscreenToggleButton';
 import NotificationsDropdown from './NotificationsDropdown';
+import ThemeToggleButton from './ThemeToggleButton';
 
 const TopBar = () => {
 	return (
@@ -20,8 +21,8 @@ const TopBar = () => {
 						<NotificationsDropdown />
 						{/* fullscreen button toggler */}
 						<FullscreenToggleButton />
-						{/* Messages section */}
-						<MessagesDropdownSection />
+						{/* Theme toggler section */}
+						<ThemeToggleButton />
 						{/* user profile section */}
 						<UserProfileDropdownSection />
 					</ul>

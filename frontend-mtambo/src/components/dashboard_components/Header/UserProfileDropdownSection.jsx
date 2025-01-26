@@ -22,18 +22,18 @@ const UserProfileDropdownSection = () => {
 				data-bs-auto-close="outside"
 				aria-expanded="false"
 			>
-				<img src={user.avatar || "/images/avatar_placeholder.avif"} alt="user-image" className="user-avtar" />
+				<img src={user.avatar || "/images/avatar_placeholder.png"} alt="user-image" className="user-avtar" />
 				<span>{user.first_name} {user.last_name}</span>
 			</a>
 			<div className="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
 				<div className="dropdown-header">
 					<div className="d-flex mb-1">
 						<div className="flex-shrink-0">
-							<img src={user.avatar || "/images/avatar_placeholder.avif"} alt="user-image" className="user-avtar wid-35" />
+							<img src={user.avatar || "/images/avatar_placeholder.png"} alt="user-image" className="user-avtar wid-35" />
 						</div>
 						<div className="flex-grow-1 ms-3">
 							<h6 className="mb-1 email_long" title={user.email}>{user.email}</h6>
-							<span>{user.account_type}</span>
+							<span className='account-type-lable'>{user.account_type}</span>
 						</div>
 						{/* Logout button */}
 						<a href="#!" className="pc-head-link bg-transparent" onClick={logOut}>

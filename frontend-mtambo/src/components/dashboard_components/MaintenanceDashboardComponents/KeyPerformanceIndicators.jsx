@@ -2,21 +2,21 @@ import React from "react";
 
 const KeyPerformanceIndicators = ({ data }) => {
     return (
-        <div class="row mt-4">
+        <div className="row mt-4">
             {data.map((item, index) => (
-                <div key={index} class="col-sm-6 col-md-3">
-                    <div class={`card card-stats card-${item.color} card-round`}>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-4">
-                                    <div class="icon-big text-center">
-                                        <i class={`${item.icon} fa-2x`}></i>
+                <div key={index} className="col-sm-6 col-md-3">
+                    <div className={`card card-stats card-round`}>
+                        <div className="card-body">
+                            <div className="row">
+                                <div className="col-4">
+                                    <div className="icon-big text-center">
+                                        <i className={`${item.icon} fa-2x`}></i>
                                     </div>
                                 </div>
-                                <div class="col-8 col-stats">
-                                    <div class="numbers">
-                                        <p class="card-category">{item.title}</p>
-                                        <h4 class="card-title">{item.count}</h4>
+                                <div className="col-8 col-stats">
+                                    <div className="numbers">
+                                        <p className="card-category">{item.title}</p>
+                                        <h4 className="card-title">{item.count}</h4>
                                     </div>
                                 </div>
                             </div>

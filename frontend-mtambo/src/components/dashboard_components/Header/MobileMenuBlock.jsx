@@ -6,20 +6,26 @@ const MobileMenuBlock = () => {
     const { toggleSidebar } = useSidebarToggle();
 
     return (
-        <div className="me-auto pc-mob-drp">
+        <div className="me-auto pc-mob-drp pc-topbar-toggler-section">
             <ul className="list-unstyled">
                 {/* ======= Menu collapse Icon ===== */}
                 <li className="pc-h-item pc-sidebar-collapse">
-                    <a 
-                        href="#" 
-                        className="pc-head-link ms-0" 
+                    <a
+                        href="#"
+                        className="pc-head-link ms-0 custom-collapse-icon"
                         id="sidebar-hide"
                         onClick={(e) => {
                             e.preventDefault();
                             toggleSidebar();
                         }}
                     >
-                        <i className="ti ti-menu-2"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width={25} height={25} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-align-right-2">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M20 4v16" />
+                            <path d="M4 6h12" />
+                            <path d="M10 12h6" />
+                            <path d="M6 18h10" />
+                        </svg>
                     </a>
                 </li>
                 <li className="pc-h-item pc-sidebar-popup">

@@ -1,14 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 import PageHeader from "./PageHeader";
 import ExpandableTable from "../Tables/ExpandableTable";
 import PaginationControl from "../Tables/PaginationControl";
 
-const JobManagement = () => {
+const OverdueJobs = () => {
     const PageHeaderbreadcrumbItems = [
         { label: 'Home', link: '/dashboard' },
         { label: 'Job Management' }
     ];
+
+    //fetch the information of current maintenance company from localstorage to get email
+    const currentData = JSON.parse(localStorage.getItem('user'));
+    const email = currentData ? currentData.email : '';
+
+    // useEffect(() => {
+
+    //     fetchCompletedJobs = async () => {
+    //         try {
+    //             const response = await axios.get(`api/jobs/maintenance-schedule/maintenance_company/1/upcoming_jobs/);
+    //         } catch (error) {
+                
+    //         }
+    //     };
+    // }, []);
+
+    // Fetch maintenance company ID by email and then fetch technicians too.
+    // const fetchCompanyIdAndTechnicians = async (email) => {
+    //     try {
+    //         const response = await axios.get(`/ api / maintenance - companies / email / ${ email } / `);
+    //         if (response.status === 200) {
+    //             const companyId = response.data.id;
+    //             // Once we have the company ID, fetch technicians
+    //             fetchTechnicians(companyId);
+    //         }
+    //     } catch (err) {
+    //         setLoading(false);
+    //         const errorMessage = err.response?.data?.detail || 'Failed to fetch maintenance company details using email.';
+    //         setError(errorMessage);
+    //         console.error(errorMessage);
+    //     }
+    // };
+
+    // Fetch technicians by company ID
+    const fetchTechnicians = async (companyId) => {
+        try {
+            const response = await axios.get(`/ api / maintenance - companies / ${ companyId } / technicians / `);
+            if (response.status === 200) {
+                setFetchedTechnicianData(response.data);
+                console.log(fetchedTechnicianData);
+            } else {
+                setError('No technicians found for this maintenance company.');
+            }
+        } catch (err) {
+            setLoading(false);
+            const errorMessage = err.response?.data?.detail || 'Failed to fetch technicians.';
+            setError(errorMessage);
+            console.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     
@@ -76,7 +129,7 @@ const JobManagement = () => {
                     {/* Card Container */}
                     <div className="card table-card">
                         <div className="card-header d-flex justify-content-between align-items-center">
-                            <span className="h4">Job Management</span>
+                            <span className="h4">Completed Jobs</span>
                             {/* Export Button */}
                             <button className="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-download">
@@ -110,4 +163,4 @@ const JobManagement = () => {
     );
 };
 
-export default JobManagement;
+export default OverdueJobs;

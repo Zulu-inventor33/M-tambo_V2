@@ -12,8 +12,13 @@ import JobManagement from '../MaintenanceDashboardComponents/JobManagement';
 import ProfileContent from '../MaintenanceDashboardComponents/ProfileContent';
 import AddNewBuilding from '../MaintenanceDashboardComponents/AddNewBuilding';
 import AddNewEquipment from '../MaintenanceDashboardComponents/AddNewEquipment';
-import TechnicianDashboard from '../MaintenanceDashboardComponents/TechniciansDashboard';
-
+import TechniciansDashboard from '../MaintenanceDashboardComponents/Technicians/TechniciansDashboard';
+import CreateMaintenanceTask from '../MaintenanceDashboardComponents/CreateMaintenanceTask';
+import Reports from '../MaintenanceDashboardComponents/Reports';
+import Calendar from '../MaintenanceDashboardComponents/Calendar/Calendar';
+import CompletedJobs from '../MaintenanceDashboardComponents/CompletedJobs';
+import OverdueJobs from '../MaintenanceDashboardComponents/OverdueJobs';
+import UpcomingJobs from '../MaintenanceDashboardComponents/UpcomingJobs';
 
 const MaintenanceDashboard = () => {
   return (
@@ -26,9 +31,16 @@ const MaintenanceDashboard = () => {
         <Route path="/" element={<DashboardMainContent />} />
         <Route path="profile" element={<ProfileContent />} />
         <Route path="job-management" element={<JobManagement />} />
+        <Route path="completed-jobs" element={<CompletedJobs />} />
+        <Route path="upcoming-jobs" element={<UpcomingJobs />} />
+        <Route path="overdue-jobs" element={<OverdueJobs  />} />
         <Route path="add-new-building" element={<AddNewBuilding />} />
+        <Route path="buildings" element={<TechniciansDashboard />} />
         <Route path="add-new-equipment" element={<AddNewEquipment />} />
-        <Route path="technicians" element={<TechnicianDashboard />} />
+        <Route path="technicians" element={<TechniciansDashboard />} />
+        <Route path="create-maintenance-task" element={<CreateMaintenanceTask />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="calendar" element={<Calendar />} />
       </Routes>
       <Footer />
     </div>

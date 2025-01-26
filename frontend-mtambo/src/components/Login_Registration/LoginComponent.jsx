@@ -25,6 +25,7 @@ const LoginComponent = () => {
 		startLoading();
 
 		// Set a timeout to stop the loader after 1.5 seconds
+		// It should take 1.5s for the loader to stop 
 		setTimeout(() => {
 			stopLoading(); // Stop the loader after 1.5 seconds
 		}, 1500);
@@ -84,8 +85,6 @@ const LoginComponent = () => {
 			loginAction(userData);
 		}
 	};
-
-
 
 	return (
 		<div className="auth-main">

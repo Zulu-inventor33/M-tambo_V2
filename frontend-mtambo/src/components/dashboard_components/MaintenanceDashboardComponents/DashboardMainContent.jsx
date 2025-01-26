@@ -1,13 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import PageHeader from './PageHeader';
 import KeyPerformanceIndicators from './KeyPerformanceIndicators';
 import JobStatusSummary from './JobStatusSummary';
 import TechniciansAvailability from './TechniciansAvailability';
 import MainContentHeader from './MainContentHeader';
 
 const DashboardMainContent = () => {
-    // Mock data (in the future, this data will come from the API)
+    const PageHeaderbreadcrumbItems = [
+        { label: 'Dashboard' }
+    ];
     const keyPerformanceData = [
         {
             title: "Active Elevators",
@@ -39,22 +42,7 @@ const DashboardMainContent = () => {
         <div className='pc-container'>
             <div className='pc-content'>
                 {/* the header section of the dashboard */}
-                <div className="page-header">
-                    <div className="page-block">
-                        <div className="row align-items-center">
-                            <div className="col-md-12">
-                                <div className="page-header-title">
-                                    <h5 className="m-b-10">Home</h5>
-                                </div>
-                                <ul className="breadcrumb">
-                                    <li className="breadcrumb-item">
-                                        <Link to="/dashboard">Dashboard</Link>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PageHeader title='Home' breadcrumbItems={PageHeaderbreadcrumbItems} />
                 <MainContentHeader />
                 {/* key performance indicators section */}
                 <KeyPerformanceIndicators data={keyPerformanceData} />

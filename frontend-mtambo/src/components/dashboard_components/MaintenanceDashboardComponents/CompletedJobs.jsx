@@ -4,7 +4,7 @@ import PageHeader from "./PageHeader";
 import ExpandableTable from "../Tables/ExpandableTable";
 import PaginationControl from "../Tables/PaginationControl";
 
-const JobManagement = () => {
+const CompletedJobs = () => {
     const PageHeaderbreadcrumbItems = [
         { label: 'Home', link: '/dashboard' },
         { label: 'Job Management' }
@@ -76,7 +76,7 @@ const JobManagement = () => {
                     {/* Card Container */}
                     <div className="card table-card">
                         <div className="card-header d-flex justify-content-between align-items-center">
-                            <span className="h4">Job Management</span>
+                            <span className="h4">Completed Jobs</span>
                             {/* Export Button */}
                             <button className="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-download">
@@ -110,4 +110,4 @@ const JobManagement = () => {
     );
 };
 
-export default JobManagement;
+export default CompletedJobs;

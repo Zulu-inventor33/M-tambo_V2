@@ -473,32 +473,6 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 ----------------------------------------- ACCOUNT TYPE SELECTION STYLING ---------------------------------
 ===================================================================================================================== */
 /* Style the select dropdown */
-.form-select {
-    background-color: #f8f9fa;
-    border: 1px solid #ced4da;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    font-family: 'Arial', sans-serif;
-    transition: all 0.3s ease-in-out;
-    width: 100%;
-}
-
-.form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
-    outline: none;
-}
-
-.form-select option {
-    background-color: #fff;
-    padding: 0.5rem;
-}
-
-.form-select option:hover {
-    background-color: #e9ecef;
-}
-
 
 .account-type-title {
     font-weight: 600;

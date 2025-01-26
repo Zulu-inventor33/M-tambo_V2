@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'react-tooltip/dist/react-tooltip.css'
 
 import AuthProvider from './context/AuthenticationContext';
 import PrivateRoute from './router/PrivateRoute';
