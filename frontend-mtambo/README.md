@@ -64,7 +64,7 @@ The database used is **PostgreSQL**, which ensures reliable and scalable data st
 ## Technologies Used
 
 - **Frontend**: React, Redux, Axios, Material-UI
-- **Backend**: Django, Django REST Framework, PostgreSQL
+- **Backend**: Django, Django REST Framework, MySQL
 - **Authentication**: JWT (JSON Web Tokens)
 - **Deployment**: Docker, Nginx, Gunicorn
 - **Version Control**: Git, GitHub
@@ -78,7 +78,7 @@ The database used is **PostgreSQL**, which ensures reliable and scalable data st
 Before running the application, ensure you have the following installed:
 - Node.js (v14 or higher)
 - Python (v3.8 or higher)
-- PostgreSQL (v12 or higher)
+- MySQL
 - Docker (optional, for containerized deployment)
 
 ### Installation

@@ -46,6 +46,8 @@ const AuthProvider = ({ children }) => {
 					account_type: response.data.account_type,
 					created_at: response.data.created_at,
 					is_staff: response.data.is_staff,
+					account_type_id: response.data.account_type_id,
+					user_id: response.data.user_id,
 				};
 				// Set user data and token in the state
 				setUser(userData);

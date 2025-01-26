@@ -10,21 +10,27 @@ const UpcomingJobs = () => {
         { label: 'Home', link: '/dashboard' },
         { label: 'Job Management' }
     ];
+    const [fetchedCompletedJobs, setFetchedCompletedJobs] = useState([]);
 
     //fetch the information of current maintenance company from localstorage to get email
     const currentData = JSON.parse(localStorage.getItem('user'));
-    const email = currentData ? currentData.email : '';
+    //retrieve the id of the current maintenance company
+    const companyId = currentData ? currentData.account_type_id : '';
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     fetchCompletedJobs = async () => {
-    //         try {
-    //             const response = await axios.get(`api/jobs/maintenance-schedule/maintenance_company/1/upcoming_jobs/);
-    //         } catch (error) {
+        fetchCompletedJobs = async () => {
+            try {
+                const response = await axios.get(`/api/jobs/maintenance-schedule/maintenance_company/${companyId}/upcoming_jobs/`);
+                if (response.status === 200) {
+                    setFetchedCompletedJobs(response.data);
+                    console.log(fetchedCompletedJobs);
+                }
+            } catch (error) {
                 
-    //         }
-    //     };
-    // }, []);
+            }
+        };
+    }, []);
 
     // Fetch maintenance company ID by email and then fetch technicians too.
     // const fetchCompanyIdAndTechnicians = async (email) => {

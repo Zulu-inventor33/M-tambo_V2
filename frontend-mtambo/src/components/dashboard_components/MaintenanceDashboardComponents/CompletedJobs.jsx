@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 import PageHeader from "./PageHeader";
 import ExpandableTable from "../Tables/ExpandableTable";
@@ -11,7 +12,29 @@ const CompletedJobs = () => {
     ];
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    
+    const [fetchedCompletedJobs, setFetchedCompletedJobs] = useState([]);
+
+    //fetch the information of current maintenance company from localstorage to get email
+    const currentData = JSON.parse(localStorage.getItem('user'));
+    //retrieve the id of the current maintenance company
+    const companyId = currentData ? currentData.account_type_id : '';
+
+    useEffect(() => {
+        const fetchCompletedJobs = async () => {
+            try {
+                const response = await axios.get(`/api/jobs/maintenance-schedule/maintenance_company/${companyId}/upcoming_jobs/`);
+                if (response.status === 200) {
+                    setFetchedCompletedJobs(response.data);
+                    console.log(fetchedCompletedJobs);
+                }
+            } catch (error) {
+                console.error("Error fetching completed jobs from completed Jobs:", error);
+            }
+        };
+
+        fetchCompletedJobs();
+    }, []);
+
     const columns = ['Technician', 'Building', 'Description', 'Scheduled Date', 'Status'];
     const technicians = [
         { technician: "Erik Baglioni", building: "Main Office - Block A", description: "Fixing the air conditioning", scheduledDate: "2025-01-15", status: "In Progress" },
@@ -90,7 +113,7 @@ const CompletedJobs = () => {
                         </div>
                         {/* Table */}
                         <div className="card-body">
-                            <ExpandableTable 
+                            <ExpandableTable
                                 columns={columns}
                                 currentRows={currentRows}
                             />
