@@ -1,0 +1,5 @@
+.dashboard-logo {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: var(--pc-sidebar-header-color);
+}

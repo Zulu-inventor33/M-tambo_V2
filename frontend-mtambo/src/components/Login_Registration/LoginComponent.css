@@ -210,7 +210,7 @@ nav {
     align-items: center;
     text-align: center;
     text-transform: uppercase;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
 
@@ -444,7 +444,22 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 
 .submit-button:hover {
     background-color: #218838;
+    scale: 1.05;
 }
+
+.submit-button:disabled {
+    background-color: #ccc;
+    color: #292d34;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.submit-button:disabled:hover {
+    background-color: #ccc;
+    cursor: not-allowed;
+    scale: 1;
+}
+
 
 .password-toggle-button {
     background: none;
@@ -457,6 +472,8 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 ======================================================================================================================
 ----------------------------------------- ACCOUNT TYPE SELECTION STYLING ---------------------------------
 ===================================================================================================================== */
+/* Style the select dropdown */
+
 .account-type-title {
     font-weight: 600;
 }
@@ -579,6 +596,11 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     width: 180px;
 }
   
+.loading-message {
+    color: #888;
+    font-size: 14px;
+    margin-top: 10px;
+}
 
 @media screen and (max-width: 544px) {
     .login-page-new__main-form-row input {

@@ -1,7 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../../context/AuthenticationContext';
+
 const Menu = () => {
+  const { user, logOut } = useAuth();
+  console.log(user);
+  console.log("yoooooooooooooooooooooooooooo");
   return (
     <nav className="hidden md:flex space-x-6 justify-center tracking-tight flex-grow flex-basis-auto">
       <Link to="/" className="desktop-link text-white transition-colors duration-300">Home</Link>
