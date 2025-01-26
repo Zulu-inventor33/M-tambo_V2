@@ -169,7 +169,8 @@ class LoginView(APIView):
                     'created_at': user.created_at,
                     'is_staff': user.is_staff,
                     'access': str(access_token),
-                    'refresh': str(refresh)
+                    'refresh': str(refresh),
+                    'id': user.id
                 }
 
                 # Return the response with user data and tokens
