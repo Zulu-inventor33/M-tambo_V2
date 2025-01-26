@@ -1,6 +1,6 @@
-# M-Tambo: Elevator Maintenance Management System
+# M-Tambo: Computerised Maintenance Management System
 
-![M-Tambo Logo](https://via.placeholder.com/150x50?text=M-Tambo+Logo)  
+![M-Tambo Logo](https://github.com/HassanMunene/Example-/blob/main/mtambo_home_page.png)  
 *Streamlining Elevator Maintenance for Developers, Maintenance Teams, and Technicians*
 
 ---
