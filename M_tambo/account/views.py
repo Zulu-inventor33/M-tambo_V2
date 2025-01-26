@@ -6,19 +6,20 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny  # Allow any user to access these endpoints
 from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
+from django.shortcuts import get_object_or_404
+
 
 # View for User SignUp
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # Step 1: Validate and create the user
+        # Step 1: Validate and create the user using UserSerializer
         user_serializer = UserSerializer(data=request.data)
-        print(f"serealized data: {user_serializer}")
 
         if user_serializer.is_valid():
-            user = user_serializer.save()  # Save user and get the user instance
-            account_type = user.account_type
+            user = user_serializer.save()  # Save the user and get the user instance
+            account_type = user.account_type  # Extract the account type
 
             # Step 2: Handle profile creation based on account type
             if account_type == 'maintenance':
@@ -124,65 +125,69 @@ class SignUpView(APIView):
             developer_name=developer_name,
             address=address
         )
-        
+
         # Return response with user and developer profile data
         return Response(
             {"user": UserSerializer(user).data, "developer_profile": DeveloperSerializer(developer_profile).data},
             status=status.HTTP_201_CREATED
         )
 
-
 class LoginView(APIView):
-    # Allow any user to access this endpoint
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # Deserialize the incoming request data
         serializer = LoginSerializer(data=request.data)
+        
         if serializer.is_valid():
             email_or_phone = serializer.validated_data['email_or_phone']
             password = serializer.validated_data['password']
             
             # Adjust authentication to handle email or phone number login
             user = authenticate(request, username=email_or_phone, password=password)
-            print(f"yooooooo: {user}")
-
-            #this is for debugging purposes
-            #we have added on top of returning access token, we are return user so that
-            #we can use the user to maintain a session on the frontend using react context
-            if user:
-                print(f"Full User Object: {user}")
-                print(f"User ID: {user.id}")
-                print(f"User Email: {user.email}")
-                print(f"First_Name: {user.first_name}")
-                print(f"account_type: {user.account_type}")
-            else:
-                print("Authentication failed!")
             
             if user is not None:
-                # Generate JWT tokens for the authenticated user
+                # Generate the tokens for the user
                 refresh = RefreshToken.for_user(user)
                 access_token = refresh.access_token
 
-                # Serialize the user data to return relevant information
+                # Determine the account type based on the user's related profile
+                account_type = None
+                profile_id = None
+                if hasattr(user, 'developer_profile'):
+                    account_type = 'developer'
+                    profile_id = user.developer_profile.id
+                elif hasattr(user, 'maintenance_profile'):
+                    account_type = 'maintenance'
+                    profile_id = user.maintenance_profile.id
+                elif hasattr(user, 'technician_profile'):
+                    account_type = 'technician'
+                    profile_id = user.technician_profile.id
+
+                # Prepare the user data for the response
                 user_data = {
-                    'id': user.id,
                     'first_name': user.first_name,
+                    'last_name': user.last_name,
                     'email': user.email,
-                    'account_type': user.account_type
+                    'phone_number': user.phone_number,  # Assuming the User model has a 'phone_number' field
+                    'account_type': account_type,
+                    'created_at': user.created_at,
+                    'is_staff': user.is_staff,
+                    'access': str(access_token),
+                    'refresh': str(refresh),
+                    'account_type_id': profile_id,
+                    'user_id' : user.id
+
                 }
 
-                # Return the user data and tokens in the response
-                return Response({
-                    'user': user_data,
-                    'access': str(access_token),
-                    'refresh': str(refresh)
-                })
-
+                # Return the response with user data and tokens
+                return Response(user_data, status=status.HTTP_200_OK)
+            
+            # Invalid credentials
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # If serializer is invalid, return validation errors
+        # If the serializer is not valid, return the validation errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # View to List Available Specializations (for Frontend Dropdown)
 class SpecializationListView(APIView):

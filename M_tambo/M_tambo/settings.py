@@ -25,17 +25,19 @@ SECRET_KEY = 'django-insecure-kp+-@nban-ay6zzr#2zg@6k4xsb@n#k4h_!z^5l($cb$9a%c95
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# ALLOWED_HOSTS
+# Allows requests from localhost, 127.0.0.1, [::1], or any host when in production (you can modify it later)
 ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]"]
 
-# Allow the React app to communicate with the Django API
+# Allow the React app to communicate with the Django API (optional - can be removed if not using React)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # React app
+    "http://localhost:5173",
 ]
 
-# Enable credentials if needed (e.g., for cookies or authentication headers)
+# Enable credentials if needed (optional - can be removed if not using React)
 CORS_ALLOW_CREDENTIALS = True
 
-# Specify the allowed methods
+# Specify the allowed methods for CORS (optional - can be modified based on needs)
 CORS_ALLOW_METHODS = [
     'GET',
     'POST',
@@ -44,7 +46,7 @@ CORS_ALLOW_METHODS = [
     'OPTIONS',
 ]
 
-# Ensure allowed headers for the JSON content type
+# Ensure allowed headers for the JSON content type (optional - can be modified)
 CORS_ALLOW_HEADERS = [
     'content-type',
     'accept',
@@ -56,8 +58,6 @@ CORS_ALLOW_HEADERS = [
     'cache-control',
     'pragma',
 ]
-
-
 
 # Application definition
 
@@ -75,6 +75,12 @@ INSTALLED_APPS = [
     'technicians',
     'rest_framework',
     'rest_framework_simplejwt',
+    'buildings',
+    'elevators',
+    'alerts',
+    'jobs',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 REST_FRAMEWORK = {
@@ -86,11 +92,10 @@ REST_FRAMEWORK = {
     ],
 }
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -123,8 +128,6 @@ WSGI_APPLICATION = 'M_tambo.wsgi.application'
 AUTH_USER_MODEL = 'account.User'
 
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -132,10 +135,18 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'mtambo_v2_db',
+#         'USER': 'root',
+#         'PASSWORD': 'Munene14347',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -151,25 +162,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Redis backend for results
+
+from celery.schedules import crontab
+
+# Configure Celery Beat Schedule to run the task every 5 minutes
+CELERY_BEAT_SCHEDULE = {
+    'check-overdue-schedules-every-5-minutes': {
+        'task': 'jobs.tasks.check_overdue_schedules',  # Task path (module + function)
+        'schedule': crontab(minute='*/5'),  # Run every 5 minutes
+    },
+}

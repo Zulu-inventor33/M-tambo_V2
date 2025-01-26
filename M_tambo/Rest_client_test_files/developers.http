@@ -1,0 +1,401 @@
+### 1. Test: Get List of All Developers
+# URL: /api/developers/
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output (Success):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "specialization": "Backend Developer",
+    "experience": "5 years"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "janesmith@example.com",
+    "specialization": "Frontend Developer",
+    "experience": "3 years"
+  }
+]
+
+### Failure Scenario: Unauthorized Access (Invalid Token)
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <INVALID_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 2. Test: Get Developer Details by ID
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/1/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output (Success):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "specialization": "Backend Developer",
+  "experience": "5 years",
+  "projects": [
+    {
+      "project_id": 101,
+      "project_name": "E-commerce Website",
+      "status": "Completed"
+    },
+    {
+      "project_id": 102,
+      "project_name": "API for Mobile App",
+      "status": "In Progress"
+    }
+  ]
+}
+
+### Failure Scenario: Developer Not Found by ID
+GET http://localhost:8000/api/developers/999/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Developer not found"
+}
+
+---
+
+### 3. Test: Get Developer Details by Email
+# URL: /api/developers/email/{developer_email}/
+GET http://localhost:8000/api/developers/email/johndoe@example.com/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Output (Success):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "specialization": "Backend Developer",
+  "experience": "5 years",
+  "projects": [
+    {
+      "project_id": 101,
+      "project_name": "E-commerce Website",
+      "status": "Completed"
+    },
+    {
+      "project_id": 102,
+      "project_name": "API for Mobile App",
+      "status": "In Progress"
+    }
+  ]
+}
+
+### Failure Scenario: Developer Not Found by Email
+GET http://localhost:8000/api/developers/email/nonexistentemail@example.com/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Developer with this email not found."
+}
+
+---
+
+### 4. Test: Get Developer Details by Invalid Email Format
+# URL: /api/developers/email/{developer_email}/
+GET http://localhost:8000/api/developers/email/invalidemail/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid email format."
+}
+
+---
+
+### 5. Test: No Developers in the Database
+# URL: /api/developers/
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "No developers found."
+}
+
+---
+
+### 6. Test: Get Developer Details by ID (Not Existing Developer)
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/1000/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "detail": "Developer not found"
+}
+
+---
+
+### 7. Test: Invalid ID in Get Developer by ID Request
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/abc/ HTTP/1.1
+Authorization: Bearer <YOUR_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "detail": "Invalid ID format."
+}
+
+---
+
+### 8. Test: Get Developer Details with Missing Authorization Token
+# URL: /api/developers/{developer_id}/
+GET http://localhost:8000/api/developers/1/ HTTP/1.1
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 9. Test: Get Developer by Email with Missing Authorization Token
+# URL: /api/developers/email/{developer_email}/
+GET http://localhost:8000/api/developers/email/johndoe@example.com/ HTTP/1.1
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+---
+
+### 10. Test: Get List of All Developers (Unauthorized Access)
+# URL: /api/developers/
+GET http://localhost:8000/api/developers/ HTTP/1.1
+Authorization: Bearer <INVALID_ACCESS_TOKEN>
+
+### Expected Failure Output:
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+
+### GET /api/developers/{developer_id}/approve-maintenance-logs/ ###
+# Test to fetch unapproved maintenance logs for a developer, including both regular and adhoc schedules
+GET http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Accept: application/json
+
+### Response Example (Successful GET) ###
+# Example response for GET request when there are unapproved maintenance schedules.
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "unapproved_regular_schedules": [
+    {
+      "maintenance_schedule": {
+        "id": 35,
+        "elevator": 1,
+        "technician": 1,
+        "technician_full_name": "Charlie Brown",
+        "maintenance_company": 1,
+        "maintenance_company_name": "Johnson Elevators Co.",
+        "scheduled_date": "2025-01-15T00:00:00Z",
+        "next_schedule": "1_month",
+        "description": "Monthly Maintenance",
+        "status": "completed",
+        "building": {
+          "id": 1,
+          "name": "Sundowners Towers"
+        },
+        "developer": {
+          "id": 1,
+          "name": "Alice Tech Solutions"
+        },
+        "condition_report": [
+          {
+            "id": 6,
+            "maintenance_schedule": 35,
+            "technician": 1,
+            "date_inspected": "2025-01-16T14:51:01.244439Z",
+            "alarm_bell": "Working fine",
+            "noise_during_motion": "No noise",
+            "cabin_lights": "All lights operational",
+            "position_indicators": "All working",
+            "hall_lantern_indicators": "All indicators functional",
+            "cabin_flooring": "No damage",
+            "additional_comments": "Elevator condition is optimal"
+          }
+        ],
+        "maintenance_log": [
+          {
+            "id": 6,
+            "maintenance_schedule": 35,
+            "technician": 1,
+            "condition_report": 6,
+            "date_completed": "2025-01-16T14:51:01.563700Z",
+            "check_machine_gear": true,
+            "check_machine_brake": true,
+            "check_controller_connections": true,
+            "blow_dust_from_controller": true,
+            "clean_machine_room": true,
+            "clean_guide_rails": true,
+            "observe_operation": true,
+            "description": "All maintenance tasks completed successfully.",
+            "overseen_by": "John Doe",
+            "approved_by": null
+          }
+        ]
+      }
+    }
+  ],
+  "unapproved_adhoc_schedules": [
+    {
+      "maintenance_schedule": {
+        "id": 1,
+        "schedule_type": "adhoc",
+        "elevator": 1,
+        "technician": 1,
+        "technician_full_name": "Charlie Brown",
+        "maintenance_company": 1,
+        "maintenance_company_name": "Johnson Elevators Co.",
+        "scheduled_date": "2025-01-17T14:10:59.863476Z",
+        "description": "Ad-hoc maintenance to check for system issues.",
+        "status": "completed",
+        "building": {
+          "id": 1,
+          "name": "Sundowners Towers"
+        },
+        "developer": {
+          "id": 1,
+          "name": "Alice Tech Solutions"
+        },
+        "condition_report": [
+          {
+            "id": 1,
+            "ad_hoc_schedule": 1,
+            "technician": 1,
+            "date_inspected": "2025-01-17T14:51:10.510579Z",
+            "components_checked": "Doors, Motor, Safety Brakes",
+            "condition": "Doors are slightly misaligned, motor running smoothly, safety brakes functional."
+          }
+        ],
+        "maintenance_log": [
+          {
+            "id": 1,
+            "ad_hoc_schedule": 1,
+            "technician": 1,
+            "condition_report": 1,
+            "date_completed": "2025-01-17T14:51:10.780526Z",
+            "summary_title": "Door Realignment and Motor Inspection",
+            "description": "Realigned elevator doors and inspected the motor for wear. Adjustments were made to improve alignment.",
+            "overseen_by": "Senior Technician John Doe",
+            "approved_by": null
+          }
+        ]
+      }
+    }
+  ]
+}
+
+### PUT /api/developers/{developer_id}/approve-maintenance-logs/ ###
+# Test to approve maintenance logs for both regular and adhoc schedules
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+# Approving a mix of regular and adhoc logs
+{
+  "regular_maintenance_log_ids": [6],
+  "adhoc_maintenance_log_ids": [1]
+}
+
+### PUT (Single Adhoc Log) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "adhoc_maintenance_log_ids": 1
+}
+
+### PUT (Single Regular Log) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": 6
+}
+
+### PUT (No Logs Provided) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": [],
+  "adhoc_maintenance_log_ids": []
+}
+
+### PUT (Non-Existent Logs) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": [999],
+  "adhoc_maintenance_log_ids": [998]
+}
+
+### PUT (Already Approved Logs) ###
+PUT http://127.0.0.1:8000/api/developers/1/approve-maintenance-logs/
+Content-Type: application/json
+
+{
+  "regular_maintenance_log_ids": [6],  # Assuming this log is already approved
+  "adhoc_maintenance_log_ids": [1]    # Assuming this log is already approved
+}
+

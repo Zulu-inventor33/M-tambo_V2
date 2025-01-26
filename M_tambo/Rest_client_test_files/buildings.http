@@ -1,0 +1,197 @@
+### Building API
+
+# 1. List all buildings
+GET http://localhost:8000/api/buildings/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+  {
+    "id": 1,
+    "name": "Sky Tower",
+    "developer": 2,
+    "developer_name": "Dev Corp",
+    "location": "Downtown",
+    "floors": 50,
+    "completion_date": "2025-08-01"
+  },
+  {
+    "id": 2,
+    "name": "Sunset Heights",
+    "developer": 3,
+    "developer_name": "Urban Builders",
+    "location": "Uptown",
+    "floors": 40,
+    "completion_date": "2024-12-01"
+  }
+]
+---
+### 1. Add a new building
+POST http://localhost:8000/api/buildings/add/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Content-Type: application/json
+
+{
+  "developer_id": 2,
+  "name": "Ocean View",
+  "address": "123 tech avenue",
+  "contact": "134842783"
+}
+
+### Expected Response
+HTTP/1.1 201 Created
+Allow: POST, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "id": 1,
+    "name": "Ocean View",
+    "address": "123 tech avenue",
+    "contact": "134842783",
+    "developer": {
+        "id": 2,
+        "developer_name": "Martin Developers"
+    }
+}
+---
+# 3. Get details of a specific building by ID
+GET http://localhost:8000/api/buildings/1/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "id": 1,
+  "name": "Sky Tower",
+  "developer": 2,
+  "developer_name": "Dev Corp",
+  "location": "Downtown",
+  "floors": 50,
+  "completion_date": "2025-08-01"
+}
+---
+# 4. Get all buildings for a specific developer
+GET http://localhost:8000/api/buildings/developer/2/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+  {
+    "id": 1,
+    "name": "Sky Tower",
+    "developer": 2,
+    "developer_name": "Dev Corp",
+    "location": "Downtown",
+    "floors": 50,
+    "completion_date": "2025-08-01"
+  },
+  {
+    "id": 3,
+    "name": "Ocean View",
+    "developer": 2,
+    "developer_name": "Dev Corp",
+    "location": "Beachfront",
+    "floors": 25,
+    "completion_date": "2026-03-01"
+  }
+]
+---
+# 5. Get all jobs for a building (by job status)
+GET http://localhost:8000/api/buildings/1/jobs/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+  {
+    "job_id": 1,
+    "status": "In Progress",
+    "description": "Elevator installation",
+    "assigned_to": "John Doe",
+    "start_date": "2024-05-01"
+  },
+  {
+    "job_id": 2,
+    "status": "Completed",
+    "description": "Plumbing installation",
+    "assigned_to": "Jane Smith",
+    "start_date": "2023-11-01"
+  }
+]
+---
+# 6. Get all elevators in a specific building
+GET http://localhost:8000/api/buildings/1/elevators/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+  {
+    "id": 1,
+    "machine_number": "A123",
+    "building": 1,
+    "floor_count": 10,
+    "capacity": 1000,
+    "installation_date": "2023-01-01"
+  },
+  {
+    "id": 2,
+    "machine_number": "B456",
+    "building": 1,
+    "floor_count": 15,
+    "capacity": 1500,
+    "installation_date": "2022-05-01"
+  }
+]
+---
+# 7. Get specific elevator job history and issues for a building
+GET http://localhost:8000/api/buildings/1/elevators/1/ HTTP/1.1
+Host: localhost:8000
+Authorization: Bearer <your_token_here>
+Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "id": 1,
+  "machine_number": "A123",
+  "building": 1,
+  "floor_count": 10,
+  "capacity": 1000,
+  "installation_date": "2023-01-01",
+  "job_history": [
+    {
+      "job_id": 1,
+      "status": "In Progress",
+      "description": "Elevator installation",
+      "assigned_to": "John Doe",
+      "start_date": "2024-05-01"
+    },
+    {
+      "job_id": 2,
+      "status": "Completed",
+      "description": "Elevator maintenance",
+      "assigned_to": "Jane Smith",
+      "start_date": "2023-12-15"
+    }
+  ],
+  "issues": [
+    {
+      "issue_id": 1,
+      "description": "Overheating issue in elevator motor",
+      "reported_by": "John Doe",
+      "date_reported": "2023-06-15"
+    }
+  ]
+}
+---
+
+

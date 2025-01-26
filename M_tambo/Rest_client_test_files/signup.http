@@ -18,6 +18,21 @@ POST http://localhost:8000/api/signup/ HTTP/1.1
 Content-Type: application/json
 
 {
+    "first_name": "Martin",
+    "last_name": "Smith",
+    "email": "martin.developer2@example.com",
+    "phone_number": "123456789",
+    "password": "password123",
+    "account_type": "developer",
+    "developer_name": "Martin Developers",
+    "address": "123 Tech Ave, Innovate City"
+}
+
+### Sign Up - Developer 3
+POST http://localhost:8000/api/signup/ HTTP/1.1
+Content-Type: application/json
+
+{
     "first_name": "John",
     "last_name": "Doe",
     "email": "john.developer2@example.com",
@@ -197,22 +212,22 @@ Content-Type: application/json
     "password": "password123",
     "account_type": "technician",
     "specialization": "Elevators",
-    "maintenance_company_id": 11
+    "maintenance_company_id": 1
 }
 
-### Sign Up - Technician 2 (HVAC) Linked to Maintenance Company ID 12
+### Sign Up - Technician 2 (Elevators) Linked to Maintenance Company ID 12
 POST http://localhost:8000/api/signup/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "first_name": "Charlie",
+    "first_name": "Charles",
     "last_name": "Brown",
-    "email": "charlie.techniciain1@example.com",
-    "phone_number": "5679901234",
+    "email": "charlie.techniciain23@example.com",
+    "phone_number": "56799012334",
     "password": "password123",
     "account_type": "technician",
-    "specialization": "HVAC",
-    "maintenance_company_id": 12
+    "specialization": "Elevators",
+    "maintenance_company_id": 1
 }
 
 # Description:
@@ -233,7 +248,7 @@ Content-Type: application/json
     "password": "password123",
     "account_type": "technician",
     "specialization": "HVAC",
-    "maintenance_company_id": 12
+    "maintenance_company_id": 3
 }
 
 # Description:
@@ -254,7 +269,7 @@ Content-Type: application/json
     "password": "password123",
     "account_type": "technician",
     "specialization": "HVAC",
-    "maintenance_company_id": 14
+    "maintenance_company_id": 3
 }
 
 # Description:
