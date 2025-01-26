@@ -152,12 +152,16 @@ class LoginView(APIView):
 
                 # Determine the account type based on the user's related profile
                 account_type = None
+                profile_id = None
                 if hasattr(user, 'developer_profile'):
                     account_type = 'developer'
+                    profile_id = user.developer_profile.id
                 elif hasattr(user, 'maintenance_profile'):
                     account_type = 'maintenance'
+                    profile_id = user.maintenance_profile.id
                 elif hasattr(user, 'technician_profile'):
                     account_type = 'technician'
+                    profile_id = user.technician_profile.id
 
                 # Prepare the user data for the response
                 user_data = {
@@ -170,7 +174,9 @@ class LoginView(APIView):
                     'is_staff': user.is_staff,
                     'access': str(access_token),
                     'refresh': str(refresh),
-                    'id': user.id
+                    'account_type_id': profile_id,
+                    'user_id' : user.id
+
                 }
 
                 # Return the response with user data and tokens
