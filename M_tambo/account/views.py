@@ -7,13 +7,14 @@ from rest_framework.permissions import AllowAny  # Allow any user to access thes
 from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
 from django.shortcuts import get_object_or_404
+from brokers.models import BrokerReferral, BrokerUser
+from payments.models import PaymentSettings
 
 
-# View for User SignUp
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request, referral_code=None):
         # Step 1: Validate and create the user using UserSerializer
         user_serializer = UserSerializer(data=request.data)
 
@@ -23,7 +24,7 @@ class SignUpView(APIView):
 
             # Step 2: Handle profile creation based on account type
             if account_type == 'maintenance':
-                return self.create_maintenance_profile(request, user)
+                return self.create_maintenance_profile(request, user, referral_code)
             elif account_type == 'technician':
                 return self.create_technician_profile(request, user)
             elif account_type == 'developer':
@@ -38,7 +39,7 @@ class SignUpView(APIView):
         # If user_serializer is not valid, return errors
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def create_maintenance_profile(self, request, user):
+    def create_maintenance_profile(self, request, user, referral_code):
         # Handle the maintenance user profile creation
         company_name = request.data.get("company_name")
         company_address = request.data.get("company_address")
@@ -60,9 +61,51 @@ class SignUpView(APIView):
         maintenance_profile.specialization = specialization_name
         maintenance_profile.save()
 
-        # Return response with user and maintenance profile data
+        # Step 2: Process the referral if referral_code is provided
+        if referral_code:
+            broker = get_object_or_404(BrokerUser, referral_code=referral_code)  # Find the broker by referral code
+
+            # Step 3: Get default commission values from PaymentSettings
+            payment_settings = PaymentSettings.objects.first()  # Get the first (and only) PaymentSettings instance
+            if not payment_settings:
+                return Response(
+                    {"error": "Payment settings are not configured."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            commission_percentage = payment_settings.default_commission  # Use default_commission from PaymentSettings
+            commission_duration_months = payment_settings.default_commission_duration  # Use default_commission_duration from PaymentSettings
+
+            # Step 4: Create a BrokerReferral record with the default commission values
+            BrokerReferral.objects.create(
+                broker=broker,
+                maintenance_company=maintenance_profile,
+                commission_percentage=commission_percentage,
+                commission_duration_months=commission_duration_months,
+            )
+
+            # Return the response with the broker's referral information
+            return Response(
+                {
+                    "user": UserSerializer(user).data,
+                    "maintenance_profile": MaintenanceSerializer(maintenance_profile).data,
+                    "broker": {
+                        "email": broker.email,
+                        "commission_percentage": commission_percentage,
+                        "commission_duration_months": commission_duration_months
+                    },
+                    "message": f"Successfully registered under broker {broker.email} with commission rate of {commission_percentage}%."
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        # If no referral code is provided, just return the maintenance company details
         return Response(
-            {"user": UserSerializer(user).data, "maintenance_profile": MaintenanceSerializer(maintenance_profile).data},
+            {
+                "user": UserSerializer(user).data,
+                "maintenance_profile": MaintenanceSerializer(maintenance_profile).data,
+                "message": "Successfully registered maintenance company without a referral."
+            },
             status=status.HTTP_201_CREATED
         )
 

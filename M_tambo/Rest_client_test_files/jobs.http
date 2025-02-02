@@ -56,13 +56,13 @@ HTTP/1.1 400 Bad Request
 # Description: Creates a new maintenance schedule for a given elevator ID.
 # This endpoint allows you to schedule a maintenance task for an elevator by providing necessary details like technician, scheduled date, and the maintenance frequency.
 # =======================
-POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/create/elevator/123/
+POST http://127.0.0.1:8000/api/jobs/maintenance-schedule/elevator/1/create_initial_schedule
 
 Content-Type: application/json
 {
-    "technician": 456,  # ID of the technician (optional, if not provided, auto-assign from elevator's technician)
-    "next_schedule": "1_month",  # "1_month", "3_months", or "6_months" (Optional, frequency of the next maintenance)
-    "scheduled_date": "2024-12-31"  # The date when the maintenance is scheduled (Required)
+    "description": "Scheduled Monthly Maintenance Schedule",
+    "next_schedule": "1_month", # "1_month", "3_months", or "6_months" (Optional, frequency of the next maintenance)
+    "scheduled_date": "2024-12-31" # The date when the maintenance is scheduled (Required)
 }
 
 # Success Response

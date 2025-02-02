@@ -61,7 +61,7 @@ class TechnicianSerializer(serializers.ModelSerializer):
 class MaintenanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Maintenance
-        fields = ['company_name', 'company_address', 'company_registration_number', 'specialization', 'user']
+        fields = ['id','company_name', 'company_address', 'company_registration_number', 'specialization', 'user']
 
     def update(self, instance, validated_data):
         instance.company_name = validated_data.get('company_name', instance.company_name)

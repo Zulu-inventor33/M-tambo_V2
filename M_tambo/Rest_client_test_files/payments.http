@@ -1,0 +1,141 @@
+# 1. GET Request - Retrieve all payment settings with configuration status
+### Get the current payment settings along with a flag indicating whether each field has been configured
+GET http://127.0.0.1:8000/api/payments/admin/configure_payment_settings/
+Accept: application/json
+
+### Expected Response for Case 1 (GET request)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "min_charge_per_elevator": 700.00,
+    "default_commission": 12.5,
+    "default_commission_duration": 24,
+    "default_calculation_date": 25,
+    "default_due_date": 5,
+    "is_configured": {
+        "min_charge_per_elevator": false,
+        "default_commission": false,
+        "default_commission_duration": false,
+        "default_calculation_date": false,
+        "default_due_date": false
+    }
+}
+
+###
+
+# 2. POST Request - Update payment settings (partial update)
+### Update multiple fields (e.g., update default_commission and default_due_date)
+POST http://127.0.0.1:8000/api/payments/admin/configure_payment_settings/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "default_commission": 15.0,
+    "default_due_date": 7
+}
+
+### Expected Response for Case 2 (POST request: successful update)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "message": "Payment settings updated successfully.",
+    "data": {
+        "default_commission": 15.0,
+        "default_due_date": 7
+    }
+}
+
+###
+
+# 3. POST Request with Invalid Data - Invalid default_calculation_date
+### Attempt to update default_calculation_date with an invalid value (32, which is out of the valid range)
+POST http://127.0.0.1:8000/api/payments/admin/configure_payment_settings/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "default_calculation_date": 32  # Invalid day of the month
+}
+
+### Expected Response for Case 3 (Invalid field: default_calculation_date)
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+    "default_calculation_date": [
+        "Ensure this value is less than or equal to 31."
+    ]
+}
+
+###
+
+# 4. POST Request - Update a single field (default_commission_duration)
+### Update the default_commission_duration to 36
+POST http://127.0.0.1:8000/api/payments/admin/configure_payment_settings/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "default_commission_duration": 36
+}
+
+### Expected Response for Case 4 (POST request: successful update)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "message": "Payment settings updated successfully.",
+    "data": {
+        "default_commission_duration": 36
+    }
+}
+
+###
+
+# 5. POST Request with Empty Payload (No Fields Provided)
+### Try sending an empty payload with no fields to update
+POST http://127.0.0.1:8000/api/payments/admin/configure_payment_settings/
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Expected Response for Case 5 (No fields provided)
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+    "non_field_errors": [
+        "At least one field must be provided for updating."
+    ]
+}
+
+###
+
+# 6. GET Request after Updating Settings - Verify the changes
+### After updating, retrieve the settings again to confirm updates
+GET http://127.0.0.1:8000/api/payments/admin/configure_payment_settings/
+Accept: application/json
+
+### Expected Response for Case 6 (GET request: after updates)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "min_charge_per_elevator": 700.00,
+    "default_commission": 15.0,
+    "default_commission_duration": 36,
+    "default_calculation_date": 25,
+    "default_due_date": 7,
+    "is_configured": {
+        "min_charge_per_elevator": false,
+        "default_commission": true,
+        "default_commission_duration": true,
+        "default_calculation_date": false,
+        "default_due_date": true
+    }
+}
+
+###

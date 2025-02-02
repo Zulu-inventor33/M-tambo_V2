@@ -46,6 +46,7 @@ urlpatterns = [
     #     "maintenance_company_id": 11  # ID of the maintenance company (e.g., Smith Elevators Co.)
     # }
     path('signup/', SignUpView.as_view(), name='signup'),
+    path('signup/<str:referral_code>/', SignUpView.as_view(), name='signup-with-referral'),
 
     # Endpoint for user login to receive JWT access and refresh tokens
     # POST /api/login/
@@ -133,4 +134,6 @@ urlpatterns = [
     path('buildings/', include('buildings.urls')),
     path('elevators/', include('elevators.urls')),
     path('jobs/', include('jobs.urls')),
+    path('brokers/', include('brokers.urls')),
+    path('payments/', include('payments.urls')),
 ]

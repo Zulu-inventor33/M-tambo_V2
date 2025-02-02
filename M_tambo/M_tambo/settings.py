@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'elevators',
     'alerts',
     'jobs',
+    'brokers',
+    'payments',
     'rest_framework',
     'rest_framework_simplejwt',
     'django_celery_beat',

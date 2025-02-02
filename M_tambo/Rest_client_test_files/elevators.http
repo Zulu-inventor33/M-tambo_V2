@@ -458,4 +458,66 @@ Content-Type: application/json
 }
 
 
+### GET Request: Fetch all elevators with running maintenance schedules (today or future)
+
+GET http://127.0.0.1:8000/api/elevators/with_running_schedules/
+Accept: application/json
+
+### Expected Success Response (200 OK):
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "user_name": "LIFT1",
+        "controller_type": "Digital",
+        "machine_type": "gearless",
+        "building": 1,
+        "machine_number": "XYZ123",
+        "capacity": 1000,
+        "manufacturer": "LiftCo",
+        "installation_date": "2023-01-01",
+        "maintenance_company": 1,
+        "developer": 1,
+        "technician": 1
+    },
+    {
+        "id": 15,
+        "user_name": "Elevator A",
+        "controller_type": "",
+        "machine_type": "gearless",
+        "building": 15,
+        "machine_number": "M12345",
+        "capacity": 100,
+        "manufacturer": "Hyundai",
+        "installation_date": "2025-01-15",
+        "maintenance_company": 1,
+        "developer": 1,
+        "technician": 2
+    }
+]
+
+### Possible Error Response (404 Not Found if no elevators are returned):
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "Not found."
+}
+
+### Possible Error Response (400 Bad Request for invalid request format):
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+    "detail": "Bad Request"
+}
+
+### Notes:
+- The expected response returns a list of elevators that have maintenance schedules set for today or any future date.
+- If no such elevators are found, the response will be a `404 Not Found`.
+- If there’s an issue with the request format, the server might return a `400 Bad Request`.
+
+
 

@@ -10,6 +10,7 @@ from buildings.models import Building
 from .serializers import ElevatorSerializer
 from .models import ElevatorIssueLog
 from jobs.models import AdHocMaintenanceSchedule
+from jobs.models import MaintenanceSchedule
 from .serializers import ElevatorIssueLogSerializer
 from jobs.serializers import AdHocMaintenanceScheduleSerializer
 from datetime import datetime
@@ -273,4 +274,47 @@ class LoggedElevatorIssuesView(APIView):
         serializer = ElevatorIssueLogSerializer(issues, many=True)
 
         # Return the list of logged issues
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class ElevatorWithRunningSchedulesView(APIView):
+    permission_classes = [AllowAny]  # Adjust permission as necessary
+
+    def get(self, request, *args, **kwargs):
+        """
+        List all elevators that have a running scheduled maintenance for today or in the future.
+        """
+        # We need to filter elevators that have a maintenance schedule with a scheduled date today or in the future
+        elevators_with_schedules = Elevator.objects.filter(
+            maintenance_schedules__scheduled_date__gte=timezone.now().date(),  # Include today or future dates
+            maintenance_schedules__status="scheduled"  # Only include scheduled maintenance
+        ).distinct()  # Remove duplicate entries for the same elevator
+
+        # Serialize the elevator data
+        serializer = ElevatorSerializer(elevators_with_schedules, many=True)
+
+        # Return the serialized data in the response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class ElevatorWithoutRunningSchedulesView(APIView):
+    permission_classes = [AllowAny]  # Adjust permission as necessary
+
+    def get(self, request, *args, **kwargs):
+        # Get today's date
+        today = timezone.now().date()
+
+        # Find all elevators that do not have maintenance schedules scheduled for today or in the future
+        elevators_without_schedules = Elevator.objects.filter(
+            ~Q(maintenance_schedules__scheduled_date__gte=today)
+        ).distinct()
+
+        # If no elevators are found, return 404 not found
+        if not elevators_without_schedules:
+            raise NotFound(detail="No elevators without running schedules found.")
+
+        # Serialize the elevator data using ElevatorSerializer
+        serializer = ElevatorSerializer(elevators_without_schedules, many=True)
+
+        # Return the serialized data in the response
         return Response(serializer.data, status=status.HTTP_200_OK)

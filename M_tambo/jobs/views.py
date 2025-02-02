@@ -34,7 +34,15 @@ class CreateRoutineMaintenanceScheduleView(APIView):
             elevator = Elevator.objects.get(id=elevator_id)
         except Elevator.DoesNotExist:
             raise NotFound(f"Elevator with ID {elevator_id} does not exist.")
-        
+
+        # Check if the elevator already has an existing maintenance schedule
+        existing_schedule = MaintenanceSchedule.objects.filter(elevator=elevator).first()
+        if existing_schedule:
+            return Response(
+                {"detail": "Sorry, that elevator already has an existing running schedule."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # Extract maintenance company and technician from the elevator
         maintenance_company = elevator.maintenance_company
         technician = elevator.technician

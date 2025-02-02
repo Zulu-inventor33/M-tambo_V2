@@ -11,4 +11,6 @@ urlpatterns = [
     path('delete/<int:id>/', views.DeleteElevatorView.as_view(), name='delete_elevator'),
     path('<int:elevator_id>/log_an_issue/', views.LogElevatorIssueView.as_view(), name='log_elevator_issue'),
     path('<int:elevator_id>/logged_issues/', views.LoggedElevatorIssuesView.as_view(), name='logged_elevator_issues'),
+    path('with_running_schedules/', views.ElevatorWithRunningSchedulesView.as_view(), name='elevator-with-running-schedules'),
+    path('no_running_schedules/', views.ElevatorWithoutRunningSchedulesView.as_view(), name='elevator-no-running-schedules'),
 ]

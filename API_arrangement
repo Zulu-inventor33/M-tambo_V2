@@ -3,6 +3,7 @@ mtambo/
 ├── accounts/                   # App for managing login, signup, authentication, user profiles
 │   ├── urls.py                 # URL routing for accounts (login, signup, user management)
 │   ├── /api/accounts/signup/     # POST: Register a new user (Technician or Admin) with details
+│   ├── /api/accounts/signup/{refferal_code}    # POST: Register a new Maintenance company under a certain broker
 │   ├── /api/accounts/login/      # POST: User login (returns JWT token on success)
 │   ├── /api/accounts/logout/     # POST: Logout user (invalidate JWT token)
 │   ├── /api/accounts/profile/    # GET: Get logged-in user's profile (name, email, etc.)
@@ -112,12 +113,15 @@ mtambo/
 │   │   ├── /api/elevators/delete/{id} # DELETE: DELETE a given elevator based on the id
 │   │   ├── /api/elevators/update/{id} # PUT and PATCH: Update the details of given elevator based on the id. You could either pass one value or many values.
 │   |   ├── /api/elevators/building/{building_id}  # GET: Get all elevators in a given building
-│   │   ├── /api/claims/{claim_id}/  # GET: Get specific claim details (building, technician, job ID)
+│   │   ├── /api/elevators/{elevator_id}/log_an_issue  # PUT: Record a specific problem that you realize in regards to a certain elevator
+│   │   ├── /api/elevators/{elevator_id}/logged_issues  # GET: List all the logged issues of a certain elevator
 │   │   ├── /api/claims/file/   # POST: File a claim for a completed job
 │
-│   ├── claims/                 # Claims-related views, models, serializers
+│   ├── brokers/                 # Claims-related views, models, serializers
 │   │   ├── urls.py             # URL routing for Claim-related routes
-│   │   ├── /api/claims/        # GET: List all claims filed by developers
+│   │   ├── /api/brokers/        # GET: List all brokers registered in the M-tambo system
+│   │   ├── /api/brokers/register/       # PUT: register a broker in the M-tambo system
+│   |   ├── /api/brokers/{broker_id}/maintenance_companies/       # GET: list all the maintenance companies registered under a certain broker in the M-tambo system
 │   │   ├── /api/claims/{claim_id}/  # GET: Get specific claim details (building, technician, job ID)
 │   │   ├── /api/claims/file/   # POST: File a claim for a completed job
 │
@@ -127,9 +131,10 @@ mtambo/
 │   │   ├── /api/alerts/{alert_id}/  # GET: Get specific alert details
 │   │   ├── /api/alerts/mark-read/{alert_id}/  # PUT: Mark an alert as read
 │
-│   ├── calendar/               # Calendar-related views, models, serializers
-│   │   ├── urls.py             # URL routing for Calendar-related routes
+│   ├── Payments/               # payment-related views, models, serializers
+│   │   ├── urls.py             # URL routing for Payment-related routes
 │   │   ├── /api/calendar/      # GET: Get a list of all scheduled maintenance tasks
+│   │   ├── /api/payments/admin/configure_payment_settings     # GET and POST: This an admin API(is_staff) to set the default payment settings
 │   │   ├── /api/calendar/{date}/  # GET: Get tasks scheduled for a specific day
 │
 │   ├── logged_issues/          # Logged issues (from developers) related views, models, serializers
