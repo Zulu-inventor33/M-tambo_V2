@@ -50,6 +50,7 @@
 
   --svg-stroke-color: rgb(38, 38, 38);
   --bs-disabled-color: rgba(46, 38, 61, 0.4);
+  --bs-disabled-bg-color: #e0e0e0;
 
   --bs-ring-offset-shadow: 0 0 rgba(0, 0, 0, 0.2);
   --bs-ring-shadow: 0 0 rgba(0, 0, 0, 0.2);
@@ -67,6 +68,12 @@
   --bs-modal-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5);
   --bs-modal-header-border: rgba(0, 0, 0, 0.2);
   --bs-modal-footer-border: rgba(0, 0, 0, 0.2);
+  --bs-modal-width: 500px;
+
+  --base-modal-custom-overlay-bg: rgba(255, 255, 255, 0.6);
+  --base-modal-custom-content-bg: #fff;
+  --base-modal-custom-border-color: rgba(0, 0, 0, 0.2);
+  --base-modal-custom-color: rgb(38, 38, 38);
 }
 
 [data-pc-theme_contrast=true] {
@@ -306,6 +313,7 @@ h2,
 
   --svg-stroke-color: #FFFFFFDE;
   --bs-disabled-color: rgba(209, 217, 194, 0.4);
+  --bs-disabled-bg-color: #616161;
 
   --bs-ring-offset-shadow: 0 0 rgba(255, 255, 255, 0.1);
   --bs-ring-shadow: 0 0 rgba(255, 255, 255, 0.1);
@@ -323,6 +331,11 @@ h2,
   --bs-modal-shadow: 0 0.25rem 0.5rem rgba(255, 255, 255, 0.5);
   --bs-modal-header-border: rgba(255, 255, 255, 0.1);
   --bs-modal-footer-border: rgba(255, 255, 255, 0.1);
+
+  --base-modal-custom-overlay-bg: rgba(3, 3, 3, 0.8);
+  --base-modal-custom-content-bg: rgb(38, 38, 38);
+  --base-modal-custom-border-color: rgba(255, 255, 255, 0.13);
+  --base-modal-custom-color: #FFFFFFDE;
 }
 
 *,
@@ -884,6 +897,7 @@ progress {
   height: auto;
 }
 
+
 .img-thumbnail {
   padding: 0.25rem;
   background-color: #fafafb;
@@ -1364,7 +1378,7 @@ progress {
   height: 16px;
 }
 
-.fullcalendar-container .fc-direction-ltr .fc-daygrid-event.fc-event-end, 
+.fullcalendar-container .fc-direction-ltr .fc-daygrid-event.fc-event-end,
 .fullcalendar-container .fc-direction-rtl .fc-daygrid-event.fc-event-start {
   margin-right: 2px;
   margin-left: 4px;
@@ -19029,15 +19043,14 @@ pre[class*=language-]>code {
 }
 
 .pc-sidebar .pc-micon>svg {
-  width: 18px;
-  height: 18px;
-  fill: rgba(114, 103, 239, 0.2);
+  width: 22px;
+  height: 22px;
   display: inline-block;
 }
 
 .pc-sidebar.pc-sidebar-hide .pc-micon>svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 
 .pc-sidebar .pc-link {
@@ -26571,4 +26584,128 @@ select.form-control[data-multiselectsplitter-secondselect-selector] {
   position: absolute;
   bottom: 0;
   right: 0;
+}
+
+
+/* custom styles starts here THESE ARE THE STYLES THAT I HAVE DONE FOR MYSELF THESE 
+  DID NOT COME WITH THE FREE TEMPLATE STYLES */
+.stepper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin: 0 20px;
+  text-align: center;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: var(--bs-body-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.step-label {
+  font-size: 14px;
+  color: var(--bs-body-color);
+}
+
+.step.active .step-number {
+  background-color: var(--bs-primary);
+  color: var(--bs-primary-light);
+}
+
+.step.disabled .step-number {
+  background-color: var(--bs-disabled-bg-color);
+  color: var(--bs-disabled-color);
+}
+
+.stepper .step-label {
+  color: var(--bs-body-color);
+}
+
+.stepper .step.active .step-label {
+  color: var(--bs-primary);
+}
+
+.stepper .step.disabled .step-label {
+  color: var(--bs-body-color);
+}
+
+.step-connector {
+  width: 60px;
+  height: 2px;
+  background-color: #e0e0e0;
+}
+
+.step-connector.active {
+  background-color: #28a745;
+}
+
+/* CUSTOME BASE MODAL STYLING. THIS IS JUST A MODAL THAT I HAVE DECIDED TO COME UP WITH */
+.base_modal_custom .modal-overlay {
+  z-index: 1001;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--base-modal-custom-overlay-bg);
+  backdrop-filter: blur(4px);
+}
+
+.custom-breadcrumb .breadcrumb-container {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  color: var(--bs-body-color);
+}
+
+.custom-breadcrumb .breadcrumb-button {
+  background: none;
+  border: none;
+  color: var(--bs-body-color);
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.4rem 0.5rem;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  border-radius: 3px;
+}
+
+.custom-breadcrumb .breadcrumb-separator {
+  margin: 0 0.3rem;
+  color: var(--bs-body-color);
+  font-size: 1rem;
+}
+
+.breadcrumb-button:hover {
+  color: #fff;
+  background-color: #0056b3;
+}
+
+.breadcrumb-button.active {
+  background-color: var(--bs-primary);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .custom-breadcrumb .breadcrumb-container {
+    margin-bottom: 1rem;
+  }
 }

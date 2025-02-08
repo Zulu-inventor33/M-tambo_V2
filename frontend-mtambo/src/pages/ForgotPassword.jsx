@@ -2,10 +2,10 @@ import React from 'react';
 
 import ForgotPasswordComponent from '../components/ForgotPasswordComponent';
 
-const ForgotPassword = () => {
+const ForgotPassword = ({ setProgress }) => {
   return (
     <div>
-        <ForgotPasswordComponent />
+        <ForgotPasswordComponent setProgress={setProgress} />
     </div>
   );
 };

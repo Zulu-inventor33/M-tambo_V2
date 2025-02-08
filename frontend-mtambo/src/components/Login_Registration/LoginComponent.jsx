@@ -1,47 +1,35 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthenticationContext';
 
-import { useLoader } from '../../context/LoaderContext';
 import './LoginComponent.css';
 
-const LoginComponent = () => {
+const LoginComponent = ({ setProgress }) => {
 	const navigate = useNavigate();
 	const { loginAction } = useAuth();
-	const { startLoading, stopLoading } = useLoader();
-
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState({ email: '', password: '' });
 	const [loading, setLoading] = useState(false);
-	// A shake animation to show an error
 	const [isShaking, setIsShaking] = useState(false);
+
+	useEffect(() => {
+		setProgress(40);
+		setTimeout(() => {
+			setProgress(100);
+		}, 800)
+	}, [])
 
 	const handleRegisterRedirect = (e) => {
 		e.preventDefault();
-		startLoading();
-
-		// Set a timeout to stop the loader after 1.5 seconds
-		// It should take 1.5s for the loader to stop 
-		setTimeout(() => {
-			stopLoading(); // Stop the loader after 1.5 seconds
-		}, 1500);
-
 		navigate('/register');
 	};
 
 	const handleForgotPassword = (e) => {
 		e.preventDefault();
-		startLoading();
-
-		// Set a timeout to stop the loader after 1.5 seconds
-		setTimeout(() => {
-			stopLoading(); // Stop the loader after 1.5 seconds
-		}, 1500);
-
 		navigate('/forgot-password');
 	};
 

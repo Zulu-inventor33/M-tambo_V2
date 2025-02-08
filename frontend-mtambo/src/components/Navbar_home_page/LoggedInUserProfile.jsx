@@ -2,12 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
 
 import { useAuth } from '../../context/AuthenticationContext';
-import { useLoader } from '../../context/LoaderContext';
 
 const LoggedInUserProfile = () => {
     const navigate = useNavigate();
     const { user, logOut } = useAuth();
-    const { startLoading, stopLoading } = useLoader();
 
     if (!user) {
         return null;
@@ -15,13 +13,6 @@ const LoggedInUserProfile = () => {
 
     const EditAndViewProfileRedirect = (e) => {
         e.preventDefault();
-        startLoading();
-
-        // Set a timeout to stop the loader after 1.5 seconds
-        setTimeout(() => {
-            stopLoading(); // Stop the loader after 1.5 seconds
-        }, 1500);
-
         navigate('/dashboard/profile');
     };
 

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-import { useAuth } from '../../../context/AuthenticationContext';
+import { useAuth } from '../../../../context/AuthenticationContext';
 
 const MainContentHeader = () => {
     const { user } = useAuth();

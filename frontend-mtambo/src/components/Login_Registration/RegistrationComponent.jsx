@@ -1,29 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useLoader } from '../../context/LoaderContext';
 import useForm from './UseForm';
 import Step1 from './Step-1';
 import Step2 from './Step-2';
 
-const RegistrationComponent = () => {
+const RegistrationComponent = ({ setProgress }) => {
     const { formData, handleInputChange, errors, errorMessages, step, setStep,
         handleSubmit, handleNextStep, handlePrevStep, handleSpecializationChange,
         maintenanceCompanies, loading, isShaking, setFormData
     } = useForm();
-    const { startLoading, stopLoading } = useLoader();
     const navigate = useNavigate();
 
-    const handleLoginRedirect = (e) => {
-        e.preventDefault(); // Prevent the default link behavior
-        startLoading(); // Start showing the loader
-
-        // Set a timeout to stop the loader after 1.5 seconds
+    useEffect(() => {
+        setProgress(40);
         setTimeout(() => {
-            stopLoading(); // Stop the loader after 1.5 seconds
-        }, 1500);
+            setProgress(100);
+        }, 800);
+    }, [])
 
-        // Immediately navigate to the login page without waiting
+    const handleLoginRedirect = (e) => {
+        e.preventDefault();
         navigate('/login');
     };
 

@@ -2,18 +2,14 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// Import the useLoader hook
-import { useLoader } from '../../context/LoaderContext';
 import { notifySuccess, notifyError } from '../../utils/notificationUtils';
 
 const useForm = () => {
-    const { startLoading, stopLoading } = useLoader();
     const [loading, setLoading] = useState(false);
     const [maintenanceCompanies, setMaintenanceCompanies] = useState([]);
     const [errors, setErrors] = useState({});
     const [errorMessages, setErrorMessages] = useState([]);
     const [step, setStep] = useState(1);
-    // A shake animation to show an error
     const [isShaking, setIsShaking] = useState(false);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -35,7 +31,6 @@ const useForm = () => {
         maintenance_company_id: '',
     });
 
-    //update the formData whenever a registered input changes.
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -44,7 +39,6 @@ const useForm = () => {
         }));
     };
 
-    // validate the data the we are inputing
     const validateForm = () => {
         let errors = {};
         let valid = true;
@@ -82,7 +76,6 @@ const useForm = () => {
     const isStepComplete = () => {
         const errors = [];
         if (step === 1) {
-            // Check if any required field is empty or if passwords do not match
             if (
                 formData.email === '' || formData.firstName === '' ||
                 formData.lastName === '' || formData.phone === '' ||
@@ -157,14 +150,12 @@ const useForm = () => {
         // Call the function to fetch maintenance companies based on selection
         try {
             setLoading(true);
-            startLoading();
             const response = await axios.get(`/api/maintenance-companies/${selectedSpecialization}`);
             setMaintenanceCompanies(response.data);
         } catch (error) {
             console.error('Error fetching maintenance companies:', error);
         } finally {
             setLoading(false);
-            stopLoading();
         }
     };
 

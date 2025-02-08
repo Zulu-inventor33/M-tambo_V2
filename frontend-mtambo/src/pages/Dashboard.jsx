@@ -7,38 +7,36 @@ import DeveloperDashboard from '../components/dashboard_components/Dashboard/Dev
 import AdminDashboard from '../components/dashboard_components/Dashboard/AdminDashboard';
 
 
-const Dashboard = () => {
-	const { user } = useAuth(); // Get user data from context
+const Dashboard = ({ setProgress }) => {
+	const { user } = useAuth();
 
 	if (!user) {
-		// If user data is not available, you can redirect or show a loading state
 		return <div>No user is available from dashboard page Loading...</div>;
 	}
-
 	// Render dashboard based on account type
 	switch (user.account_type) {
 		case 'technician':
 			return (
 				<div>
-					<TechnicianDashboard />
+					<TechnicianDashboard setProgress={setProgress} />
 				</div>
 			);
 		case 'developer':
 			return (
 				<div>
-					<DeveloperDashboard />
+					<DeveloperDashboard setProgress={setProgress} />
 				</div>
 			);
 		case 'maintenance':
 			return (
 				<div>
-					<MaintenanceDashboard />
+					<MaintenanceDashboard setProgress={setProgress} />
 				</div>
 			);
 		case 'administrator':
 			return (
 				<div>
-					<AdminDashboard />
+					<AdminDashboard  setProgress={setProgress} />
 				</div>
 			);
 		default:

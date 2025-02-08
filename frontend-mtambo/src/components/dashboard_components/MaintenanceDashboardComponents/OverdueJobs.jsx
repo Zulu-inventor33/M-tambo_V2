@@ -15,35 +15,6 @@ const OverdueJobs = () => {
     const currentData = JSON.parse(localStorage.getItem('user'));
     const email = currentData ? currentData.email : '';
 
-    // useEffect(() => {
-
-    //     fetchCompletedJobs = async () => {
-    //         try {
-    //             const response = await axios.get(`api/jobs/maintenance-schedule/maintenance_company/1/upcoming_jobs/);
-    //         } catch (error) {
-                
-    //         }
-    //     };
-    // }, []);
-
-    // Fetch maintenance company ID by email and then fetch technicians too.
-    // const fetchCompanyIdAndTechnicians = async (email) => {
-    //     try {
-    //         const response = await axios.get(`/ api / maintenance - companies / email / ${ email } / `);
-    //         if (response.status === 200) {
-    //             const companyId = response.data.id;
-    //             // Once we have the company ID, fetch technicians
-    //             fetchTechnicians(companyId);
-    //         }
-    //     } catch (err) {
-    //         setLoading(false);
-    //         const errorMessage = err.response?.data?.detail || 'Failed to fetch maintenance company details using email.';
-    //         setError(errorMessage);
-    //         console.error(errorMessage);
-    //     }
-    // };
-
-    // Fetch technicians by company ID
     const fetchTechnicians = async (companyId) => {
         try {
             const response = await axios.get(`/ api / maintenance - companies / ${ companyId } / technicians / `);

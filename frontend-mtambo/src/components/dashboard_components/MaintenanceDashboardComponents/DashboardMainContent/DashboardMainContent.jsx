@@ -1,13 +1,33 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
-import PageHeader from './PageHeader';
 import KeyPerformanceIndicators from './KeyPerformanceIndicators';
 import JobStatusSummary from './JobStatusSummary';
 import TechniciansAvailability from './TechniciansAvailability';
 import MainContentHeader from './MainContentHeader';
+import MainContentSearchSection from './MainContentSearchSection';
 
-const DashboardMainContent = () => {
+const DashboardMainContent = ({ setProgress }) => {
+    const [searchResults, setSearchResults] = useState(null);
+
+    const handleSearch = (type, query, dateFilter) => {
+        // Dummy data for demonstration
+        const dummyData = {
+            technician: { id: 1, name: 'John Doe', role: 'Senior Technician', status: 'Available' },
+            task: { id: 101, description: 'Elevator Maintenance', date: dateFilter || '2023-10-15', status: 'Pending' },
+            building: { id: 201, name: 'Tech Tower', location: 'Downtown', elevators: 5 },
+            elevator: { id: 301, building: 'Tech Tower', status: 'Operational', lastService: '2023-09-20' },
+        };
+
+        setSearchResults(dummyData[type]);
+    };
+
+    useEffect(() => {
+        setProgress(40);
+        setTimeout(() => {
+            setProgress(100);
+        }, 800)
+    }, [])
+
     const PageHeaderbreadcrumbItems = [
         { label: 'Dashboard' }
     ];
@@ -41,8 +61,17 @@ const DashboardMainContent = () => {
     return (
         <div className='pc-container'>
             <div className='pc-content'>
+                {/* Search Section */}
+                <MainContentSearchSection onSearch={handleSearch} />
+
+                {/* Display Search Results */}
+                {searchResults && (
+                    <div className="search-results">
+                        <h3>Search Results</h3>
+                        <pre>{JSON.stringify(searchResults, null, 2)}</pre>
+                    </div>
+                )}
                 {/* the header section of the dashboard */}
-                <PageHeader title='Home' breadcrumbItems={PageHeaderbreadcrumbItems} />
                 <MainContentHeader />
                 {/* key performance indicators section */}
                 <KeyPerformanceIndicators data={keyPerformanceData} />

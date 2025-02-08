@@ -1,21 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 
-import { useLoader } from "../context/LoaderContext";
-
-const ForgotPasswordComponent = () => {
-    const { startLoading, stopLoading } = useLoader();
+const ForgotPasswordComponent = ({ setProgress }) => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setProgress(40);
+        setTimeout(() => {
+            setProgress(100);
+        }, 800)
+    }, [])
 
     const handleBackToLogin = (e) => {
         e.preventDefault();
-        startLoading();
-    
-        // Set a timeout to stop the loader after 1.5 seconds
-        setTimeout(() => {
-          stopLoading(); // Stop the loader after 1.5 seconds
-        }, 1500);
-    
         navigate('/login');
     }
     return (

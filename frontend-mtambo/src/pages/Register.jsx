@@ -1,10 +1,10 @@
 import React from 'react';
 import RegistrationComponent from '../components/Login_Registration/RegistrationComponent';
 
-const Register = () => {
+const Register = ({ setProgress }) => {
   return (
     <div>
-        <RegistrationComponent />
+        <RegistrationComponent setProgress={setProgress} />
     </div>
   );
 };
