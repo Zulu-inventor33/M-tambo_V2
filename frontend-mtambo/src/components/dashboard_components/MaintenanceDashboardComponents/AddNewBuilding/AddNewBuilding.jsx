@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 import FormProgressStepper from './FormProgressStepper';
 import BuildingDetails from './BuildingDetails';
 import ElevatorDetails from './ElevatorDetails';
 import MaintenanceSchedule from './MaintenanceSchedule';
+import AddNewBuildingHeader from './AddNewBuildingHeader';
+import { fetchAllDevelopers } from '../../../../api/Developers';
+import { fetchAllTechniciansForSpecificMaintenance } from '../../../../api/Technicians';
 
 const AddNewBuilding = ({ setProgress }) => {
     const [step, setStep] = useState(1);
     const [allDevelopers, setAllDevelopers] = useState([]);
+    const [loadingDevelopers, setLoadingDevelopers] = useState(false);
+    const [errorLoadingDevelopers, setErrorLoadingDevelopers] = useState(false);
     const [selectedDeveloper, setSelectedDeveloper] = useState(null);
     const [allTechnicians, setAllTechnicians] = useState([]);
+    const [loadingTechnicians, setLoadingTechnicians] = useState(false);
+    const [errorLoadingTechnicians, setErrorLoadingTechnicians] = useState(false);
     const [selectedTechnician, setSelectedTechnician] = useState(null);
+    const [elevatorId, setElevatorId] = useState("");
     const [formData, setFormData] = useState({
         developer_id: "",
         name: "",
@@ -35,12 +42,61 @@ const AddNewBuilding = ({ setProgress }) => {
         },
     });
 
+    // Retrieve the company object to get ID from localStorage
+    const currentCompany = localStorage.getItem('user');
+    const parsedCompany = currentCompany ? JSON.parse(currentCompany) : null;
+    const companyId = parsedCompany ? parsedCompany.account_type_id : "";
+
     //enable loader
     useEffect(() => {
         setProgress(40);
         setTimeout(() => {
             setProgress(100);
-        }, 800)     
+        }, 800)
+
+        //try to fetch all the developers
+        const fetchDevelopersData = async () => {
+            setLoadingDevelopers(true);
+            try {
+                const AllDevelopersData = await fetchAllDevelopers();
+                // console.log("All developers", AllDevelopersData);
+                // Transform the developers data into the format required by react-select
+                const developers = AllDevelopersData.map(dev => ({
+                    value: dev.id,
+                    label: dev.developer_name
+                }));
+                setAllDevelopers(developers);
+                setLoadingDevelopers(false);
+            } catch (error) {
+                setLoadingDevelopers(false);
+                // Set the error state with the detailed message
+                setErrorLoadingDevelopers(true);
+                console.log("Error fetching the developers", error.message);
+            }
+        }
+
+        //try to fetch technicians for the current maintenance company
+        const fetchAllTechnicians = async () => {
+            setLoadingTechnicians(true);
+            try {
+                const AllTechniciansData = await fetchAllTechniciansForSpecificMaintenance(companyId);
+                // console.log("All technicians", AllTechniciansData);
+                // Transform the data into the format required by react-select
+                const technicians = AllTechniciansData.map(tech => ({
+                    value: tech.id,
+                    label: tech.technician_name
+                }));
+                setAllTechnicians(technicians);
+                setLoadingTechnicians(false);
+            } catch (error) {
+                setLoadingTechnicians(false);
+                setErrorLoadingTechnicians(true);
+                console.error("Error fetching technicians:", error);
+            }
+        }
+
+        fetchDevelopersData();
+        fetchAllTechnicians();
     }, [])
 
     const handleNextStep = () => {
@@ -54,53 +110,6 @@ const AddNewBuilding = ({ setProgress }) => {
             setStep(step - 1);
         }
     };
-
-    // Retrieve the company object to get ID from localStorage
-    const currentCompany = localStorage.getItem('user');
-    const parsedCompany = currentCompany ? JSON.parse(currentCompany) : null;
-    const companyId = parsedCompany ? parsedCompany.account_type_id : "";
-    
-    // fetch the developers 
-    useEffect(() => {
-        const fetchAllDevelopers = async () => {
-            try {
-                const response = await axios.get(`/api/developers/`);
-                if (response.status === 200) {
-                    // Transform the data into the format required by react-select
-                    const developers = response.data.map(dev => ({
-                        value: dev.id,
-                        label: dev.developer_name
-                    }));
-                    setAllDevelopers(developers);
-                }
-            } catch (error) {
-                console.error("Error fetching all the developers in the system:", error);
-            }
-        };
-
-        fetchAllDevelopers();
-    }, []);
-
-    // Fetch all technicians for the maintenance company
-    useEffect(() => {
-        const fetchAllTechnicians = async () => {
-            try {
-                const response = await axios.get("/api/maintenance-companies/1/technicians/");
-                if (response.status === 200) {
-                    // Transform the data into the format required by react-select
-                    const technicians = response.data.map(tech => ({
-                        value: tech.id,
-                        label: tech.technician_name
-                    }));
-                    setAllTechnicians(technicians);
-                }
-            } catch (error) {
-                console.error("Error fetching technicians:", error);
-            }
-        };
-
-        fetchAllTechnicians();
-    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -125,7 +134,7 @@ const AddNewBuilding = ({ setProgress }) => {
         setSelectedDeveloper(selectedOption);
         setFormData({
             ...formData,
-            developer_id: selectedOption ? selectedOption.value : "", // Save the developer ID
+            developer_id: selectedOption ? selectedOption.value : "",
         });
     };
 
@@ -140,46 +149,11 @@ const AddNewBuilding = ({ setProgress }) => {
         });
     };
 
-    const handleSubmit = async () => {
-        try {
-            // Ensure all required fields are filled
-            if (!validateStep()) {
-                console.error("Please fill all required fields.");
-                return;
-            }
-
-            // Prepare the payload
-            const payload = {
-                ...formData,
-                developer_id: selectedDeveloper ? selectedDeveloper.value : null, // Use the selected developer's ID
-            };
-
-            // Log the payload for debugging
-            console.log("Submitting Payload:", payload);
-
-            // Make the POST request
-            const response = await axios.put(
-                "http://localhost:8000/api/maintenance-companies/1/buildings/add",
-                payload
-            );
-
-            // Handle the response
-            if (response.status === 200 || response.status === 201) {
-                console.log("Building added successfully:", response.data);
-                alert("Building added successfully!");
-            } else {
-                console.error("Failed to add building:", response.data);
-                alert("Failed to add building. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            alert("An error occurred. Please try again.");
-        }
-    };
-
     return (
         <div className='pc-container'>
             <div className='pc-content'>
+                {/* header section */}
+                <AddNewBuildingHeader />
                 <div className="container-fluid">
                     <div className="card">
                         <div className="card-header">
@@ -192,14 +166,14 @@ const AddNewBuilding = ({ setProgress }) => {
                             {/* Building Detials Form */}
                             {step === 1 && (
                                 <BuildingDetails
-                                    step={step}
                                     handleNextStep={handleNextStep}
-                                    handlePreviousStep={handlePreviousStep}
                                     allDevelopers={allDevelopers}
                                     formData={formData}
                                     selectedDeveloper={selectedDeveloper}
                                     handleChange={handleChange}
                                     handleDeveloperChange={handleDeveloperChange}
+                                    loadingDevelopers={loadingDevelopers}
+                                    errorLoadingDevelopers={errorLoadingDevelopers}
                                 />
                             )}
 
@@ -215,16 +189,15 @@ const AddNewBuilding = ({ setProgress }) => {
                                     selectedTechnician={selectedTechnician}
                                     handleChange={handleChange}
                                     handleTechnicianChange={handleTechnicianChange}
+                                    setElevatorId={setElevatorId}
+                                    loadingTechnicians={loadingTechnicians}
+                                    errorLoadingTechnicians={errorLoadingTechnicians}
                                 />
                             )}
 
                             {/* Review Order Form */}
                             {step === 3 && (
-                                <MaintenanceSchedule
-                                    formData={formData}
-                                    handleChange={handleChange}
-                                    handleSubmit={handleSubmit}
-                                />
+                                <MaintenanceSchedule elevatorId={elevatorId} />
                             )}
                         </div>
                     </div>

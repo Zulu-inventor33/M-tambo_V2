@@ -1,89 +1,119 @@
 import React, { useState } from 'react';
 import Select from 'react-select';
-import { Form } from 'react-bootstrap';
 
-const MaintenanceSchedule = ({ formData, handleChange, handleSubmit }) => {
-    const [errors, setErrors] = useState({
-        schedule_type: false,
-        description: false,
-        scheduled_date: false,
-    });
+import { createRegularMaintenanceSchedule } from '../../../../api/MaintenanceSchedule';
+import BaseModal from '../../BaseModal';
 
-    const validateFields = () => {
-        const newErrors = {};
-        // Check if any of the fields are empty
-        newErrors.schedule_type = formData.maintenance.schedule_type.trim() === "";
-        newErrors.description = formData.maintenance.description.trim() === "";
-        newErrors.scheduled_date = formData.maintenance.scheduled_date.trim() === "";
+const MaintenanceSchedule = ({ elevatorId }) => {
+    const [loading, setLoading] = useState(false);
+    const [selectedScheduleType, setSelectedScheduleType] = useState(null);
+    const [startDate, setStartDate] = useState("");
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
 
-        setErrors(newErrors);
+    const scheduleTypes = [
+        { value: "1_week", label: "Weekly" },
+        { value: "1_month", label: "Monthly" },
+        { value: "1_year", label: "Yearly" },
+    ];
 
-        // Return true if all fields are valid, false if any field is invalid
-        return Object.values(newErrors).every((value) => !value);
-    };
-
-    const handleNextClick = () => {
-        if (validateFields()) {
-            console.log("yes it is okay mate")
+    const generateDescription = (frequency) => {
+        switch (frequency) {
+            case "1_week":
+                return "Weekly maintenance schedule";
+            case "1_month":
+                return "Montly maintenance schedule";
+            case "1_year":
+                return "Yearly maintenance schedule";
+            default:
+                return "";
         }
     };
 
-    const scheduleTypes = [
-        { label: "Weekly", value: "Weekly" },
-        { label: "Monthly", value: "Monthly" },
-        { label: "Yearly", value: "Yearly" },
-        // Add more schedule types as needed
-    ];
+    const handleScheduleTypeChange = (selectedOption) => {
+        setSelectedScheduleType(selectedOption);
+    };
+
+    const handleSubmitMaintenanceSchedule = async () => {
+        console.log("submitting maintenance schedule");
+        setLoading(true);
+        const generatedDescription = generateDescription(selectedScheduleType.value);
+        console.log("generated description", generatedDescription);
+        try {
+            const response = await createRegularMaintenanceSchedule(
+                elevatorId,
+                selectedScheduleType.value,
+                startDate,
+                generatedDescription
+            );
+            console.log("Schedule Created:", response);
+            setShowSuccessModal(true);
+        } catch (error) {
+            console.error("Error creating schedule:", error);
+            setShowErrorModal(true);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <form id="maintenance-schedule-form">
             <div className="row">
                 <div className="col-md-6">
                     <div className="form-group">
-                        <label className="form-label">Schedule Type</label>
+                        <label className="form-label">Frequency</label>
                         <Select
                             options={scheduleTypes}
-                            value={formData.maintenance.schedule_type ? { label: formData.maintenance.schedule_type, value: formData.maintenance.schedule_type } : null}
-                            onChange={(selectedOption) => handleChange('maintenance.schedule_type', selectedOption ? selectedOption.value : '')}
-                            placeholder="Select schedule type"
+                            value={selectedScheduleType}
+                            onChange={handleScheduleTypeChange}
+                            placeholder="Select Frequency"
                             isSearchable
+                            isLoading={loading}
+                            isDisabled={loading}
                         />
-                        {errors.schedule_type && <div className="text-danger">Schedule type is required</div>}
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Scheduled Date</label>
+                        <label className="form-label">Start Date</label>
                         <input
                             type="date"
                             className="form-control"
                             name="scheduled_date"
-                            value={formData.maintenance.scheduled_date}
-                            onChange={handleChange}
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
                         />
-                        {errors.scheduled_date && <div className="text-danger">Scheduled date is required</div>}
-                    </div>
-                </div>
-
-                <div className="col-md-6">
-                    <div className="form-group">
-                        <label className="form-label">Description</label>
-                        <textarea
-                            className="form-control"
-                            name="description"
-                            value={formData.maintenance.description}
-                            onChange={handleChange}
-                            placeholder="Enter maintenance description"
-                        />
-                        {errors.description && <div className="text-danger">Description is required</div>}
                     </div>
                 </div>
             </div>
 
-            <div className="col-12 d-flex justify-content-between align-items-center">
-                <button type="button" className="btn btn-secondary" onClick={handleNextClick}>
-                    Submit
+            <div className="col-12 d-flex justify-content-end align-items-center">
+                <button type="button" className="btn btn-primary" onClick={handleSubmitMaintenanceSchedule}>
+                    Schedule Maintenance
                 </button>
             </div>
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <BaseModal
+                    modalHeader={false}
+                    showBaseModal={showSuccessModal}
+                    title="Success"
+                    message="A maintenance schedule has been created for the elevator. To add another elevator and create a maintenance schedule, click the button below. Otherwise, you can head to the schedules."
+                    onClose={handleCloseModal}
+                    onSuccessAction={handleNextStep}
+                    buttonText="Proceed to Schedule Maintenance"
+                />
+            )}
+
+            {/* Error Modal */}
+            {showErrorModal && (
+                <BaseModal
+                    modalHeader={false}
+                    showBaseModal={showErrorModal}
+                    title="Error"
+                    message="Please ensure all fields are filled. If the issue persists, contact support."
+                    onClose={handleCloseErrorModal}
+                />
+            )}
         </form>
     );
 };

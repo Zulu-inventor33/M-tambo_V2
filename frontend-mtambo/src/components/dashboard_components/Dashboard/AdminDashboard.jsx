@@ -7,7 +7,7 @@ import Header from '../Header/TopBar';
 import Sidebar from '../Sidebar/Sidebar';
 import './dashboard.css';
 
-import TechnicianMainContentSection from '../TechniciansDashboardComponents/TechnicianMainContentSection';
+import TechnicianMainContentSection from '../TechniciansDashboardComponents/TechnicianMainContent/TechnicianMainContentSection';
 
 const DeveloperDashboard = () => {
   return (

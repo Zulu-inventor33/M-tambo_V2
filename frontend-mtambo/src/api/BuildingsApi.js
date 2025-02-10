@@ -21,3 +21,16 @@ export const fetchTechnicianBuildings = async (technicianId) => {
         throw error;
     }
 }
+
+// Add a building with an Elevator Connected to it
+export const AddBuildingAndElevator = async (companyId, payload) => {
+    try {
+        const response = await axios.put(`/api/maintenance-companies/${companyId}/buildings/add`, payload);
+        // Handle the response (you can return it or do something else)
+        console.log('Building and Elevator added successfully:', response.data);
+        return response;
+    } catch (error) {
+        console.error('Error adding building and elevator:', error);
+        throw new Error('Failed to add building and elevator. Please try again later.');
+    }
+};

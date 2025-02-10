@@ -9,7 +9,7 @@ import './dashboard.css';
 import TechnicianBuildings from '../TechniciansDashboardComponents/Buildings/TechnicianBuildings';
 import TechnicianSchedules from '../TechniciansDashboardComponents/Schedules/TechnicianSchedules';
 import FileMaintenanceLog from '../TechniciansDashboardComponents/Schedules/FileMaintenanceLog';
-import TechnicianMainContentSection from '../TechniciansDashboardComponents/TechnicianMainContentSection';
+import TechnicianMainContentSection from '../TechniciansDashboardComponents/TechnicianMainContent/TechnicianMainContentSection';
 import TechnicianCompletedSchedules from '../TechniciansDashboardComponents/CompletedTasks/TechnicianCompletedSchedules';
 
 const TechnicianDashboard = ({ setProgress }) => {

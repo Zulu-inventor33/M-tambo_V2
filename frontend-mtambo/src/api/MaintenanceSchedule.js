@@ -15,6 +15,7 @@ export const retrieveMaintenanceSchedules = async () => {
 
 // create a regular maintenance schedule
 export const createRegularMaintenanceSchedule = async (elevatorId, frequency, start_date, description) => {
+    console.log("santoshi", elevatorId, frequency, start_date, description);
     try {
         const response = await axios.post(`/api/jobs/maintenance-schedule/elevator/${elevatorId}/create_initial_schedule`, {
             next_schedule: frequency,

@@ -26709,3 +26709,110 @@ select.form-control[data-multiselectsplitter-secondselect-selector] {
     margin-bottom: 1rem;
   }
 }
+
+/* Custome styling of the search section in the Main content section of dashboard */
+
+.main-buttons-container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.main-search-section {
+  width: auto;
+}
+
+.main-content-form {
+  position: relative;
+}
+
+.main-content-form .fa-search {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #9ca3af;
+}
+
+.main-content-form span {
+  position: absolute;
+  right: 17px;
+  top: 13px;
+  padding: 2px;
+  border-left: 1px solid #d1d5db;
+}
+
+.main-content-form .left-pan {
+  padding-left: 7px;
+}
+
+.main-content-form .left-pan i {
+  padding-left: 10px;
+}
+
+.main-content-form .form-input {
+  height: 50px;
+  text-indent: 33px;
+  border-radius: 4px;
+}
+
+.main-content-form .form-input:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.main-content-form .btn-outline-primary {
+  padding: 10px 15px;
+}
+
+/* Make buttons stack on smaller screens */
+@media (max-width: 768px) {
+  .main-buttons-container {
+    gap: 24px;
+  }
+  
+  .main-search-section-container {
+      flex-direction: column;
+      gap: 20px;
+  }
+
+  .main-search-section {
+    width: 100%;
+  }
+
+  .main-content-form {
+      width: 100%;
+  }
+
+  .main-content-form .form-input {
+      width: 100%;
+      text-indent: 20px;
+  }
+
+  .main-content-form .fa-search {
+      top: 20px;
+      left: 15px;
+  }
+
+  .main-content-form span {
+      right: 10px;
+      top: 13px;
+  }
+}
+
+/* Smaller screens like mobile */
+@media (max-width: 480px) {
+  .btn-outline-primary {
+      padding: 8px 12px;
+      font-size: 14px;
+  }
+
+  .form-input {
+      height: 45px;
+      font-size: 14px;
+      text-indent: 28px;
+  }
+
+  .left-pan i {
+      padding-left: 8px;
+  }
+}

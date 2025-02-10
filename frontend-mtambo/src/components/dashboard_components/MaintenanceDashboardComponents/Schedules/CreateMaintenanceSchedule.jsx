@@ -31,6 +31,7 @@ const CreateMaintenanceSchedule = ({ setProgress }) => {
     const parsedCompany = currentCompany ? JSON.parse(currentCompany) : null;
     const companyId = parsedCompany ? parsedCompany.account_type_id : '';
 
+    //fetch buildings
     useEffect(() => {
         const fetchBuildingsData = async () => {
             setLoading(true);
@@ -50,6 +51,7 @@ const CreateMaintenanceSchedule = ({ setProgress }) => {
         fetchBuildingsData();
     }, []);
 
+    //fetch elevators
     useEffect(() => {
         if (selectedBuilding) {
             const fetchElevatorsData = async () => {
@@ -107,7 +109,6 @@ const CreateMaintenanceSchedule = ({ setProgress }) => {
             setLoading(true);
             const generatedDescription = generateDescription(selectedFrequency.value);
             setDescription(generatedDescription);
-            console.log(description);
             try {
                 const response = await createRegularMaintenanceSchedule(
                     selectedElevator.value,
