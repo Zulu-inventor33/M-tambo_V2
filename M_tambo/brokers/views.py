@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny  # For testing purposes
 # from rest_framework.permissions import IsAuthenticated  # For production
-from .serializers import BrokerRegistrationSerializer
+from .serializers import *
 from .models import *
 from account.serializers import MaintenanceSerializer, MaintenanceListSerializer
 from django.shortcuts import get_object_or_404
@@ -83,4 +83,55 @@ class MaintenanceCompaniesListView(APIView):
                 "maintenance_companies": serialized_maintenance_companies.data
             },
             status=status.HTTP_200_OK
+        )
+    
+
+class BrokerDetailView(APIView):
+    """
+    API endpoint to retrieve all details of a specific broker by broker_id.
+    """
+    permission_classes = [AllowAny]  # You can change this to IsAuthenticated or other permissions as needed
+
+    def get(self, request, broker_id):
+        # Retrieve the broker by ID, or return a 404 if not found
+        broker = get_object_or_404(BrokerUser, id=broker_id)
+        
+        # Serialize the broker data
+        serializer = BrokerDetailSerializer(broker)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class BrokerUpdateView(APIView):
+    """
+    API endpoint to update the details (first name, last name, phone number) of a given broker.
+    Only the provided fields will be updated. If any field is missing, it won't be updated.
+    """
+    permission_classes = [AllowAny]
+
+
+    def put(self, request, broker_id):
+        try:
+            # Get the broker by broker_id or raise 404 if not found
+            broker = BrokerUser.objects.get(id=broker_id)
+        except BrokerUser.DoesNotExist:
+            # If the broker is not found, return a custom 404 response with a specific message
+            return Response(
+                {"detail": f"Broker with ID {broker_id} does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Pass the data from request to the serializer for validation and update
+        serializer = BrokerUpdateSerializer(broker, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()  # Save the updated broker data
+            return Response(
+                {"message": "Broker details updated successfully.", "data": serializer.data},
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(
+            {"message": "Invalid data.", "errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
         )

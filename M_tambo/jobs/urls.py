@@ -2,8 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('maintenance-schedule/elevator/<int:elevator_id>/create_initial_schedule', views.CreateRoutineMaintenanceScheduleView.as_view(), name='create_maintenance_schedule'),
-    path('maintenance-schedule/elevator/<int:elevator_id>/create_adhoc', views.CreateAdHocMaintenanceScheduleView.as_view(), name='create_adhoc_maintenance_schedule'),
+    path('maintenance-schedule/elevator/<int:elevator_id>/create_initial_schedule/', views.CreateRoutineMaintenanceScheduleView.as_view(), name='create_maintenance_schedule'),
+    path('maintenance-schedule/elevator/<int:elevator_id>/create_adhoc/', views.CreateAdHocMaintenanceScheduleView.as_view(), name='create_adhoc_maintenance_schedule'),
     path('maintenance-schedule/<int:schedule_id>/completed/', views.ChangeMaintenanceScheduleToCompletedView.as_view(), name='update-maintenance-schedule-status'),
     path('maintenance-schedule/', views.MaintenanceScheduleListView.as_view(), name='maintenance-schedule-list'),
     path('maintenance-schedule/<int:schedule_id>/remove/', views.MaintenanceScheduleDeleteView.as_view(), name='delete-maintenance-schedule'),

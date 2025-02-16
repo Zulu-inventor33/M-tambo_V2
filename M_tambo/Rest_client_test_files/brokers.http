@@ -219,3 +219,74 @@ Content-Type: application/json
 
 ###
 
+### Get Broker Details by Broker ID
+GET http://localhost:8000/api/brokers/2/ HTTP/1.1
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+### Example Response
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "id": 2,
+    "first_name": "Samuel",
+    "last_name": "Jackson",
+    "email": "samuel.jackson1@example.com",
+    "phone_number": "+441632960969",
+    "referral_code": "87C747E8",
+    "commission_percentage": "14.50",
+    "commission_duration_months": 36,
+    "registration_date": "2025-01-29T06:58:14.488717Z",
+    "referrals": [
+        {
+            "maintenance_company": {
+                "id": 21,
+                "company_name": "Chaucho Backup Inc.",
+                "company_address": "500 Power St, Citytown",
+                "company_registration_number": "REG112233",
+                "specialization": "Power Backup Generators",
+                "user": 30
+            },
+            "commission_percentage": "14.50",
+            "commission_duration_months": 36,
+            "referral_date": "2025-02-05T13:24:40.028631Z"
+        },
+        {
+            "maintenance_company": {
+                "id": 20,
+                "company_name": "Kiangondu Power Inc.",
+                "company_address": "500 Power St, Citytown",
+                "company_registration_number": "REG112233",
+                "specialization": "Power Backup Generators",
+                "user": 29
+            },
+            "commission_percentage": "12.50",
+            "commission_duration_months": 36,
+            "referral_date": "2025-02-05T12:58:11.189923Z"
+        }
+    ]
+}
+
+
+### Update Only the Phone Number
+PUT http://localhost:8000/api/brokers/2/update/ HTTP/1.1
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "phone_number": "+441632960970"
+}
+
+### Example Response
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "message": "Broker details updated successfully.",
+    "data": {
+        "first_name": "Samuel",
+        "last_name": "Jackson",
+        "phone_number": "+441632960970"
+    }
+}

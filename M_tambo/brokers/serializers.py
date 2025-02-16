@@ -2,6 +2,8 @@
 from rest_framework import serializers
 from .models import BrokerUser
 import uuid
+from account.serializers import MaintenanceSerializer
+from .models import BrokerUser, BrokerReferral
 
 class BrokerRegistrationSerializer(serializers.ModelSerializer):
     """
@@ -66,3 +68,34 @@ class BrokerRegistrationSerializer(serializers.ModelSerializer):
         representation['commission_percentage'] = instance.commission_percentage  # Include commission percentage
         representation['commission_duration_months'] = instance.commission_duration_months  # Include commission duration
         return representation
+    
+
+class BrokerReferralSerializer(serializers.ModelSerializer):
+    maintenance_company = MaintenanceSerializer()  # Assuming MaintenanceSerializer is used for maintenance companies
+    
+    class Meta:
+        model = BrokerReferral
+        fields = ['maintenance_company', 'commission_percentage', 'commission_duration_months', 'referral_date']
+
+class BrokerDetailSerializer(serializers.ModelSerializer):
+    # Including all fields for broker user
+    referrals = BrokerReferralSerializer(many=True)  # Nested referrals details
+
+    class Meta:
+        model = BrokerUser
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'phone_number', 'referral_code', 
+            'commission_percentage', 'commission_duration_months', 'registration_date', 
+            'referrals'
+        ]
+
+
+class BrokerUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BrokerUser
+        fields = ['first_name', 'last_name', 'phone_number']  # Fields you want to update
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'phone_number': {'required': False}
+        }

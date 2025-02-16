@@ -15,6 +15,8 @@ from .serializers import ElevatorIssueLogSerializer
 from jobs.serializers import AdHocMaintenanceScheduleSerializer
 from datetime import datetime
 from django.utils import timezone
+from django.db.models import Q
+
 
 class AddElevatorView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this view

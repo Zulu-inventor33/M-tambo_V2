@@ -7,8 +7,9 @@ from rest_framework.permissions import AllowAny  # Allow any user to access thes
 from .models import User, Developer, Maintenance, Technician
 from .serializers import UserSerializer, DeveloperSerializer, MaintenanceSerializer, TechnicianSerializer, LoginSerializer, MaintenanceListSerializer
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from brokers.models import BrokerReferral, BrokerUser
-from payments.models import PaymentSettings
+from payments.models import PaymentSettings,PaymentPlan
 
 
 class SignUpView(APIView):
@@ -61,53 +62,86 @@ class SignUpView(APIView):
         maintenance_profile.specialization = specialization_name
         maintenance_profile.save()
 
-        # Step 2: Process the referral if referral_code is provided
+        # Step 3: Get the PaymentSettings for default commission and other settings
+        payment_settings = PaymentSettings.objects.first()  # Get the first (and only) PaymentSettings instance
+        if not payment_settings:
+            return Response(
+                {"error": "Payment settings are not configured."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Default values from PaymentSettings
+        commission_percentage = payment_settings.default_commission
+        commission_duration_months = payment_settings.default_commission_duration
+        min_charge_per_elevator = payment_settings.min_charge_per_elevator
+
+        # Step 4: Check if a referral code was provided and handle accordingly
         if referral_code:
-            broker = get_object_or_404(BrokerUser, referral_code=referral_code)  # Find the broker by referral code
+            # Referral code exists, link to broker and use broker's commission percentage
+            broker = get_object_or_404(BrokerUser, referral_code=referral_code)
 
-            # Step 3: Get default commission values from PaymentSettings
-            payment_settings = PaymentSettings.objects.first()  # Get the first (and only) PaymentSettings instance
-            if not payment_settings:
-                return Response(
-                    {"error": "Payment settings are not configured."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            # Update broker_commission from the broker's commission_percentage
+            broker_commission = broker.commission_percentage
 
-            commission_percentage = payment_settings.default_commission  # Use default_commission from PaymentSettings
-            commission_duration_months = payment_settings.default_commission_duration  # Use default_commission_duration from PaymentSettings
-
-            # Step 4: Create a BrokerReferral record with the default commission values
+            # Create a BrokerReferral record linking the broker to the maintenance company
             BrokerReferral.objects.create(
                 broker=broker,
                 maintenance_company=maintenance_profile,
-                commission_percentage=commission_percentage,
+                commission_percentage=broker_commission,
                 commission_duration_months=commission_duration_months,
             )
 
-            # Return the response with the broker's referral information
-            return Response(
-                {
-                    "user": UserSerializer(user).data,
-                    "maintenance_profile": MaintenanceSerializer(maintenance_profile).data,
-                    "broker": {
-                        "email": broker.email,
-                        "commission_percentage": commission_percentage,
-                        "commission_duration_months": commission_duration_months
-                    },
-                    "message": f"Successfully registered under broker {broker.email} with commission rate of {commission_percentage}%."
-                },
-                status=status.HTTP_201_CREATED
+            # Prepare broker info for the response
+            broker_info = {
+                "email": broker.email,
+                "commission_percentage": broker_commission,
+                "commission_duration_months": commission_duration_months
+            }
+
+            # Create a PaymentPlan linked to the broker
+            payment_plan = PaymentPlan.objects.create(
+                maintenance_company=maintenance_profile,
+                amount_per_asset=min_charge_per_elevator,
+                broker_commission=broker_commission,
+                start_date=timezone.now(),
             )
 
-        # If no referral code is provided, just return the maintenance company details
-        return Response(
-            {
+            # Return the response with broker details
+            return Response({
                 "user": UserSerializer(user).data,
                 "maintenance_profile": MaintenanceSerializer(maintenance_profile).data,
-                "message": "Successfully registered maintenance company without a referral."
-            },
-            status=status.HTTP_201_CREATED
-        )
+                "broker": broker_info,
+                "payment_plan": {
+                    "amount_per_asset": min_charge_per_elevator,
+                    "broker_commission": broker_commission,
+                    "start_date": timezone.now().isoformat()
+                },
+                "message": f"Successfully registered maintenance company under broker {broker.email}."
+            }, status=status.HTTP_201_CREATED)
+
+        else:
+            # No referral code provided, use the default commission from PaymentSettings
+            broker_commission = commission_percentage  # Default from PaymentSettings
+
+            # Create the PaymentPlan without a broker
+            payment_plan = PaymentPlan.objects.create(
+                maintenance_company=maintenance_profile,
+                amount_per_asset=min_charge_per_elevator,
+                broker_commission=broker_commission,
+                start_date=timezone.now(),
+            )
+
+            # Return the response without broker info
+            return Response({
+                "user": UserSerializer(user).data,
+                "maintenance_profile": MaintenanceSerializer(maintenance_profile).data,
+                "payment_plan": {
+                    "amount_per_asset": min_charge_per_elevator,
+                    "broker_commission": broker_commission,
+                    "start_date": timezone.now().isoformat()
+                },
+                "message": "Successfully registered maintenance company without a broker."
+            }, status=status.HTTP_201_CREATED)
 
     def create_technician_profile(self, request, user):
         # Ensure both specialization and maintenance_company_id are provided

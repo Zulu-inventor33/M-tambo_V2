@@ -25,7 +25,31 @@ SECRET_KEY = 'django-insecure-kp+-@nban-ay6zzr#2zg@6k4xsb@n#k4h_!z^5l($cb$9a%c95
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'af40-45-146-55-196.ngrok-free.app']
+
+
+# M-PESA API Configuration
+MPESA_ENVIRONMENT = 'sandbox'  # Use 'production' for live transactions
+MPESA_CONSUMER_KEY = 'GaPIqmGPRlJTaHogidR4B2snUm9vAKCjC1rlI0jCLdkwrmTX'
+MPESA_CONSUMER_SECRET = 'sdlZ8PNjjETUCGGGpvyfWl3uz8WAhl1rnyeYvMQCG9xzNSEFGFv5KF1UPf95JdmG'
+MPESA_EXPRESS_SHORTCODE = '600999'  # PartyA shortcode
+MPESA_BUSINESS_SHORTCODE = '174379'  # BusinessShortCode for Lipa na M-PESA Online
+MPESA_PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+MPESA_CALLBACK_URL = 'https://af40-45-146-55-196.ngrok-free.app/api/payments/expected_payments/{expected_payment_id}/mpesa_payment_callback'
+MPESA_LIPA_NA_MPESA_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+MPESA_API_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+
+
+# M-PESA B2C Configuration
+MPESA_B2C_INITIATOR_NAME = 'testapi'
+MPESA_B2C_INITIATOR_PASSWORD = 'Safaricom999!*!'
+MPESA_B2C_PARTY_A = '600982'
+MPESA_B2C_PARTY_B = '600000'
+MPESA_B2C_PHONE_NUMBER = '254708374149'
+MPESA_B2C_SECURITY_CREDENTIAL = 'JZ+DXHUdutlW/ZUEpJNNj50fOB7yrqsw9aGVzJK5QkTrB/UzkvDChybP2ANH65eZ8aljUVmZS+cyjw4KRjx5s/PNuQnq9K7xmgg1GA3zSj3FbA9qT2S7FTQ9QLfuuY9rzxRXWhEZG7MeqBk96o6T9qNiyWedsGFnHBA4fMe/7Gqwv5KpGjQoXMmBjGWTskSJYvSkd/ruCOLsXT/gkcZVFlbUY7WO8ewwodsCWFumaiiH5QuBPtN/bXHFJ+R+VrEb2Xgr9ReNbamZ1agg2hHSrNyAinVtOFx9Regk2gnYGQRz0h9vjM/55oRpC94MySHpXMSvwFPMpBvRQPz4b2ptdQ=='
+MPESA_B2C_COMMAND_ID = 'BusinessPayment'
+MPESA_B2C_API_URL = 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest'
+MPESA_B2C_CALLBACK_URL = 'https://af40-45-146-55-196.ngrok-free.app/api/payments/broker/{broker_id}/mpesa-b2c-callback/'
 
 
 # Application definition
@@ -48,6 +72,7 @@ INSTALLED_APPS = [
     'jobs',
     'brokers',
     'payments',
+    'django_daraja',
     'rest_framework',
     'rest_framework_simplejwt',
     'django_celery_beat',
@@ -160,11 +185,25 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Redis backend for results
 from celery.schedules import crontab
 
 # Configure Celery Beat Schedule to run the task every 5 minutes
+# Celery Beat Schedule Configuration
 CELERY_BEAT_SCHEDULE = {
+    # Task for checking overdue schedules every 5 minutes
     'check-overdue-schedules-every-5-minutes': {
-        'task': 'jobs.tasks.check_overdue_schedules',  # Task path (module + function)
-        'schedule': crontab(minute='*/5'),  # Run every 5 minutes
+        'task': 'jobs.tasks.check_overdue_schedules',  # Path to the task function
+        'schedule': crontab(minute='*/5'),  # Runs every 5 minutes
+    },
+    # Task for running monthly payment calculations on the 25th at midnight
+    'monthly-payment-calculations': {
+        'task': 'payments.tasks.run_monthly_tasks',  # Path to the task function
+        'schedule': crontab(hour=0, minute=0, day_of_month='25'),  # Runs on the 25th at midnight
+    },
+    # Task for checking and updating overdue payments on the 6th at midnight
+    'check-overdue-payments-every-6th': {
+        'task': 'payments.tasks.check_and_update_overdue_payments',  # Path to the task function
+        'schedule': crontab(minute=0, hour=0, day_of_month=6),  # Runs at midnight on the 6th of each month
     },
 }
 
+# Set timezone for Celery tasks to run in Africa/Nairobi (adjust to your timezone if needed)
+CELERY_TIMEZONE = 'Africa/Nairobi'
 

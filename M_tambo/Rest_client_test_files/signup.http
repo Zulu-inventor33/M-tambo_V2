@@ -248,7 +248,7 @@ Content-Type: application/json
     "password": "password123",
     "account_type": "technician",
     "specialization": "HVAC",
-    "maintenance_company_id": 3
+    "maintenance_company_id": 1
 }
 
 # Description:

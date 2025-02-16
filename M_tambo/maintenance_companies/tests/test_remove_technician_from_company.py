@@ -13,7 +13,7 @@ def maintenance_company():
 
 @pytest.fixture
 def technician(maintenance_company):
-    return baker.make('account.Technician', maintenance_company=maintenance_company)
+    return baker.make('.Technician', maintenance_company=maintenance_company)
 
 @pytest.fixture
 def elevator(maintenance_company, technician):

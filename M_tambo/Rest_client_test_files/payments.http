@@ -139,3 +139,624 @@ Content-Type: application/json
 }
 
 ###
+
+### Request to Get all Expected Payments
+GET http://127.0.0.1:8000/api/payments/expected_payments/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+
+### Response - Successful Request (HTTP 200 OK)
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "id": 1,
+    "maintenance_company_name": "Johnson Elevators Co.",
+    "total_amount": "4900.00",
+    "calculation_date": "2025-02-25T00:00:00Z",
+    "due_date": "2025-03-05T23:59:59Z",
+    "status": "pending",
+    "payment_date": null,
+    "assets": [
+        {
+            "id": 1,
+            "user_name": "LIFT1",
+            "building_name": "Building A",
+            "machine_number": "M12345"
+        },
+        {
+            "id": 2,
+            "user_name": "LIFT2",
+            "building_name": "Building B",
+            "machine_number": "M12346"
+        }
+    ],
+    "asset_count": 2
+}
+
+### Response - Empty List (No Expected Payments)
+HTTP/1.1 200 OK
+Content-Type: application/json
+[]
+
+
+### Request to Get all Payment Plans
+GET http://127.0.0.1:8000/api/payments/payment_plans/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+
+### Response - Successful Request (HTTP 200 OK)
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+        "id": 1,
+        "maintenance_company_name": "PowerBackup Inc.",
+        "maintenance_company_id": 16,
+        "broker_name": "Samuel Jackson",
+        "broker_id": 2,
+        "broker_commission": "12.50",
+        "broker_referral_code": "87C747E8",
+        "start_date": "2025-02-05T09:21:04",
+        "amount_per_asset": "700.00"
+    },
+    {
+        "id": 2,
+        "maintenance_company_name": "KentwoodPowers Inc.",
+        "maintenance_company_id": 17,
+        "broker_name": "Samuel Jackson",
+        "broker_id": 2,
+        "broker_commission": "14.50",
+        "broker_referral_code": "87C747E8",
+        "start_date": "2025-02-05T09:47:38",
+        "amount_per_asset": "700.00"
+    }
+]
+
+### Response - Empty List (No Payment Plans)
+HTTP/1.1 200 OK
+Content-Type: application/json
+[]
+
+
+### Get an existing expected payment (Valid ID)
+GET http://127.0.0.1:8000/api/payments/expected_payments/1/ HTTP/1.1
+Accept: application/json
+
+### Expected Response for the valid ID (assuming ID 1 exists)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "id": 1,
+    "maintenance_company_name": "PowerBackup Inc.",
+    "total_amount": "4900.00",
+    "calculation_date": "2025-02-25T00:00:00Z",
+    "due_date": "2025-03-05T23:59:59Z",
+    "status": "pending",
+    "payment_date": null,
+    "assets": [
+        {
+            "id": 1,
+            "building_name": "Building A",
+            "user_name": "John Doe",
+            "machine_number": "M123"
+        },
+        {
+            "id": 2,
+            "building_name": "Building B",
+            "user_name": "Jane Smith",
+            "machine_number": "M124"
+        }
+    ],
+    "asset_count": 2
+}
+
+### Get an expected payment that doesn't exist (Non-Existent ID)
+GET http://127.0.0.1:8000/api/payments/expected_payments/999/ HTTP/1.1
+Accept: application/json
+
+### Expected Response for non-existent ID
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "Expected Payment not found."
+}
+
+### Get an expected payment with no assets (Valid ID but no assets)
+GET http://127.0.0.1:8000/api/payments/expected_payments/2/ HTTP/1.1
+Accept: application/json
+
+### Expected Response when there are no assets
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "id": 2,
+    "maintenance_company_name": "KentwoodPowers Inc.",
+    "total_amount": "0.00",
+    "calculation_date": "2025-02-25T00:00:00Z",
+    "due_date": "2025-03-05T23:59:59Z",
+    "status": "pending",
+    "payment_date": null,
+    "assets": [],
+    "asset_count": 0
+}
+
+### Get an invalid ID that causes a server error (Generic error handling)
+GET http://127.0.0.1:8000/api/payments/expected_payments/invalid/ HTTP/1.1
+Accept: application/json
+
+### Expected Response for a server-side error
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+    "detail": "Invalid input or server error."
+}
+
+
+### Fetch all expected payments for a specific maintenance company
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/1/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+### Example Response for valid maintenance_company_id:
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+  {
+    "id": 1,
+    "maintenance_company_name": "PowerBackup Inc.",
+    "total_amount": "15000.00",
+    "calculation_date": "2025-02-05T00:00:00Z",
+    "due_date": "2025-03-05T23:59:59Z",
+    "status": "pending",
+    "payment_date": null,
+    "assets": [
+      {
+        "id": 1,
+        "name": "Elevator 1",
+        "location": "Building A"
+      },
+      {
+        "id": 2,
+        "name": "Elevator 2",
+        "location": "Building B"
+      }
+    ],
+    "asset_count": 2
+  },
+  {
+    "id": 2,
+    "maintenance_company_name": "KentwoodPowers Inc.",
+    "total_amount": "14000.00",
+    "calculation_date": "2025-02-05T00:00:00Z",
+    "due_date": "2025-03-05T23:59:59Z",
+    "status": "pending",
+    "payment_date": null,
+    "assets": [
+      {
+        "id": 3,
+        "name": "Elevator 3",
+        "location": "Building C"
+      }
+    ],
+    "asset_count": 1
+  }
+]
+
+### Example Response when no expected payments are found for the maintenance company
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/9999/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "detail": "No expected payments found for this company."
+}
+
+### Example Response for an invalid maintenance_company_id (not found)
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/9999/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+  "detail": "Maintenance company not found."
+}
+
+
+### Fetch the latest expected payment for a specific maintenance company
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/1/latest/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+### Example Response for a valid maintenance_company_id and existing latest payment
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "id": 1,
+    "maintenance_company_name": "PowerBackup Inc.",
+    "total_amount": "15000.00",
+    "calculation_date": "2025-02-05T00:00:00Z",
+    "due_date": "2025-03-05T23:59:59Z",
+    "status": "pending",
+    "payment_date": null,
+    "assets": [
+        {
+            "id": 1,
+            "name": "Elevator 1",
+            "location": "Building A"
+        },
+        {
+            "id": 2,
+            "name": "Elevator 2",
+            "location": "Building B"
+        }
+    ],
+    "asset_count": 2
+}
+
+### Example Response when no expected payment is found for the maintenance company
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/9999/latest/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+    "detail": "No expected payment found for this company."
+}
+
+### Example Response when the maintenance company is not found
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/9999/latest/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+    "detail": "Maintenance company not found."
+}
+
+
+### Fetch all the pending expected payments for a specific maintenance company
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/1/pending/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+### Example Response for valid maintenance_company_id and valid status choice (pending)
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+        "id": 1,
+        "maintenance_company_name": "PowerBackup Inc.",
+        "total_amount": "15000.00",
+        "calculation_date": "2025-02-05T00:00:00Z",
+        "due_date": "2025-03-05T23:59:59Z",
+        "status": "pending",
+        "payment_date": null,
+        "assets": [
+            {
+                "id": 1,
+                "name": "Elevator 1",
+                "location": "Building A"
+            },
+            {
+                "id": 2,
+                "name": "Elevator 2",
+                "location": "Building B"
+            }
+        ],
+        "asset_count": 2
+    }
+]
+
+### Example Response for a maintenance company ID that doesn't exist
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/9999/pending/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+    "detail": "Maintenance company not found."
+}
+
+### Example Response for a status choice that is invalid
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/1/unknownstatus/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+{
+    "detail": "Invalid status choice. Valid choices are pending, paid, overdue."
+}
+
+### Example Response for a maintenance company that has no expected payments with the chosen status
+GET http://127.0.0.1:8000/api/payments/expected_payments/maintenance_company/1/paid/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+    "detail": "No expected payments found for this company with status paid."
+}
+
+
+### Test filtering expected payments by maintenance company ID and status
+PUT http://127.0.0.1:8000/api/payments/expected_payments/filter/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+{
+    "maintenance_company_id": 1,
+    "status": "pending"
+}
+
+### Example Response for valid filters (maintenance company ID and status)
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+        "id": 1,
+        "maintenance_company_name": "PowerBackup Inc.",
+        "total_amount": "15000.00",
+        "calculation_date": "2025-02-05T00:00:00Z",
+        "due_date": "2025-03-05T23:59:59Z",
+        "status": "pending",
+        "payment_date": null,
+        "assets": [
+            {
+                "id": 1,
+                "name": "Elevator 1",
+                "location": "Building A"
+            }
+        ],
+        "asset_count": 1
+    }
+]
+
+### Test filtering expected payments by calculation date
+PUT http://127.0.0.1:8000/api/payments/expected_payments/filter/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+{
+    "calculation_date": "2025-02-01T00:00:00"
+}
+
+### Example Response for valid calculation date filter
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+        "id": 1,
+        "maintenance_company_name": "PowerBackup Inc.",
+        "total_amount": "15000.00",
+        "calculation_date": "2025-02-05T00:00:00Z",
+        "due_date": "2025-03-05T23:59:59Z",
+        "status": "pending",
+        "payment_date": null,
+        "assets": [
+            {
+                "id": 1,
+                "name": "Elevator 1",
+                "location": "Building A"
+            }
+        ],
+        "asset_count": 1
+    }
+]
+
+### Test filtering expected payments by due date
+PUT http://127.0.0.1:8000/api/payments/expected_payments/filter/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+{
+    "due_date": "2025-03-01T00:00:00"
+}
+
+### Example Response for valid due date filter
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+        "id": 1,
+        "maintenance_company_name": "PowerBackup Inc.",
+        "total_amount": "15000.00",
+        "calculation_date": "2025-02-05T00:00:00Z",
+        "due_date": "2025-03-05T23:59:59Z",
+        "status": "pending",
+        "payment_date": null,
+        "assets": [
+            {
+                "id": 1,
+                "name": "Elevator 1",
+                "location": "Building A"
+            }
+        ],
+        "asset_count": 1
+    }
+]
+
+### Test invalid date format for calculation_date
+PUT http://127.0.0.1:8000/api/payments/expected_payments/filter/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+{
+    "calculation_date": "invalid-date-format"
+}
+
+### Example Response for invalid calculation date format
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+{
+    "detail": "Invalid calculation_date format. Please use 'YYYY-MM-DDTHH:MM:SS'."
+}
+
+### Test no expected payments found with given filters
+PUT http://127.0.0.1:8000/api/payments/expected_payments/filter/ HTTP/1.1
+Authorization: Bearer <your_token>  # (Optional if you have authorization setup)
+Content-Type: application/json
+
+{
+    "maintenance_company_id": 1,
+    "status": "paid"
+}
+
+### Example Response for no expected payments found
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+    "detail": "No expected payments match the provided criteria."
+}
+
+
+# GET request to fetch the details of a specific expected payment
+GET http://127.0.0.1:8000/api/payments/admin/expected_payments/1/configure_expected_payments/ 
+Authorization: Bearer <your-access-token>
+
+### Response for successful GET request:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "maintenance_company_name": "Johnson Elevators Co.",
+  "total_amount": "4900.00",
+  "calculation_date": "2025-02-25T00:00:00Z",
+  "due_date": "2025-03-05T23:59:59Z",
+  "status": "pending",
+  "payment_date": null,
+  "assets": [
+    {
+      "id": 1,
+      "user_name": "LIFT1",
+      "building_name": "Sundowners Towers",
+      "machine_number": "XYZ123"
+    },
+    {
+      "id": 2,
+      "user_name": "LIFT-001",
+      "building_name": "Sunset Towers",
+      "machine_number": "MACHINE-001"
+    },
+    {
+      "id": 12,
+      "user_name": "LIFT-0012",
+      "building_name": "Skyward Tower",
+      "machine_number": "M00YT1"
+    },
+    {
+      "id": 13,
+      "user_name": "LIFT-0011",
+      "building_name": "Blue Towers",
+      "machine_number": "M0WEE01"
+    },
+    {
+      "id": 14,
+      "user_name": "LIFT-0021",
+      "building_name": "Black Towers",
+      "machine_number": "M0WOE01"
+    },
+    {
+      "id": 15,
+      "user_name": "Elevator A",
+      "building_name": "Skymax Tower",
+      "machine_number": "M12345"
+    },
+    {
+      "id": 16,
+      "user_name": "Elevator B",
+      "building_name": "Sunrise Plaza",
+      "machine_number": "M67890"
+    }
+  ],
+  "asset_count": 7
+}
+
+# PUT request to update the details of a specific expected payment
+PUT http://127.0.0.1:8000/api/payments/admin/expected_payments/1/configure_expected_payments/
+Authorization: Bearer <your-access-token>
+
+### Request body (payload) for updating the expected payment:
+Content-Type: application/json
+
+{
+  "total_amount": "5000.00",
+  "calculation_date": "2025-01-25T00:00:00Z",  # New calculation date
+  "due_date": "2025-02-05T23:59:59Z",  # New due date
+  "status": "pending",  # You can update the status if needed
+  "payment_date": null,  # Payment date can remain null unless the payment is made
+  "assets": [1, 2, 12, 13, 14, 15, 16]  # New asset list if needed, you can leave the same or modify
+}
+
+### Response for successful PUT request:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "maintenance_company_name": "Johnson Elevators Co.",
+  "total_amount": "5000.00",
+  "calculation_date": "2025-01-25T00:00:00Z",
+  "due_date": "2025-02-05T23:59:59Z",
+  "status": "pending",
+  "payment_date": null,
+  "assets": [
+    {
+      "id": 1,
+      "user_name": "LIFT1",
+      "building_name": "Sundowners Towers",
+      "machine_number": "XYZ123"
+    },
+    {
+      "id": 2,
+      "user_name": "LIFT-001",
+      "building_name": "Sunset Towers",
+      "machine_number": "MACHINE-001"
+    },
+    {
+      "id": 12,
+      "user_name": "LIFT-0012",
+      "building_name": "Skyward Tower",
+      "machine_number": "M00YT1"
+    },
+    {
+      "id": 13,
+      "user_name": "LIFT-0011",
+      "building_name": "Blue Towers",
+      "machine_number": "M0WEE01"
+    },
+    {
+      "id": 14,
+      "user_name": "LIFT-0021",
+      "building_name": "Black Towers",
+      "machine_number": "M0WOE01"
+    },
+    {
+      "id": 15,
+      "user_name": "Elevator A",
+      "building_name": "Skymax Tower",
+      "machine_number": "M12345"
+    },
+    {
+      "id": 16,
+      "user_name": "Elevator B",
+      "building_name": "Sunrise Plaza",
+      "machine_number": "M67890"
+    }
+  ],
+  "asset_count": 7
+}

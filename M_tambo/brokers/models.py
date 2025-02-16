@@ -28,7 +28,7 @@ class BrokerUser(AbstractUser):
     # Broker-specific fields
     phone_number = models.CharField(max_length=15, unique=True, help_text="Phone number of the broker.")
     referral_code = models.CharField(max_length=8, unique=True, help_text="Unique referral code for the broker.")  # 8 characters
-    commission_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=12.5, help_text="Commission percentage earned by the broker (default is 12.5%).")
+    commission_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Commission percentage earned by the broker (default is 12.5%).")
     commission_duration_months = models.PositiveIntegerField(default=24, help_text="Duration (in months) for which the broker earns commissions (default is 24 months).")
     registration_date = models.DateTimeField(default=timezone.now, help_text="Date when the broker registered.")
 
@@ -68,7 +68,7 @@ class BrokerReferral(models.Model):
     commission_duration_months = models.PositiveIntegerField(default=24, help_text="Duration (in months) for which the broker earns commissions for this referral.")
 
     def __str__(self):
-        return f"Referral by {self.broker.email} for {self.maintenance_company.maintenance.company_name}"
+        return f"Referral by {self.broker.email} for {self.maintenance_company.company_name}"
 
     class Meta:
         verbose_name = "Broker Referral"

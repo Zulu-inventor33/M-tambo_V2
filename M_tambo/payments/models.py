@@ -1,27 +1,59 @@
 from django.db import models
+import random
+import string
+from django.db.models import Count
 from django.utils import timezone
+from datetime import timedelta
 from django.core.validators import MinValueValidator
+from decimal import Decimal
 from maintenance_companies.models import MaintenanceCompanyProfile
 from django.core.validators import MinValueValidator, MaxValueValidator
 from brokers.models import BrokerUser
+from account.models import Maintenance
 from elevators.models import Elevator  # Assuming Elevator model exists
+
 
 class PaymentPlan(models.Model):
     """
     Defines the payment plan for maintenance companies.
+    Includes details such as the amount charged per asset, start and end dates,
+    and an optional broker commission field.
     """
-    maintenance_company = models.ForeignKey(MaintenanceCompanyProfile, on_delete=models.CASCADE, related_name="payment_plans")
+    maintenance_company = models.ForeignKey(
+        Maintenance,
+        on_delete=models.CASCADE,
+        related_name="payment_plans",
+        help_text="The maintenance company associated with this payment plan."
+    )
     amount_per_asset = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=700.00,
         validators=[MinValueValidator(0)],
         help_text="Amount charged per elevator per month (default is Kshs. 700)."
     )
-    start_date = models.DateTimeField(default=timezone.now, help_text="Start date of the payment plan.")
-    end_date = models.DateTimeField(null=True, blank=True, help_text="End date of the payment plan (if applicable).")
+    broker_commission = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="Optional commission percentage for the broker. Can be null if no commission is applicable."
+    )
+    start_date = models.DateTimeField(
+        default=timezone.now,
+        help_text="Start date of the payment plan."
+    )
+    end_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="End date of the payment plan (if applicable)."
+    )
 
     def __str__(self):
+        """
+        String representation of the PaymentPlan model.
+        Returns a formatted string with the maintenance company name and the amount per asset.
+        """
         return f"Payment Plan for {self.maintenance_company.company_name} - Kshs. {self.amount_per_asset} per elevator/month"
 
 
@@ -35,12 +67,12 @@ class ExpectedPayment(models.Model):
         ('overdue', 'Overdue'),  # Payment was not made by the due date
     ]
 
-    maintenance_company = models.ForeignKey(MaintenanceCompanyProfile, on_delete=models.CASCADE, related_name="expected_payments")
+    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name="expected_payments")
     assets = models.ManyToManyField(Elevator, related_name="expected_payments", help_text="List of assets (elevators) being charged.")
     total_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(Decimal('0.00'))],
         help_text="Total amount due for the month."
     )
     calculation_date = models.DateTimeField(default=timezone.now, help_text="Date when the expected payment was calculated (25th of the month).")
@@ -48,12 +80,21 @@ class ExpectedPayment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', help_text="Payment status (pending, paid, overdue).")
     payment_date = models.DateTimeField(null=True, blank=True, help_text="Date when the payment was made (if paid).")
 
+    # New field for the payment reference code
+    payment_reference_code = models.CharField(
+        max_length=6, 
+        unique=True, 
+        blank=True, 
+        null=True, 
+        help_text="A 6-digit alphanumeric code to reference this expected payment."
+    )
+
     def __str__(self):
         return f"Expected Payment for {self.maintenance_company.company_name} - Kshs. {self.total_amount} (Status: {self.get_status_display()})"
 
     def save(self, *args, **kwargs):
         """
-        Override save method to set the due date and calculate the total amount.
+        Override save method to set the calculation_date, due_date, total_amount, and payment_reference_code before saving the object.
         """
         if not self.pk:  # Only set calculation_date and due_date for new instances
             # Set calculation_date to the 25th of the current month
@@ -63,14 +104,31 @@ class ExpectedPayment(models.Model):
             next_month = self.calculation_date.replace(day=28) + timezone.timedelta(days=4)  # Move to next month
             self.due_date = next_month.replace(day=5, hour=23, minute=59, second=59)
 
-            # Calculate total_amount based on the number of assets and the amount_per_asset
+            # Calculate total_amount based on the number of assets (elevators) and amount_per_asset from PaymentPlan
             payment_plan = self.maintenance_company.payment_plans.first()  # Get the latest payment plan
             if payment_plan:
-                self.total_amount = payment_plan.amount_per_asset * self.assets.count()
+                self.total_amount = payment_plan.amount_per_asset * self.maintenance_company.elevators.count()
             else:
-                self.total_amount = 700.00 * self.assets.count()  # Default amount per asset
+                # Fallback to the minimum charge per elevator from PaymentSettings if no payment plan exists
+                min_charge_per_elevator = PaymentSettings.objects.first().min_charge_per_elevator
+                self.total_amount = min_charge_per_elevator * self.maintenance_company.elevators.count()
 
+            # Set status to 'paid' if the total amount is 0.00
+            if self.total_amount == 0.00:
+                self.status = 'paid'
+
+            # Generate a unique 6-digit alphanumeric reference code
+            self.payment_reference_code = self.generate_payment_reference_code()
+
+        # Save the object to generate an ID
         super().save(*args, **kwargs)
+
+    def generate_payment_reference_code(self):
+        """
+        Generates a random 6-digit alphanumeric reference code.
+        """
+        characters = string.ascii_uppercase + string.digits  # Use uppercase letters and digits
+        return ''.join(random.choice(characters) for _ in range(6))
 
     def update_status(self):
         """
@@ -94,7 +152,7 @@ class Payment(models.Model):
     """
     Tracks payments made by maintenance companies.
     """
-    maintenance_company = models.ForeignKey(MaintenanceCompanyProfile, on_delete=models.CASCADE, related_name="payments")
+    maintenance_company = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name="payments")
     expected_payment = models.ForeignKey(ExpectedPayment, on_delete=models.CASCADE, related_name="payments", null=True, blank=True)
     amount = models.DecimalField(
         max_digits=10,
@@ -209,6 +267,8 @@ class WithdrawalRequest(models.Model):
         validators=[MinValueValidator(0)],
         help_text="Amount requested for withdrawal."
     )
+    mpesa_receipt_number = models.CharField(max_length=100, blank=True, null=True, help_text="M-PESA receipt number after successful withdrawal.")
+    phone_number = models.CharField(max_length=100, blank=True, null=True, help_text="Phone Number Receiving the money.")
     request_date = models.DateTimeField(default=timezone.now, help_text="Date and time when the request was made.")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', help_text="Status of the withdrawal request.")
 
